@@ -32,7 +32,7 @@ export default async function PostPage({ params }: PageProps<"/posts/[slug]">) {
         All writing
       </Link>
       <header className="mt-8 mb-12 max-w-4xl">
-        <h1 className="text-4xl leading-[1.05] font-extrabold tracking-[-0.035em] text-balance sm:text-6xl">
+        <h1 className="font-display text-5xl leading-[1.02] text-balance sm:text-7xl">
           {post.title}
         </h1>
         <p className="mt-5 text-sm text-muted-foreground">

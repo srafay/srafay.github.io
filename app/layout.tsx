@@ -1,14 +1,15 @@
 import type { Metadata } from "next";
-import { Bricolage_Grotesque, JetBrains_Mono, Source_Serif_4 } from "next/font/google";
+import { IM_Fell_English, JetBrains_Mono, Source_Serif_4 } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import { SiteHeader } from "@/components/site-header";
 import { site } from "@/lib/site";
 import "./globals.css";
 
-const display = Bricolage_Grotesque({
-  variable: "--font-display",
+const display = IM_Fell_English({
+  variable: "--font-fell",
   subsets: ["latin"],
-  axes: ["opsz", "wdth"],
+  weight: "400",
+  style: ["normal", "italic"],
 });
 
 const serif = Source_Serif_4({

@@ -19,7 +19,7 @@ export function SiteHeader() {
 
   return (
     <header className="mx-auto flex w-full max-w-5xl items-center justify-between px-4 py-5 sm:px-8">
-      <Link href="/" className="text-lg font-bold tracking-tight">
+      <Link href="/" className="font-display text-xl italic">
         srafay
       </Link>
       <nav className="flex items-center gap-1">
@@ -30,7 +30,7 @@ export function SiteHeader() {
               key={item.href}
               href={item.href}
               aria-current={active ? "page" : undefined}
-              className="relative rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground aria-[current=page]:text-foreground"
+              className="relative rounded-md px-3 py-1.5 text-muted-foreground transition-colors hover:text-foreground aria-[current=page]:text-foreground"
             >
               {active && (
                 <motion.span

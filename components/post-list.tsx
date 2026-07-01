@@ -18,7 +18,7 @@ export function PostList({ posts }: { posts: Post[] }) {
               {formatDate(post.date)}
             </time>
             <span>
-              <span className="text-xl font-semibold tracking-tight decoration-signal decoration-2 underline-offset-4 group-hover:underline">
+              <span className="font-display text-2xl decoration-signal decoration-1 decoration-2 underline-offset-4 group-hover:underline">
                 {post.title}
                 {post.draft && <span className="ml-2 text-sm font-normal text-muted-foreground">(draft)</span>}
               </span>

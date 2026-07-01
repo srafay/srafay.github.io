@@ -10,8 +10,9 @@
   --color-surface: var(--surface);
   --color-signal: var(--signal);
   --color-link: var(--link);
-  --font-sans: var(--font-display);
-  --font-heading: var(--font-display);
+  --font-sans: var(--font-serif-body);
+  --font-display: var(--font-fell);
+  --font-heading: var(--font-fell);
   --font-serif: var(--font-serif-body);
   --font-mono: var(--font-code);
   --color-ring: var(--ring);
@@ -41,13 +42,14 @@
   through `metadata.theme` (see content/posts/README.md).
 */
 :root {
-  --background: #f3f5f8;
-  --surface: #e7ebf1;
-  --foreground: #13203a;
-  --muted-foreground: #55617a;
-  --border: #d5dce7;
-  --signal: #e9a23b; /* marks, dots, rules */
-  --link: #8a5a00; /* signal darkened for text contrast */
+  /* Fog: pale mauve paper, aubergine ink, sea-glass light. */
+  --background: #ebe6ec;
+  --surface: #ded6e0;
+  --foreground: #241523;
+  --muted-foreground: #6b5868;
+  --border: #d2c7d4;
+  --signal: #2e8a77; /* marks, rules, focus */
+  --link: #1f6b5c; /* signal darkened for text contrast */
 
   --card: var(--surface);
   --card-foreground: var(--foreground);
@@ -67,13 +69,14 @@
 }
 
 .dark {
-  --background: #0d1525;
-  --surface: #16223a;
-  --foreground: #e4e9f2;
-  --muted-foreground: #8d9ab3;
-  --border: #24324d;
-  --signal: #f2b550;
-  --link: #f2b550;
+  /* Night: aubergine dark, bone text, sea-glass light. */
+  --background: #170e18;
+  --surface: #241726;
+  --foreground: #eee3d8;
+  --muted-foreground: #a8949f;
+  --border: #3a2a3c;
+  --signal: #9ed6c5;
+  --link: #9ed6c5;
   --destructive: #f97066;
 }
 
@@ -116,9 +119,8 @@
 }
 .prose h2,
 .prose h3 {
-  font-family: var(--font-display);
-  font-weight: 700;
-  letter-spacing: -0.02em;
+  font-family: var(--font-fell);
+  font-weight: 400;
   line-height: 1.2;
 }
 .prose h2 {
@@ -190,6 +192,19 @@
 }
 .dark [data-rehype-pretty-code-figure] span {
   color: var(--shiki-dark);
+}
+
+/*
+  The home hero: the name sits in the dark and a lantern lights it.
+  --lx/--ly are set by <Lantern>; these defaults are the resting spot.
+*/
+.lantern {
+  --lx: 32%;
+  --ly: 55%;
+  --lr: clamp(7rem, 22vw, 15rem);
+}
+.lantern-lit {
+  mask-image: radial-gradient(circle var(--lr) at var(--lx) var(--ly), #000 15%, transparent 100%);
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -4,7 +4,7 @@ import { getPosts } from "@/lib/posts";
 
 export const metadata: Metadata = {
   title: "Writing",
-  description: "Notes on software, systems and the occasional tangent.",
+  description: "Everything written so far, newest first.",
 };
 
 export default async function PostsPage() {
@@ -12,9 +12,9 @@ export default async function PostsPage() {
 
   return (
     <section className="pt-14 pb-16 sm:pt-20">
-      <h1 className="text-5xl font-extrabold tracking-[-0.04em] sm:text-7xl">Writing</h1>
-      <p className="mt-4 mb-12 max-w-[50ch] font-serif text-lg text-muted-foreground">
-        Notes on software, systems and the occasional tangent.
+      <h1 className="font-display text-6xl sm:text-8xl">Writing</h1>
+      <p className="mt-4 mb-12 max-w-[50ch] text-lg text-muted-foreground italic">
+        Everything written so far, newest first.
       </p>
       <PostList posts={posts} />
     </section>
