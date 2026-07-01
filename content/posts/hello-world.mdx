@@ -1,0 +1,31 @@
+export const metadata = {
+  title: "Hello, world (again)",
+  date: "2026-10-10",
+  summary: "This site replaces a 2018 placeholder that said exactly two words. Here's what changed and how it's built.",
+};
+
+The previous version of this site was a single `index.html` from 2018. It said "Hello World" and nothing else. It held that position for eight years, which is honestly a better uptime record than most things I've shipped.
+
+## What this is
+
+A place for longer notes than a commit message allows: systems I've built, mistakes I'd rather you didn't repeat, and the occasional tangent about cricket.
+
+## How it's built
+
+- **Next.js** with a static export, so every page is plain HTML on GitHub Pages.
+- **Tailwind** and **shadcn/ui** for styling, **Motion** for the animations.
+- Posts are **MDX** files in `content/posts/`. Pushing a new file publishes it.
+
+A post is just a file with some metadata at the top:
+
+```ts
+export const metadata = {
+  title: "Hello, world (again)",
+  date: "2026-10-10",
+  summary: "One line for the post list.",
+};
+```
+
+> Boring infrastructure is a feature. The interesting part should be what you write, not how it gets online.
+
+More soon.

@@ -1,0 +1,199 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-signal: var(--signal);
+  --color-link: var(--link);
+  --font-sans: var(--font-display);
+  --font-heading: var(--font-display);
+  --font-serif: var(--font-serif-body);
+  --font-mono: var(--font-code);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+}
+
+/*
+  Site tokens. A post can override any of these on its own page
+  through `metadata.theme` (see content/posts/README.md).
+*/
+:root {
+  --background: #f3f5f8;
+  --surface: #e7ebf1;
+  --foreground: #13203a;
+  --muted-foreground: #55617a;
+  --border: #d5dce7;
+  --signal: #e9a23b; /* marks, dots, rules */
+  --link: #8a5a00; /* signal darkened for text contrast */
+
+  --card: var(--surface);
+  --card-foreground: var(--foreground);
+  --popover: var(--background);
+  --popover-foreground: var(--foreground);
+  --primary: var(--foreground);
+  --primary-foreground: var(--background);
+  --secondary: var(--surface);
+  --secondary-foreground: var(--foreground);
+  --muted: var(--surface);
+  --accent: var(--surface);
+  --accent-foreground: var(--foreground);
+  --destructive: #b42318;
+  --input: var(--border);
+  --ring: var(--signal);
+  --radius: 0.5rem;
+}
+
+.dark {
+  --background: #0d1525;
+  --surface: #16223a;
+  --foreground: #e4e9f2;
+  --muted-foreground: #8d9ab3;
+  --border: #24324d;
+  --signal: #f2b550;
+  --link: #f2b550;
+  --destructive: #f97066;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/60;
+  }
+  html {
+    @apply font-sans;
+    color-scheme: light;
+  }
+  html.dark {
+    color-scheme: dark;
+  }
+  body {
+    @apply bg-background text-foreground;
+    transition:
+      background-color 0.3s ease,
+      color 0.3s ease;
+  }
+  ::selection {
+    background: color-mix(in oklab, var(--signal) 40%, transparent);
+  }
+  :focus-visible {
+    outline: 2px solid var(--signal);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+}
+
+/* Long-form text: posts and the home intro. */
+.prose {
+  font-family: var(--font-serif-body);
+  font-size: 1.1875rem;
+  line-height: 1.7;
+  max-width: 66ch;
+}
+.prose > * + * {
+  margin-top: 1.15em;
+}
+.prose h2,
+.prose h3 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+.prose h2 {
+  font-size: 1.75rem;
+  margin-top: 2.2em;
+}
+.prose h3 {
+  font-size: 1.3rem;
+  margin-top: 1.8em;
+}
+.prose a {
+  color: var(--link);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+.prose a:hover {
+  text-decoration-thickness: 2px;
+}
+.prose ul {
+  list-style: disc;
+  padding-left: 1.25em;
+}
+.prose ol {
+  list-style: decimal;
+  padding-left: 1.25em;
+}
+.prose li + li {
+  margin-top: 0.35em;
+}
+.prose li::marker {
+  color: var(--signal);
+}
+.prose blockquote {
+  border-left: 3px solid var(--signal);
+  padding-left: 1em;
+  font-style: italic;
+  color: var(--muted-foreground);
+}
+.prose hr {
+  border: 0;
+  border-top: 1px solid var(--border);
+  margin: 2.5em 0;
+}
+.prose :not(pre) > code {
+  font-family: var(--font-code);
+  font-size: 0.85em;
+  background: var(--surface);
+  padding: 0.15em 0.35em;
+  border-radius: 4px;
+}
+.prose pre {
+  font-family: var(--font-code);
+  font-size: 0.875rem;
+  line-height: 1.6;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem 1.15rem;
+  overflow-x: auto;
+}
+.prose img {
+  border-radius: 8px;
+}
+
+/* rehype-pretty-code: pick the light or dark Shiki colours. */
+[data-rehype-pretty-code-figure] span {
+  color: var(--shiki-light);
+}
+.dark [data-rehype-pretty-code-figure] span {
+  color: var(--shiki-dark);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body {
+    transition: none;
+  }
+}

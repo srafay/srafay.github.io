@@ -1,0 +1,31 @@
+export const metadata = {
+  title: "Every post can bring its own style",
+  date: "2026-10-09",
+  summary: "How a single post can recolour the site, swap fonts or add its own CSS without touching any other page.",
+  draft: true,
+  theme: {
+    light: { "--signal": "#2f9e6a", "--link": "#1f6f4a", "--background": "#f1f6f2" },
+    dark: { "--signal": "#4cc38a", "--link": "#4cc38a", "--background": "#0c1a15" },
+  },
+  css: `
+    [data-post="styling-a-post"] h1 { font-variation-settings: "wdth" 75; }
+  `,
+};
+
+import { Callout } from "./_components/callout";
+
+This post sets its own colours. Switch between light and dark mode to see both palettes, then open any other page: the site's usual colours come back.
+
+## Three levels of control
+
+1. **`theme`** in the metadata overrides the site's colour tokens, separately for light and dark mode.
+2. **`css`** in the metadata adds any CSS you like, for this page only. Scope it with `[data-post="your-slug"]` if you only want to touch the article.
+3. **Components.** Posts are MDX, so you can import a React component and use it inline:
+
+<Callout>This box is a React component imported by this post alone.</Callout>
+
+## Tokens you can override
+
+`--background`, `--surface`, `--foreground`, `--muted-foreground`, `--border`, `--signal` and `--link`.
+
+This post is marked `draft: true`, so it shows when you run the site locally but isn't published.
