@@ -48,3 +48,6 @@ next-env.d.ts
 # agent notes (kept local)
 AGENTS.md
 CLAUDE.md
+
+# cosmos homepage source: its own private git repo; only the built prototypes/cosmos.html is committed here
+/cosmos/

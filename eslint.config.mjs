@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // The cosmos homepage source lives in its own private repo (see cosmos/README.md).
+    "cosmos/**",
+    "prototypes/**",
   ]),
 ]);
 
