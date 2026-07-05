@@ -1,26 +1,16 @@
 import type { Metadata } from "next";
-import { Bodoni_Moda, Figtree, JetBrains_Mono } from "next/font/google";
+import { JetBrains_Mono } from "next/font/google";
 import { ThemeProvider } from "next-themes";
+import { preload } from "react-dom";
 import { SiteHeader } from "@/components/site-header";
+import { fontFaceCss, preloadedFonts } from "@/lib/fonts";
 import { site } from "@/lib/site";
 import "./globals.css";
 
 /*
-  Every page except the homepage. The homepage is plain HTML (app/route.ts and lib/home.ts) and loads the same two
-  typefaces from Google Fonts.
+  Every page except the homepage, which is plain HTML (app/route.ts and lib/home.ts). Both use the same self-hosted
+  typefaces (lib/fonts.ts); code is set in JetBrains Mono, used only here.
 */
-const display = Bodoni_Moda({
-  variable: "--font-display",
-  subsets: ["latin"],
-  style: ["normal", "italic"],
-  axes: ["opsz"],
-});
-
-const text = Figtree({
-  variable: "--font-text",
-  subsets: ["latin"],
-});
-
 const code = JetBrains_Mono({
   variable: "--font-code",
   subsets: ["latin"],
@@ -35,12 +25,16 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
+  for (const href of preloadedFonts) preload(href, { as: "font", type: "font/woff2", crossOrigin: "" });
   return (
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${display.variable} ${text.variable} ${code.variable} h-full antialiased`}
+      className={`${code.variable} h-full antialiased`}
     >
+      <head>
+        <style dangerouslySetInnerHTML={{ __html: fontFaceCss }} />
+      </head>
       <body className="flex min-h-full flex-col">
         {/* Same attribute and storage key as the homepage, so the theme carries across the whole site. */}
         <ThemeProvider attribute="data-theme" defaultTheme="system" enableSystem disableTransitionOnChange={false}>

@@ -10,27 +10,29 @@
 import { createHash } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
+import { fontFaceCss, preloadedFonts } from "@/lib/fonts";
 import { formatDate, getPosts, type Post } from "@/lib/posts";
 import { site } from "@/lib/site";
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 const postUrl = (post: Post) => `${site.url}/posts/${post.slug}/`;
 
-/** Links to the committed build, with a content hash so a new build is never served from cache. */
-function builtAsset(name: string) {
-  const file = path.join(process.cwd(), "public", "cosmos", name);
-  const hash = createHash("sha256").update(fs.readFileSync(file)).digest("hex").slice(0, 10);
-  return `/cosmos/${name}?v=${hash}`;
-}
+const built = (name: string) => fs.readFileSync(path.join(process.cwd(), "public", "cosmos", name));
+/** The committed script, with a content hash so a new build is never served from cache. */
+const builtScript = () => `/cosmos/cosmos.js?v=${createHash("sha256").update(built("cosmos.js")).digest("hex").slice(0, 10)}`;
 
-/* While the cosmos source's dev build is running (bun run dev in cosmos/), `next dev` loads it instead. */
+/*
+  Nothing blocks the first paint: the stylesheet is inlined (it's small and only this page uses it), the fonts are
+  self-hosted and preloaded, and the script is deferred.
+  While the cosmos source's dev build is running (bun run dev in cosmos/), `next dev` loads that instead.
+*/
 const COSMOS_DEV = "http://localhost:4173";
 async function assets() {
   if (process.env.NODE_ENV === "development") {
     const up = await fetch(`${COSMOS_DEV}/`, { method: "HEAD", signal: AbortSignal.timeout(300) }).then((r) => r.ok, () => false);
-    if (up) return { css: `${COSMOS_DEV}/cosmos.css`, js: `${COSMOS_DEV}/cosmos.js` };
+    if (up) return { styles: `<link rel="stylesheet" href="${COSMOS_DEV}/cosmos.css">`, js: `${COSMOS_DEV}/cosmos.js` };
   }
-  return { css: builtAsset("cosmos.css"), js: builtAsset("cosmos.js") };
+  return { styles: `<style>${built("cosmos.css").toString("utf8").trim()}</style>`, js: builtScript() };
 }
 
 function head(posts: Post[]) {
@@ -80,7 +82,7 @@ const footer = () =>
 
 export async function homePage() {
   const posts = await getPosts();
-  const { css, js } = await assets();
+  const { styles, js } = await assets();
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -88,10 +90,9 @@ export async function homePage() {
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, viewport-fit=cover">
 ${head(posts)}
 <script>try{const t=localStorage.getItem("theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch{}</script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;1,6..96,400&family=Figtree:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="${css}">
+${preloadedFonts.map((href) => `<link rel="preload" href="${href}" as="font" type="font/woff2" crossorigin>`).join("\n")}
+<style>${fontFaceCss}</style>
+${styles}
 <script src="${js}" defer></script>
 </head>
 <body>
