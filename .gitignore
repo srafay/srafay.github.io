@@ -49,5 +49,5 @@ next-env.d.ts
 AGENTS.md
 CLAUDE.md
 
-# cosmos homepage source: its own private git repo; only the built prototypes/cosmos.html is committed here
+# cosmos homepage source: its own private git repo; only its build, public/cosmos/, is committed here
 /cosmos/

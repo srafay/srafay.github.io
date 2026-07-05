@@ -8,6 +8,11 @@ export type PostMetadata = {
   title: string;
   /** ISO date, e.g. "2026-10-10". */
   date: string;
+  /**
+   * The real, confirmed exoplanet this post is named after and drawn as, written exactly as catalogued,
+   * e.g. "TRAPPIST-1 e". See "Posts are exoplanets" in AGENTS.md.
+   */
+  planet: string;
   summary: string;
   draft?: boolean;
   /** Per-post theme: overrides site tokens on this post's page only. */

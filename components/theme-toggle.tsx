@@ -2,43 +2,27 @@
 
 import { useSyncExternalStore } from "react";
 import { useTheme } from "next-themes";
-import { AnimatePresence, motion } from "motion/react";
-import { Moon, Sun } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
 const subscribe = () => () => {};
 
+/** The homepage's toggle: a moon in light mode, a sun at night (globals.css shows the right one). */
 export function ThemeToggle() {
   const { resolvedTheme, setTheme } = useTheme();
-  // The theme is only known in the browser; render a placeholder on the server.
+  // The theme is only known in the browser; label it generically on the server.
   const mounted = useSyncExternalStore(subscribe, () => true, () => false);
 
   const isDark = resolvedTheme === "dark";
-  const label = isDark ? "Switch to light mode" : "Switch to dark mode";
+  const label = !mounted ? "Toggle theme" : isDark ? "Switch to the ink chart (light)" : "Switch to the night sky (dark)";
 
   return (
-    <Button
-      variant="ghost"
-      size="icon"
-      aria-label={mounted ? label : "Toggle theme"}
-      title={mounted ? label : undefined}
-      onClick={() => setTheme(isDark ? "light" : "dark")}
-      className="ml-1 overflow-hidden"
-    >
-      {mounted && (
-        <AnimatePresence mode="wait" initial={false}>
-          <motion.span
-            key={isDark ? "moon" : "sun"}
-            initial={{ y: 14, rotate: -90, opacity: 0 }}
-            animate={{ y: 0, rotate: 0, opacity: 1 }}
-            exit={{ y: -14, rotate: 90, opacity: 0 }}
-            transition={{ duration: 0.22, ease: "easeOut" }}
-            className="flex"
-          >
-            {isDark ? <Moon /> : <Sun />}
-          </motion.span>
-        </AnimatePresence>
-      )}
-    </Button>
+    <button type="button" className="flip" aria-label={label} title={mounted ? label : undefined} onClick={() => setTheme(isDark ? "light" : "dark")}>
+      <svg className="moon" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z" />
+      </svg>
+      <svg className="sun" viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="12" cy="12" r="4" />
+        <path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8" />
+      </svg>
+    </button>
   );
 }

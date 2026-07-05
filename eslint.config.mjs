@@ -12,10 +12,15 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
-    // The cosmos homepage source lives in its own private repo (see cosmos/README.md).
+    // The cosmos homepage source lives in its own private repo; public/cosmos/ is its build.
     "cosmos/**",
-    "prototypes/**",
+    "public/cosmos/**",
   ]),
+  {
+    // The homepage is plain HTML from a route handler (app/route.ts), not a React page, so links to it are plain <a>s
+    // and load the page in full.
+    rules: { "@next/next/no-html-link-for-pages": "off" },
+  },
 ]);
 
 export default eslintConfig;

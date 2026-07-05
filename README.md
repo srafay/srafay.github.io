@@ -2,7 +2,11 @@
 
 Personal site and blog for Syed Rafay, live at https://srafay.github.io.
 
-Built with Next.js (static export), Tailwind CSS, shadcn/ui and Motion. Posts are MDX.
+Built with Next.js (static export) and Tailwind CSS. Posts are MDX.
+
+The homepage is a black hole with the real Solar System and each post's star system orbiting it. Its page is
+rendered from the posts by `app/route.ts` and `lib/home.ts`; the script and stylesheet that draw it,
+`public/cosmos/cosmos.js` and `cosmos.css`, are built from a separate source and committed here.
 
 ## Requirements
 
@@ -30,17 +34,22 @@ Add a file to `content/posts/`. The file name becomes the URL: `my-post.mdx` is 
 export const metadata = {
   title: "My post",
   date: "2026-10-10",
+  planet: "Kepler-452 b",
   summary: "One line for the post list and link previews.",
 };
 
 Write Markdown here. You can also use JSX and import React components.
 ```
 
+Every post is named after a real, confirmed exoplanet (`planet`), written exactly as the NASA Exoplanet Archive lists
+it, and never reused. Its planet appears on the homepage once its look has been added to the cosmos source; until
+then the post is listed as a plain link to its page.
+
 Set `draft: true` to keep a post out of the published site. Drafts still show in `bun run dev`.
 
 ### Giving a post its own style
 
-Every option below applies to that post's page only.
+Every option below applies to that post's own page only (not to the homepage's reader).
 
 - **`theme`** overrides the colour tokens, separately for light and dark mode:
 

@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { PostTheme } from "@/components/post-theme";
 import { formatDate, getPost, getPosts } from "@/lib/posts";
 
@@ -16,6 +15,7 @@ export async function generateMetadata({ params }: PageProps<"/posts/[slug]">): 
   return {
     title: post.title,
     description: post.summary,
+    alternates: { canonical: `/posts/${slug}/` },
     openGraph: { type: "article", title: post.title, description: post.summary, publishedTime: post.date },
   };
 }
@@ -26,20 +26,17 @@ export default async function PostPage({ params }: PageProps<"/posts/[slug]">) {
   const { default: Content } = await import(`@/content/posts/${slug}.mdx`);
 
   return (
-    <article data-post={slug} className="pt-14 pb-16 sm:pt-20">
+    <article data-post={slug} className="post">
       <PostTheme theme={post.theme} css={post.css} />
-      <Link href="/posts/" className="text-sm text-muted-foreground hover:text-foreground">
-        All writing
-      </Link>
-      <header className="mt-8 mb-12 max-w-4xl">
-        <h1 className="font-display text-5xl leading-[1.02] text-balance sm:text-7xl">
-          {post.title}
-        </h1>
-        <p className="mt-5 text-sm text-muted-foreground">
-          <time dateTime={post.date}>{formatDate(post.date)}</time>, {post.readingMinutes} min read
-        </p>
-      </header>
-      <div className="prose">
+      <a href="/" className="back">
+        Back to the system
+      </a>
+      <p className="des">
+        {post.planet} <span>{formatDate(post.date)}, {post.readingMinutes} min read</span>
+      </p>
+      <h1>{post.title}</h1>
+      {/* The homepage's reader fetches this page and shows what's inside data-post-body. */}
+      <div className="prose" data-post-body="">
         <Content />
       </div>
     </article>

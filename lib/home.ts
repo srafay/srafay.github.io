@@ -1,0 +1,153 @@
+/*
+  The homepage: a black hole with the real Solar System and each post's star system orbiting it.
+
+  It is plain HTML, not a React page. The cosmos script takes over the whole document (it splits the name into letters,
+  moves every piece of the page into orbit, and drives the address bar as posts open and close), so nothing else
+  may render into it. Everything people and search engines read is here, rendered from the posts at build time; the
+  script and its stylesheet, public/cosmos/cosmos.js and cosmos.css, only draw and animate it. Each post's text stays
+  on its own page, and the script fetches it from there when the post is opened.
+*/
+import { createHash } from "node:crypto";
+import fs from "node:fs";
+import path from "node:path";
+import { formatDate, getPosts, type Post } from "@/lib/posts";
+import { site } from "@/lib/site";
+
+const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+const postUrl = (post: Post) => `${site.url}/posts/${post.slug}/`;
+
+/** Links to the committed build, with a content hash so a new build is never served from cache. */
+function builtAsset(name: string) {
+  const file = path.join(process.cwd(), "public", "cosmos", name);
+  const hash = createHash("sha256").update(fs.readFileSync(file)).digest("hex").slice(0, 10);
+  return `/cosmos/${name}?v=${hash}`;
+}
+
+/* While the cosmos source's dev build is running (bun run dev in cosmos/), `next dev` loads it instead. */
+const COSMOS_DEV = "http://localhost:4173";
+async function assets() {
+  if (process.env.NODE_ENV === "development") {
+    const up = await fetch(`${COSMOS_DEV}/`, { method: "HEAD", signal: AbortSignal.timeout(300) }).then((r) => r.ok, () => false);
+    if (up) return { css: `${COSMOS_DEV}/cosmos.css`, js: `${COSMOS_DEV}/cosmos.js` };
+  }
+  return { css: builtAsset("cosmos.css"), js: builtAsset("cosmos.js") };
+}
+
+function head(posts: Post[]) {
+  const t = esc(site.name), d = esc(site.description), u = esc(`${site.url}/`);
+  const person = { "@id": `${site.url}/#person` };
+  const ld = {
+    "@context": "https://schema.org",
+    "@graph": [
+      { "@type": "Person", ...person, name: site.name, url: `${site.url}/`, sameAs: site.links.map((l) => l.href) },
+      { "@type": "WebSite", "@id": `${site.url}/#website`, url: `${site.url}/`, name: site.name, description: site.description, author: person },
+      {
+        "@type": "Blog", "@id": `${site.url}/#blog`, url: `${site.url}/`, name: `${site.name}: notes`, author: person,
+        blogPost: posts.map((p) => ({ "@type": "BlogPosting", headline: p.title, description: p.summary, datePublished: p.date, url: postUrl(p), author: person })),
+      },
+    ],
+  };
+  return [
+    `<title>${t}</title>`,
+    `<meta name="description" content="${d}">`,
+    `<link rel="canonical" href="${u}">`,
+    `<meta name="robots" content="index, follow">`,
+    `<meta name="author" content="${t}">`,
+    `<meta property="og:type" content="website">`,
+    `<meta property="og:site_name" content="${t}">`,
+    `<meta property="og:title" content="${t}">`,
+    `<meta property="og:description" content="${d}">`,
+    `<meta property="og:url" content="${u}">`,
+    `<meta name="twitter:card" content="summary">`,
+    `<meta name="twitter:title" content="${t}">`,
+    `<meta name="twitter:description" content="${d}">`,
+    `<meta name="theme-color" content="#07060b" media="(prefers-color-scheme: dark)">`,
+    `<meta name="theme-color" content="#e5e5df" media="(prefers-color-scheme: light)">`,
+    `<link rel="icon" href="/favicon.ico" sizes="any">`,
+    `<link rel="alternate" type="application/rss+xml" title="${t}" href="${site.rss}">`,
+    `<script type="application/ld+json">${JSON.stringify(ld).replace(/</g, "\\u003c")}</script>`,
+  ].join("\n");
+}
+
+/** The writing list: real links to each post's own page. The script adds the planets and opens them in place. */
+const list = (posts: Post[]) =>
+  posts.map((p) => `<li data-slug="${p.slug}" data-planet="${esc(p.planet)}" data-iso="${p.date}"><canvas class="globe" aria-hidden="true"></canvas><div>
+  <p class="meta"><b>${esc(p.planet)}</b><time datetime="${p.date}">${formatDate(p.date)}</time></p>
+  <h3><a href="/posts/${p.slug}/">${esc(p.title)}</a></h3><p>${esc(p.summary)}</p><p class="fact"></p></div></li>`).join("\n");
+
+const footer = () =>
+  [...site.links.map((l) => `<a href="${esc(l.href)}" rel="me">${esc(l.label)}</a>`), `<a href="${site.rss}">RSS</a>`].join("");
+
+export async function homePage() {
+  const posts = await getPosts();
+  const { css, js } = await assets();
+  return `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, viewport-fit=cover">
+${head(posts)}
+<script>try{const t=localStorage.getItem("theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch{}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;1,6..96,400&family=Figtree:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="${css}">
+<script src="${js}" defer></script>
+</head>
+<body>
+
+<div class="sky" aria-hidden="true">
+  <canvas id="back"></canvas>
+  <div class="hole-layer"><canvas id="hole"></canvas></div>
+  <canvas id="front"></canvas>
+</div>
+<div id="tags"></div>
+
+<div class="page" id="page">
+  <header class="bar" id="bar">
+    <a class="mark" href="#home">srafay</a>
+    <nav aria-label="Sections"><a href="#home" aria-current="true">Home</a><a href="#writing">Writing</a>
+      <button class="flip" id="flip" type="button">
+        <svg class="moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"/></svg>
+        <svg class="sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></svg>
+      </button>
+    </nav>
+  </header>
+  <section class="hero" id="home" aria-label="Introduction">
+    <div class="title">
+      <h1 id="name" aria-label="${esc(site.name)}">Syed <i>Rafay</i></h1>
+      <p>Most things fall in. A few notes made it back out.</p>
+      <a class="down" href="#writing">Read the notes</a>
+    </div>
+  </section>
+
+  <section class="writing" id="writing">
+    <div class="col">
+      <h2>Writing</h2>
+      <p class="lede">Each note is a real exoplanet, drawn the way it is known to look.</p>
+      <ul class="readable" id="list">
+${list(posts)}
+      </ul>
+    </div>
+  </section>
+
+  <footer>${footer()}</footer>
+</div>
+<p class="hint" id="hint"><span id="how"></span><br>Planets are where they really are around the Sun today.<br><b id="count">0</b> asteroids swallowed</p>
+<div class="flash" id="flash"></div>
+<div class="tunnel" id="tunnel"></div>
+<canvas class="warp" id="warp" aria-hidden="true"></canvas>
+<canvas id="cursor" aria-hidden="true"></canvas>
+
+<div class="reader" id="reader" hidden role="dialog" aria-modal="true" aria-labelledby="rdTitle">
+  <article>
+    <button class="back" id="rdBack" type="button">Back to the system</button>
+    <p class="des" id="rdDes"></p>
+    <h1 id="rdTitle"></h1>
+    <div class="prose readable" id="rdBody"></div>
+  </article>
+</div>
+</body>
+</html>
+`;
+}
