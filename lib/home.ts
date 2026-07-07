@@ -18,21 +18,22 @@ const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replac
 const postUrl = (post: Post) => `${site.url}/posts/${post.slug}/`;
 
 const built = (name: string) => fs.readFileSync(path.join(process.cwd(), "public", "cosmos", name));
-/** The committed script, with a content hash so a new build is never served from cache. */
-const builtScript = () => `/cosmos/cosmos.js?v=${createHash("sha256").update(built("cosmos.js")).digest("hex").slice(0, 10)}`;
+/** A committed script, with a content hash so a new build is never served from cache. */
+const builtScript = (name: string) => `/cosmos/${name}?v=${createHash("sha256").update(built(name)).digest("hex").slice(0, 10)}`;
 
 /*
   Nothing blocks the first paint: the stylesheet is inlined (it's small and only this page uses it), the fonts are
-  self-hosted and preloaded, and the script is deferred.
+  self-hosted and preloaded, and the script is deferred. The script hands the planets' surfaces to a worker
+  (surfaces.js, named on its tag), so painting them never blocks the page either.
   While the cosmos source's dev build is running (bun run dev in cosmos/), `next dev` loads that instead.
 */
 const COSMOS_DEV = "http://localhost:4173";
 async function assets() {
   if (process.env.NODE_ENV === "development") {
     const up = await fetch(`${COSMOS_DEV}/`, { method: "HEAD", signal: AbortSignal.timeout(300) }).then((r) => r.ok, () => false);
-    if (up) return { styles: `<link rel="stylesheet" href="${COSMOS_DEV}/cosmos.css">`, js: `${COSMOS_DEV}/cosmos.js` };
+    if (up) return { styles: `<link rel="stylesheet" href="${COSMOS_DEV}/cosmos.css">`, js: `${COSMOS_DEV}/cosmos.js`, worker: `${COSMOS_DEV}/surfaces.js` };
   }
-  return { styles: `<style>${built("cosmos.css").toString("utf8").trim()}</style>`, js: builtScript() };
+  return { styles: `<style>${built("cosmos.css").toString("utf8").trim()}</style>`, js: builtScript("cosmos.js"), worker: builtScript("surfaces.js") };
 }
 
 function head(posts: Post[]) {
@@ -82,7 +83,7 @@ const footer = () =>
 
 export async function homePage() {
   const posts = await getPosts();
-  const { styles, js } = await assets();
+  const { styles, js, worker } = await assets();
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -93,7 +94,7 @@ ${head(posts)}
 ${preloadedFonts.map((href) => `<link rel="preload" href="${href}" as="font" type="font/woff2" crossorigin>`).join("\n")}
 <style>${fontFaceCss}</style>
 ${styles}
-<script src="${js}" defer></script>
+<script src="${js}" data-surfaces="${worker}" defer></script>
 </head>
 <body>
 
