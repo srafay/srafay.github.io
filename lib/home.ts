@@ -106,7 +106,7 @@ ${preloadedFonts.map((href) => `<link rel="preload" href="${href}" as="font" typ
 ${styles}
 <script src="${js}" data-surfaces="${worker}" defer></script>
 </head>
-<body>
+<body${o.skyOnly ? ' data-view="sky"' : ""}>
 
 <div class="sky" aria-hidden="true">
   <canvas id="back"></canvas>
