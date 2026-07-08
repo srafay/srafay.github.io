@@ -1,7 +1,8 @@
 /*
-  The homepage: a black hole with the real Solar System and each post's star system orbiting it.
+  The cosmos pages: a black hole with the real Solar System and each post's star system orbiting it. Two pages use it:
+  the homepage, and the 404 page, where the sky fills the screen.
 
-  It is plain HTML, not a React page. The cosmos script takes over the whole document (it splits the name into letters,
+  They are plain HTML, not React pages. The cosmos script takes over the whole document (it splits the name into letters,
   moves every piece of the page into orbit, and drives the address bar as posts open and close), so nothing else
   may render into it. Everything people and search engines read is here, rendered from the posts at build time; the
   script and its stylesheet, public/cosmos/cosmos.js and cosmos.css, only draw and animate it. Each post's text stays
@@ -36,7 +37,7 @@ async function assets() {
   return { styles: `<style>${built("cosmos.css").toString("utf8").trim()}</style>`, js: builtScript("cosmos.js"), worker: builtScript("surfaces.js") };
 }
 
-function head(posts: Post[]) {
+function homeHead(posts: Post[]) {
   const t = esc(site.name), d = esc(site.description), u = esc(`${site.url}/`);
   const person = { "@id": `${site.url}/#person` };
   const ld = {
@@ -81,15 +82,24 @@ const list = (posts: Post[]) =>
 const footer = () =>
   [...site.links.map((l) => `<a href="${esc(l.href)}" rel="me">${esc(l.label)}</a>`), `<a href="${site.rss}">RSS</a>`].join("");
 
-export async function homePage() {
-  const posts = await getPosts();
+const nav = {
+  // On the homepage the bar moves between its two sections; anywhere else it leads back to them.
+  home: { mark: "#home", home: "#home", writing: "#writing" },
+  away: { mark: "/", home: "/", writing: "/#writing" },
+};
+
+async function cosmosPage(o: { head: string; nav: keyof typeof nav; hero: string; posts: Post[]; skyOnly?: boolean }) {
   const { styles, js, worker } = await assets();
+  const n = nav[o.nav];
+  // skyOnly: the hero alone fills the screen. The writing list and footer stay in the page, hidden, because the script
+  // reads the posts from them (so their planets still orbit and can be opened).
+  const hidden = o.skyOnly ? " hidden" : "";
   return `<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, viewport-fit=cover">
-${head(posts)}
+${o.head}
 <script>try{const t=localStorage.getItem("theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch{}</script>
 ${preloadedFonts.map((href) => `<link rel="preload" href="${href}" as="font" type="font/woff2" crossorigin>`).join("\n")}
 <style>${fontFaceCss}</style>
@@ -107,8 +117,8 @@ ${styles}
 
 <div class="page" id="page">
   <header class="bar" id="bar">
-    <a class="mark" href="#home">srafay</a>
-    <nav aria-label="Sections"><a href="#home" aria-current="true">Home</a><a href="#writing">Writing</a>
+    <a class="mark" href="${n.mark}">srafay</a>
+    <nav aria-label="Sections"><a href="${n.home}"${o.nav === "home" ? ' aria-current="true"' : ""}>Home</a><a href="${n.writing}">Writing</a>
       <button class="flip" id="flip" type="button">
         <svg class="moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"/></svg>
         <svg class="sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></svg>
@@ -117,23 +127,21 @@ ${styles}
   </header>
   <section class="hero" id="home" aria-label="Introduction">
     <div class="title">
-      <h1 id="name" aria-label="${esc(site.name)}">Syed <i>Rafay</i></h1>
-      <p>Most things fall in. A few notes made it back out.</p>
-      <a class="down" href="#writing">Read the notes</a>
+${o.hero}
     </div>
   </section>
 
-  <section class="writing" id="writing">
+  <section class="writing" id="writing"${hidden}>
     <div class="col">
       <h2>Writing</h2>
       <p class="lede">Each note is a real exoplanet, drawn the way it is known to look.</p>
       <ul class="readable" id="list">
-${list(posts)}
+${list(o.posts)}
       </ul>
     </div>
   </section>
 
-  <footer>${footer()}</footer>
+  <footer${hidden}>${footer()}</footer>
 </div>
 <p class="hint" id="hint"><span id="how"></span><br>Planets are where they really are around the Sun today.<br><b id="count">0</b> asteroids swallowed</p>
 <div class="flash" id="flash"></div>
@@ -152,4 +160,32 @@ ${list(posts)}
 </body>
 </html>
 `;
+}
+
+export async function homePage() {
+  const posts = await getPosts();
+  return cosmosPage({
+    head: homeHead(posts), nav: "home", posts,
+    hero: `      <h1 id="name" aria-label="${esc(site.name)}">Syed <i>Rafay</i></h1>
+      <p>Most things fall in. A few notes made it back out.</p>
+      <a class="down" href="#writing">Read the notes</a>`,
+  });
+}
+
+/** GitHub Pages serves this for every address that doesn't exist (the build writes it to 404.html). */
+export async function lostPage() {
+  const title = `Lost in the dark · ${site.name}`;
+  return cosmosPage({
+    head: [
+      `<title>${esc(title)}</title>`,
+      `<meta name="robots" content="noindex">`,
+      `<meta name="theme-color" content="#07060b" media="(prefers-color-scheme: dark)">`,
+      `<meta name="theme-color" content="#e5e5df" media="(prefers-color-scheme: light)">`,
+      `<link rel="icon" href="/favicon.ico" sizes="any">`,
+    ].join("\n"),
+    nav: "away", posts: await getPosts(), skyOnly: true,
+    hero: `      <h1 id="name" aria-label="Lost in the dark">Lost <i>in the dark</i></h1>
+      <p>Error 404. Whatever was here fell in, or never existed.</p>
+      <a class="down" href="/">Back to the system</a>`,
+  });
 }
