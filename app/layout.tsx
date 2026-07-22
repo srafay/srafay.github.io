@@ -1,19 +1,22 @@
 import type { Metadata } from "next";
 import { JetBrains_Mono } from "next/font/google";
 import { ThemeProvider } from "next-themes";
-import { preload } from "react-dom";
 import { SiteHeader } from "@/components/site-header";
-import { fontFaceCss, preloadedFonts } from "@/lib/fonts";
+import { fontFaceCss } from "@/lib/fonts";
 import { site } from "@/lib/site";
 import "./globals.css";
 
 /*
   Every page except the homepage, which is plain HTML (app/route.ts and lib/home.ts). Both use the same self-hosted
   typefaces (lib/fonts.ts); code is set in JetBrains Mono, used only here.
+  These pages don't preload their fonts: the faces are declared inline at the top of the page, so the browser finds
+  them almost as early anyway. Preloads here also reached the homepage, which fetches a post's page to show its text
+  (in dev as a Link header), and the browser then warned that the preloaded fonts went unused.
 */
 const code = JetBrains_Mono({
   variable: "--font-code",
   subsets: ["latin"],
+  preload: false, // only code blocks use it
 });
 
 export const metadata: Metadata = {
@@ -25,7 +28,6 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
-  for (const href of preloadedFonts) preload(href, { as: "font", type: "font/woff2", crossOrigin: "" });
   return (
     <html
       lang="en"

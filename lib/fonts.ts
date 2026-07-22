@@ -15,8 +15,8 @@ const faces = [
 ];
 
 export const fontFaceCss = faces
-  .map((f) => `@font-face{font-family:"${f.family}";font-style:${f.style};font-weight:${f.weight};font-display:swap;src:url(/fonts/${f.file}) format("woff2");unicode-range:${LATIN}}`)
+  .map((face) => `@font-face{font-family:"${face.family}";font-style:${face.style};font-weight:${face.weight};font-display:swap;src:url(/fonts/${face.file}) format("woff2");unicode-range:${LATIN}}`)
   .join("\n");
 
-/** Fetched before the CSS asks for them: the name's two styles and the body text. */
-export const preloadedFonts = faces.map((f) => `/fonts/${f.file}`);
+/** The homepage fetches these before its CSS asks for them: the name's two styles and the body text. */
+export const preloadedFonts = faces.map((face) => `/fonts/${face.file}`);
