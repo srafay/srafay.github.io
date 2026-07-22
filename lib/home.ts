@@ -143,7 +143,7 @@ ${list(o.posts)}
 
   <footer${hidden}>${footer()}</footer>
 </div>
-<p class="hint" id="hint"><span id="how"></span><br>Planets are where they really are around the Sun today.<br><b id="count">0</b> asteroids swallowed</p>
+<p class="hint" id="hint">Pick a named planet to read it.<br>Planets are where they really are around the Sun today.</p>
 <div class="flash" id="flash"></div>
 <div class="tunnel" id="tunnel"></div>
 <canvas class="warp" id="warp" aria-hidden="true"></canvas>
