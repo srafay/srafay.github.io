@@ -28,7 +28,8 @@ export default async function PostPage({ params }: PageProps<"/posts/[slug]">) {
   return (
     <article data-post={slug} className="post">
       <PostTheme theme={post.theme} css={post.css} />
-      <a href="/" className="back">
+      {/* Tells the homepage to open inside the black hole and play the system coming back out. */}
+      <a href="/?from=post" className="back">
         Back to the system
       </a>
       <p className="des">
