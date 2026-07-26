@@ -9,13 +9,31 @@ const LATIN =
 
 const faces = [
   // Bodoni Moda with its optical-size axis, so the huge title and the small labels each get the right cut.
-  { family: "Bodoni Moda", style: "normal", weight: "400 900", file: "bodoni-moda-opsz-normal.woff2" },
-  { family: "Bodoni Moda", style: "italic", weight: "400 900", file: "bodoni-moda-opsz-italic.woff2" },
-  { family: "Figtree", style: "normal", weight: "300 900", file: "figtree-wght-normal.woff2" },
+  {
+    family: "Bodoni Moda",
+    style: "normal",
+    weight: "400 900",
+    file: "bodoni-moda-opsz-normal.woff2",
+  },
+  {
+    family: "Bodoni Moda",
+    style: "italic",
+    weight: "400 900",
+    file: "bodoni-moda-opsz-italic.woff2",
+  },
+  {
+    family: "Figtree",
+    style: "normal",
+    weight: "300 900",
+    file: "figtree-wght-normal.woff2",
+  },
 ];
 
 export const fontFaceCss = faces
-  .map((face) => `@font-face{font-family:"${face.family}";font-style:${face.style};font-weight:${face.weight};font-display:swap;src:url(/fonts/${face.file}) format("woff2");unicode-range:${LATIN}}`)
+  .map(
+    (face) =>
+      `@font-face{font-family:"${face.family}";font-style:${face.style};font-weight:${face.weight};font-display:swap;src:url(/fonts/${face.file}) format("woff2");unicode-range:${LATIN}}`,
+  )
   .join("\n");
 
 /** The homepage fetches these before its CSS asks for them: the name's two styles and the body text. */

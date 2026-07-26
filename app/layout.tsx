@@ -39,7 +39,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       </head>
       <body className="flex min-h-full flex-col">
         {/* Same attribute and storage key as the homepage, so the theme carries across the whole site. */}
-        <ThemeProvider attribute="data-theme" defaultTheme="system" enableSystem disableTransitionOnChange={false}>
+        <ThemeProvider
+          attribute="data-theme"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange={false}
+        >
           <SiteHeader />
           <main className="flex-1">{children}</main>
           <footer className="site-footer">

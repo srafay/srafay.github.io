@@ -7,7 +7,8 @@
     "build": "next build && bun scripts/postbuild.ts",
     "start": "bunx serve@latest out",
     "lint": "eslint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "format": "prettier --write ."
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",
@@ -37,6 +38,7 @@
     "@typescript/native": "npm:typescript@^7.0.2",
     "eslint": "^10.12.0",
     "eslint-config-next": "^16.4.0",
+    "prettier": "^3.9.10",
     "tailwindcss": "^4.3.3",
     "typescript": "npm:@typescript/typescript6@^6.0.2"
   },

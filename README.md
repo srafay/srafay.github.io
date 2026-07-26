@@ -15,14 +15,14 @@ rendered from the posts by `app/route.ts` and `lib/home.ts`; the script and styl
 
 ## Commands
 
-| Command | What it does |
-|---|---|
-| `bun install` | Install dependencies |
-| `bun run dev` | Run the site locally at http://localhost:3000 (drafts included) |
-| `bun run build` | Build the static site into `out/` |
-| `bun run start` | Serve the built `out/` folder |
-| `bun run lint` | Lint with ESLint |
-| `bun run typecheck` | Type-check with TypeScript 7 |
+| Command             | What it does                                                    |
+| ------------------- | --------------------------------------------------------------- |
+| `bun install`       | Install dependencies                                            |
+| `bun run dev`       | Run the site locally at http://localhost:3000 (drafts included) |
+| `bun run build`     | Build the static site into `out/`                               |
+| `bun run start`     | Serve the built `out/` folder                                   |
+| `bun run lint`      | Lint with ESLint                                                |
+| `bun run typecheck` | Type-check with TypeScript 7                                    |
 
 TypeScript is installed twice on purpose: `@typescript/native` is TypeScript 7 (`tsc`), and `typescript` is the TypeScript 6 API package, which ESLint still needs until TypeScript 7.1 adds an API.
 

@@ -117,7 +117,8 @@
   justify-content: space-between;
   align-items: center;
   gap: 16px;
-  padding: calc(16px + env(safe-area-inset-top, 0px)) clamp(16px, 4vw, 48px) 16px;
+  padding: calc(16px + env(safe-area-inset-top, 0px)) clamp(16px, 4vw, 48px)
+    16px;
 }
 .bar .mark {
   font: italic 400 1.35rem var(--face-display);
@@ -185,7 +186,8 @@
   gap: 24px;
   flex-wrap: wrap;
   justify-content: flex-end;
-  padding: 28px clamp(16px, 4vw, 48px) calc(48px + env(safe-area-inset-bottom, 0px));
+  padding: 28px clamp(16px, 4vw, 48px)
+    calc(48px + env(safe-area-inset-bottom, 0px));
   color: var(--muted-foreground);
   font-size: 0.95rem;
 }

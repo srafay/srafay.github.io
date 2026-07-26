@@ -8,5 +8,7 @@ import { lostPage } from "@/lib/home";
 export const dynamic = "force-static";
 
 export async function GET() {
-  return new Response(await lostPage(), { headers: { "Content-Type": "text/html; charset=utf-8" } });
+  return new Response(await lostPage(), {
+    headers: { "Content-Type": "text/html; charset=utf-8" },
+  });
 }

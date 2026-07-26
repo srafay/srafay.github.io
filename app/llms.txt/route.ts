@@ -9,7 +9,9 @@ export const dynamic = "force-static";
 
 export async function GET() {
   const posts = await getPosts();
-  const example = posts[0] ? `${site.url}/posts/${posts[0].slug}/` : `${site.url}/`;
+  const example = posts[0]
+    ? `${site.url}/posts/${posts[0].slug}/`
+    : `${site.url}/`;
 
   const text = `# ${site.name}
 
@@ -39,5 +41,7 @@ ${posts.map((p) => `- [${p.title}](${site.url}/posts/${p.slug}/): ${p.summary} (
 ${site.links.map((l) => `- [${l.label}](${l.href})`).join("\n")}
 `;
 
-  return new Response(text, { headers: { "Content-Type": "text/markdown; charset=utf-8" } });
+  return new Response(text, {
+    headers: { "Content-Type": "text/markdown; charset=utf-8" },
+  });
 }

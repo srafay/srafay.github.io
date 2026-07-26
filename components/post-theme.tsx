@@ -13,8 +13,10 @@ function declarations(tokens: Record<string, string> = {}) {
  */
 export function PostTheme({ theme, css }: Pick<PostMetadata, "theme" | "css">) {
   const rules = [
-    theme?.light && `:root:root:not([data-theme="dark"]) { ${declarations(theme.light)} }`,
-    theme?.dark && `:root:root[data-theme="dark"] { ${declarations(theme.dark)} }`,
+    theme?.light &&
+      `:root:root:not([data-theme="dark"]) { ${declarations(theme.light)} }`,
+    theme?.dark &&
+      `:root:root[data-theme="dark"] { ${declarations(theme.dark)} }`,
     css,
   ]
     .filter(Boolean)

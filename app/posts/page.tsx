@@ -15,7 +15,10 @@ export default async function PostsPage() {
     <>
       <section className="page-intro">
         <h1>Writing</h1>
-        <p>Everything written so far, newest first. Each note is a real exoplanet.</p>
+        <p>
+          Everything written so far, newest first. Each note is a real
+          exoplanet.
+        </p>
       </section>
       <ul className="entries">
         {posts.map((post) => (
@@ -26,7 +29,11 @@ export default async function PostsPage() {
             </p>
             <h2>
               <Link href={`/posts/${post.slug}/`}>{post.title}</Link>
-              {post.draft && <span className="ml-2 text-sm text-muted-foreground">(draft)</span>}
+              {post.draft && (
+                <span className="ml-2 text-sm text-muted-foreground">
+                  (draft)
+                </span>
+              )}
             </h2>
             <p>{post.summary}</p>
           </li>
