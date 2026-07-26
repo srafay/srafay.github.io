@@ -10,7 +10,7 @@ export type PostMetadata = {
   date: string;
   /**
    * The real, confirmed exoplanet this post is named after and drawn as, written exactly as catalogued,
-   * e.g. "TRAPPIST-1 e". See "Posts are exoplanets" in AGENTS.md.
+   * e.g. "Proxima Cen b". See "Posts are exoplanets" in AGENTS.md.
    */
   planet: string;
   summary: string;

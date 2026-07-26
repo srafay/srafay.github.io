@@ -15,12 +15,19 @@ import { fontFaceCss, preloadedFonts } from "@/lib/fonts";
 import { formatDate, getPosts, type Post } from "@/lib/posts";
 import { site } from "@/lib/site";
 
-const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+const esc = (s: string) =>
+  s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
 const postUrl = (post: Post) => `${site.url}/posts/${post.slug}/`;
 
-const built = (name: string) => fs.readFileSync(path.join(process.cwd(), "public", "cosmos", name));
+const built = (name: string) =>
+  fs.readFileSync(path.join(process.cwd(), "public", "cosmos", name));
 /** A committed script, with a content hash so a new build is never served from cache. */
-const builtScript = (name: string) => `/cosmos/${name}?v=${createHash("sha256").update(built(name)).digest("hex").slice(0, 10)}`;
+const builtScript = (name: string) =>
+  `/cosmos/${name}?v=${createHash("sha256").update(built(name)).digest("hex").slice(0, 10)}`;
 
 /*
   Nothing blocks the first paint: the stylesheet is inlined (it's small and only this page uses it), the fonts are
@@ -31,23 +38,64 @@ const builtScript = (name: string) => `/cosmos/${name}?v=${createHash("sha256").
 const COSMOS_DEV = "http://localhost:4173";
 async function assets() {
   if (process.env.NODE_ENV === "development") {
-    const up = await fetch(`${COSMOS_DEV}/`, { method: "HEAD", signal: AbortSignal.timeout(300) }).then((r) => r.ok, () => false);
-    if (up) return { styles: `<link rel="stylesheet" href="${COSMOS_DEV}/cosmos.css">`, js: `${COSMOS_DEV}/cosmos.js`, worker: `${COSMOS_DEV}/surfaces.js` };
+    const up = await fetch(`${COSMOS_DEV}/`, {
+      method: "HEAD",
+      signal: AbortSignal.timeout(300),
+    }).then(
+      (r) => r.ok,
+      () => false,
+    );
+    if (up)
+      return {
+        styles: `<link rel="stylesheet" href="${COSMOS_DEV}/cosmos.css">`,
+        js: `${COSMOS_DEV}/cosmos.js`,
+        worker: `${COSMOS_DEV}/surfaces.js`,
+      };
   }
-  return { styles: `<style>${built("cosmos.css").toString("utf8").trim()}</style>`, js: builtScript("cosmos.js"), worker: builtScript("surfaces.js") };
+  return {
+    styles: `<style>${built("cosmos.css").toString("utf8").trim()}</style>`,
+    js: builtScript("cosmos.js"),
+    worker: builtScript("surfaces.js"),
+  };
 }
 
 function homeHead(posts: Post[]) {
-  const t = esc(site.name), d = esc(site.description), u = esc(`${site.url}/`);
+  const t = esc(site.name),
+    d = esc(site.description),
+    u = esc(`${site.url}/`);
   const person = { "@id": `${site.url}/#person` };
   const ld = {
     "@context": "https://schema.org",
     "@graph": [
-      { "@type": "Person", ...person, name: site.name, url: `${site.url}/`, sameAs: site.links.map((l) => l.href) },
-      { "@type": "WebSite", "@id": `${site.url}/#website`, url: `${site.url}/`, name: site.name, description: site.description, author: person },
       {
-        "@type": "Blog", "@id": `${site.url}/#blog`, url: `${site.url}/`, name: `${site.name}: notes`, author: person,
-        blogPost: posts.map((p) => ({ "@type": "BlogPosting", headline: p.title, description: p.summary, datePublished: p.date, url: postUrl(p), author: person })),
+        "@type": "Person",
+        ...person,
+        name: site.name,
+        url: `${site.url}/`,
+        sameAs: site.links.map((l) => l.href),
+      },
+      {
+        "@type": "WebSite",
+        "@id": `${site.url}/#website`,
+        url: `${site.url}/`,
+        name: site.name,
+        description: site.description,
+        author: person,
+      },
+      {
+        "@type": "Blog",
+        "@id": `${site.url}/#blog`,
+        url: `${site.url}/`,
+        name: `${site.name}: notes`,
+        author: person,
+        blogPost: posts.map((p) => ({
+          "@type": "BlogPosting",
+          headline: p.title,
+          description: p.summary,
+          datePublished: p.date,
+          url: postUrl(p),
+          author: person,
+        })),
       },
     ],
   };
@@ -75,12 +123,23 @@ function homeHead(posts: Post[]) {
 
 /** The writing list: real links to each post's own page. The script adds the planets and opens them in place. */
 const list = (posts: Post[]) =>
-  posts.map((p) => `<li data-slug="${p.slug}" data-planet="${esc(p.planet)}" data-iso="${p.date}"><canvas class="globe" aria-hidden="true"></canvas><div>
+  posts
+    .map(
+      (
+        p,
+      ) => `<li data-slug="${p.slug}" data-planet="${esc(p.planet)}" data-iso="${p.date}"><canvas class="globe" aria-hidden="true"></canvas><div>
   <p class="meta"><b>${esc(p.planet)}</b><time datetime="${p.date}">${formatDate(p.date)}</time></p>
-  <h3><a href="/posts/${p.slug}/">${esc(p.title)}</a></h3><p>${esc(p.summary)}</p><p class="fact"></p></div></li>`).join("\n");
+  <h3><a href="/posts/${p.slug}/">${esc(p.title)}</a></h3><p>${esc(p.summary)}</p><p class="fact"></p></div></li>`,
+    )
+    .join("\n");
 
 const footer = () =>
-  [...site.links.map((l) => `<a href="${esc(l.href)}" rel="me">${esc(l.label)}</a>`), `<a href="${site.rss}">RSS</a>`].join("");
+  [
+    ...site.links.map(
+      (l) => `<a href="${esc(l.href)}" rel="me">${esc(l.label)}</a>`,
+    ),
+    `<a href="${site.rss}">RSS</a>`,
+  ].join("");
 
 const nav = {
   // On the homepage the bar moves between its two sections; anywhere else it leads back to them.
@@ -88,7 +147,13 @@ const nav = {
   away: { mark: "/", home: "/", writing: "/#writing" },
 };
 
-async function cosmosPage(o: { head: string; nav: keyof typeof nav; hero: string; posts: Post[]; skyOnly?: boolean }) {
+async function cosmosPage(o: {
+  head: string;
+  nav: keyof typeof nav;
+  hero: string;
+  posts: Post[];
+  skyOnly?: boolean;
+}) {
   const { styles, js, worker } = await assets();
   const n = nav[o.nav];
   // skyOnly: the hero alone fills the screen. The writing list and footer stay in the page, hidden, because the script
@@ -134,7 +199,7 @@ ${o.hero}
   <section class="writing" id="writing"${hidden}>
     <div class="col">
       <h2>Writing</h2>
-      <p class="lede">Each note is a real exoplanet, drawn the way it is known to look.</p>
+      <p class="lede">Each exoplanet is drawn as close to real as possible.</p>
       <ul class="readable" id="list">
 ${list(o.posts)}
       </ul>
@@ -165,7 +230,9 @@ ${list(o.posts)}
 export async function homePage() {
   const posts = await getPosts();
   return cosmosPage({
-    head: homeHead(posts), nav: "home", posts,
+    head: homeHead(posts),
+    nav: "home",
+    posts,
     hero: `      <h1 id="name" aria-label="${esc(site.name)}">Syed <i>Rafay</i></h1>
       <p>Most things fall in. A few notes made it back out.</p>
       <a class="down" href="#writing">Read the notes</a>`,
@@ -183,7 +250,9 @@ export async function lostPage() {
       `<meta name="theme-color" content="#e5e5df" media="(prefers-color-scheme: light)">`,
       `<link rel="icon" href="/favicon.ico" sizes="any">`,
     ].join("\n"),
-    nav: "away", posts: await getPosts(), skyOnly: true,
+    nav: "away",
+    posts: await getPosts(),
+    skyOnly: true,
     hero: `      <h1 id="name" aria-label="Lost in the dark">Lost <i>in the dark</i></h1>
       <p>Error 404. Whatever was here fell in, or never existed.</p>
       <a class="down" href="/">Back to the system</a>`,
