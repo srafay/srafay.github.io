@@ -44,7 +44,7 @@
 */
 :root {
   /* The faces themselves are declared in lib/fonts.ts. */
-  --face-display: "Bodoni Moda", "Didot", Georgia, serif;
+  --face-display: "Fraunces", Georgia, "Times New Roman", serif;
   --face-text: "Figtree", system-ui, sans-serif;
 
   --background: #e5e5df;
