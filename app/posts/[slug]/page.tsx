@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { PostTheme } from "@/components/post-theme";
-import { formatDate, getPost, getPosts } from "@/lib/posts";
+import { formatDate, getPost, getPosts, type Post } from "@/lib/posts";
+import { site } from "@/lib/site";
 
 export const dynamicParams = false;
 
@@ -24,6 +25,28 @@ export async function generateMetadata({
       description: post.summary,
       publishedTime: post.date,
     },
+    twitter: { card: "summary", title: post.title, description: post.summary },
+  };
+}
+
+/** What search engines read about a post: a BlogPosting by the site's author, as on the homepage. */
+function structuredData(post: Post) {
+  const url = `${site.url}/posts/${post.slug}/`;
+  return {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "@id": `${url}#post`,
+    headline: post.title,
+    description: post.summary,
+    datePublished: post.date,
+    url,
+    mainEntityOfPage: url,
+    author: {
+      "@id": `${site.url}/#person`,
+      name: site.name,
+      url: `${site.url}/`,
+    },
+    isPartOf: { "@id": `${site.url}/#blog` },
   };
 }
 
@@ -35,6 +58,12 @@ export default async function PostPage({ params }: PageProps<"/posts/[slug]">) {
   return (
     <article data-post={slug} className="post">
       <PostTheme theme={post.theme} css={post.css} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(structuredData(post)).replace(/</g, "\\u003c"),
+        }}
+      />
       {/* Tells the homepage to open inside the black hole and play the system coming back out. */}
       <a href="/?from=post" className="back">
         Back to the system
