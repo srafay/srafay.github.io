@@ -14,6 +14,8 @@ export type PostMetadata = {
    */
   planet: string;
   summary: string;
+  /** Overrides the estimate from the word count, for a post whose source holds more than one version of its text. */
+  readingMinutes?: number;
   draft?: boolean;
   /** Per-post theme: overrides site tokens on this post's page only. */
   theme?: { light?: TokenOverrides; dark?: TokenOverrides };
@@ -45,7 +47,11 @@ export async function getPost(slug: string): Promise<Post> {
   const { metadata } = (await import(`@/content/posts/${slug}.mdx`)) as {
     metadata: PostMetadata;
   };
-  return { ...metadata, slug, readingMinutes: readingMinutes(slug) };
+  return {
+    ...metadata,
+    slug,
+    readingMinutes: metadata.readingMinutes ?? readingMinutes(slug),
+  };
 }
 
 /** Published posts, newest first. Drafts show only in `next dev`. */
