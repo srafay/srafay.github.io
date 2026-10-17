@@ -10,13 +10,18 @@ export type PostMetadata = {
   date: string;
   /**
    * The real, confirmed exoplanet this post is named after and drawn as, written exactly as catalogued,
-   * e.g. "Proxima Cen b". See "Posts are exoplanets" in AGENTS.md.
+   * e.g. "Proxima Cen b", or one of the Sun's own planets, e.g. "Earth". See "Posts are exoplanets" in AGENTS.md.
    */
   planet: string;
   summary: string;
   /** Overrides the estimate from the word count, for a post whose source holds more than one version of its text. */
   readingMinutes?: number;
   draft?: boolean;
+  /**
+   * The post is a page of its own, built by the cosmos repo into content/posts/<slug>/page.html and served whole by
+   * app/posts/<slug>/route.ts, instead of being rendered from this MDX file in the post layout.
+   */
+  ownPage?: boolean;
   /** Per-post theme: overrides site tokens on this post's page only. */
   theme?: { light?: TokenOverrides; dark?: TokenOverrides };
   /** Extra CSS loaded on this post's page only. */

@@ -5,9 +5,12 @@ import { site } from "@/lib/site";
 
 export const dynamicParams = false;
 
+// Posts that are pages of their own are served by their own route (app/posts/<slug>/route.ts), not this one.
 export async function generateStaticParams() {
   const posts = await getPosts();
-  return posts.map((post) => ({ slug: post.slug }));
+  return posts
+    .filter((post) => !post.ownPage)
+    .map((post) => ({ slug: post.slug }));
 }
 
 export async function generateMetadata({

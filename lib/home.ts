@@ -127,7 +127,7 @@ const list = (posts: Post[]) =>
     .map(
       (
         p,
-      ) => `<li data-slug="${p.slug}" data-planet="${esc(p.planet)}" data-iso="${p.date}"><canvas class="globe" aria-hidden="true"></canvas><div>
+      ) => `<li data-slug="${p.slug}" data-planet="${esc(p.planet)}" data-iso="${p.date}"${p.ownPage ? ' data-page="own"' : ""}><canvas class="globe" aria-hidden="true"></canvas><div>
   <p class="meta"><b>${esc(p.planet)}</b><time datetime="${p.date}">${formatDate(p.date)}</time></p>
   <h3><a href="/posts/${p.slug}/">${esc(p.title)}</a></h3><p>${esc(p.summary)}</p><p class="fact"></p></div></li>`,
     )
