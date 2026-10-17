@@ -121,8 +121,14 @@
     16px;
 }
 .bar .mark {
-  font: italic 400 1.35rem var(--face-display);
+  font: 700 15px var(--face-text);
+  letter-spacing: -0.01em;
   text-decoration: none;
+  white-space: nowrap;
+}
+.bar .mark span {
+  color: var(--muted-foreground);
+  font-weight: 500;
 }
 .bar nav {
   display: flex;

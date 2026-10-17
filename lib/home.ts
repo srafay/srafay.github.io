@@ -143,9 +143,19 @@ const footer = () =>
 
 const nav = {
   // On the homepage the bar moves between its two sections; anywhere else it leads back to them.
-  home: { mark: "#home", home: "#home", writing: "#writing" },
-  away: { mark: "/", home: "/", writing: "/#writing" },
+  home: { mark: "#home", home: "#home", posts: "#posts" },
+  away: { mark: "/", home: "/", posts: "/#posts" },
 };
+
+/** The name in the header, the same on every page, styled as on the daylight saving post. */
+const BRAND = "srafay<span>.github.io</span>";
+
+/** The light and dark switch. The homepage's own bar gives it an id; the reader's copy has none. */
+const themeButton = (attributes: string) =>
+  `<button class="flip"${attributes} type="button">
+        <svg class="moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"/></svg>
+        <svg class="sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></svg>
+      </button>`;
 
 async function cosmosPage(o: {
   head: string;
@@ -182,12 +192,9 @@ ${styles}
 
 <div class="page" id="page">
   <header class="bar" id="bar">
-    <a class="mark" href="${n.mark}">srafay</a>
-    <nav aria-label="Sections"><a href="${n.home}"${o.nav === "home" ? ' aria-current="true"' : ""}>Home</a><a href="${n.writing}">Writing</a>
-      <button class="flip" id="flip" type="button">
-        <svg class="moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"/></svg>
-        <svg class="sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></svg>
-      </button>
+    <a class="mark" href="${n.mark}">${BRAND}</a>
+    <nav aria-label="Sections"><a href="${n.home}"${o.nav === "home" ? ' aria-current="true"' : ""}>Home</a><a href="${n.posts}">Posts</a>
+      ${themeButton(' id="flip"')}
     </nav>
   </header>
   <section class="hero" id="home" aria-label="Introduction">
@@ -196,10 +203,9 @@ ${o.hero}
     </div>
   </section>
 
-  <section class="writing" id="writing"${hidden}>
+  <section class="writing" id="posts"${hidden}>
     <div class="col">
-      <h2>Writing</h2>
-      <p class="lede">Each exoplanet is drawn as close to real as possible.</p>
+      <h2>Posts</h2>
       <ul class="readable" id="list">
 ${list(o.posts)}
       </ul>
@@ -215,6 +221,12 @@ ${list(o.posts)}
 <canvas id="cursor" aria-hidden="true"></canvas>
 
 <div class="reader" id="reader" hidden role="dialog" aria-modal="true" aria-labelledby="rdTitle">
+  <header class="bar reader-bar">
+    <a class="mark" href="/" data-reader-leave="home">${BRAND}</a>
+    <nav aria-label="Site"><a href="/" data-reader-leave="home">Home</a><a href="/#posts" data-reader-leave="posts">Posts</a>
+      ${themeButton("")}
+    </nav>
+  </header>
   <article>
     <button class="back" id="rdBack" type="button">Back to the system</button>
     <p class="des" id="rdDes"></p>
@@ -233,9 +245,9 @@ export async function homePage() {
     head: homeHead(posts),
     nav: "home",
     posts,
-    hero: `      <h1 id="name" aria-label="${esc(site.name)}">Syed <i>Rafay</i></h1>
+    hero: `      <h1 id="name" class="visually-hidden" aria-label="${esc(site.name)}">${esc(site.name)}</h1>
       <p>Most things fall in. A few notes made it back out.</p>
-      <a class="down" href="#writing">Read the notes</a>`,
+      <a class="down" href="#posts">Read the notes</a>`,
   });
 }
 
