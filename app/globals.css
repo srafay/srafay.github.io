@@ -204,11 +204,24 @@
   color: var(--foreground);
 }
 
-/* A post's own page: laid out like the reader the homepage opens it in. */
+/*
+  A post's own page: laid out like the reader the homepage opens it in. The sky shows behind it
+  (components/cosmos-backdrop.tsx), so the words sit on a soft wash of the page's ground and read cleanly over it.
+*/
 .post {
-  width: min(100%, 42rem);
-  margin-inline: auto;
-  padding: 28px 20px 96px;
+  width: min(100%, 44rem);
+  margin: 8px auto 48px;
+  padding: 28px clamp(20px, 4vw, 40px) 72px;
+  border-radius: 28px;
+  background: color-mix(in oklab, var(--background) 82%, transparent);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+@media (max-width: 720px) {
+  .post {
+    margin-block: 0;
+    border-radius: 0;
+  }
 }
 .post .back {
   color: var(--muted-foreground);

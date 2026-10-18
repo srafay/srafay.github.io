@@ -1,6 +1,7 @@
 /*
-  The cosmos pages: a black hole with the real Solar System and each post's star system orbiting it. Two pages use it:
-  the homepage, and the 404 page, where the sky fills the screen.
+  The cosmos pages: a black hole with the real Solar System and each post's star system orbiting it. Three pages use
+  it: the homepage; the 404 page, where the sky fills the screen; and the sky page (/sky/), the sky alone, which posts
+  show behind themselves in a frame (see backdropScriptAddress).
 
   They are plain HTML, not React pages. The cosmos script takes over the whole document (it splits the name into letters,
   moves every piece of the page into orbit, and drives the address bar as posts open and close), so nothing else
@@ -157,31 +158,51 @@ const themeButton = (attributes: string) =>
         <svg class="sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></svg>
       </button>`;
 
+/*
+  How much of the page a cosmos page shows. "sky": the hero alone fills the screen (the 404 page). "backdrop": the sky
+  alone, with no words at all (the sky page). Either way the posts list and footer stay in the page, hidden, because the
+  script reads the posts from them, so their planets still orbit.
+*/
+type CosmosView = "sky" | "backdrop";
+
+/** The theme the page starts in: the visitor's choice, or on the sky page, the theme its post asks for. */
+function themeScript(view?: CosmosView) {
+  const chosen =
+    view === "backdrop"
+      ? `new URLSearchParams(location.search).get("theme")`
+      : `localStorage.getItem("theme")`;
+  return `<script>try{const t=${chosen};if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch{}</script>`;
+}
+
+/** The fonts, preloaded. The sky page has no words, so it loads none. */
+const fontsFor = (view?: CosmosView) =>
+  view === "backdrop"
+    ? ""
+    : `${preloadedFonts.map((href) => `<link rel="preload" href="${href}" as="font" type="font/woff2" crossorigin>`).join("\n")}
+<style>${fontFaceCss}</style>`;
+
 async function cosmosPage(o: {
   head: string;
   nav: keyof typeof nav;
   hero: string;
   posts: Post[];
-  skyOnly?: boolean;
+  view?: CosmosView;
 }) {
   const { styles, js, worker } = await assets();
   const n = nav[o.nav];
-  // skyOnly: the hero alone fills the screen. The writing list and footer stay in the page, hidden, because the script
-  // reads the posts from them (so their planets still orbit and can be opened).
-  const hidden = o.skyOnly ? " hidden" : "";
+  const hidden = o.view ? " hidden" : "";
   return `<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, viewport-fit=cover">
 ${o.head}
-<script>try{const t=localStorage.getItem("theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch{}</script>
-${preloadedFonts.map((href) => `<link rel="preload" href="${href}" as="font" type="font/woff2" crossorigin>`).join("\n")}
-<style>${fontFaceCss}</style>
+${themeScript(o.view)}
+${fontsFor(o.view)}
 ${styles}
 <script src="${js}" data-surfaces="${worker}" defer></script>
 </head>
-<body${o.skyOnly ? ' data-view="sky"' : ""}>
+<body${o.view ? ` data-view="${o.view}"` : ""}>
 
 <div class="sky" aria-hidden="true">
   <canvas id="back"></canvas>
@@ -264,9 +285,29 @@ export async function lostPage() {
     ].join("\n"),
     nav: "away",
     posts: await getPosts(),
-    skyOnly: true,
+    view: "sky",
     hero: `      <h1 id="name" aria-label="Lost in the dark">Lost <i>in the dark</i></h1>
       <p>Error 404. Whatever was here fell in, or never existed.</p>
       <a class="down" href="/">Back to the system</a>`,
   });
 }
+
+/*
+  The sky alone, as seen from a post's planet: a post shows it behind itself, in a frame. The post's planet arrives in
+  the address (?planet=Earth) and is left out, and so does the theme to show. Search engines are kept away from it.
+*/
+export async function skyPage() {
+  return cosmosPage({
+    head: [
+      `<title>Sky · ${esc(site.name)}</title>`,
+      `<meta name="robots" content="noindex">`,
+    ].join("\n"),
+    nav: "away",
+    posts: await getPosts(),
+    view: "backdrop",
+    hero: `      <h1 id="name">Sky</h1>`,
+  });
+}
+
+/** The script a post includes to show the sky behind it (cosmos/src/backdrop/loader.js), with its content hash. */
+export const backdropScriptAddress = () => builtScript("backdrop.js");

@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import { CosmosBackdrop } from "@/components/cosmos-backdrop";
 import { PostTheme } from "@/components/post-theme";
+import { backdropScriptAddress } from "@/lib/home";
 import { formatDate, getPost, getPosts, type Post } from "@/lib/posts";
 import { site } from "@/lib/site";
 
@@ -66,6 +68,10 @@ export default async function PostPage({ params }: PageProps<"/posts/[slug]">) {
         dangerouslySetInnerHTML={{
           __html: JSON.stringify(structuredData(post)).replace(/</g, "\\u003c"),
         }}
+      />
+      <CosmosBackdrop
+        planet={post.planet}
+        scriptAddress={backdropScriptAddress()}
       />
       {/* Tells the homepage to open inside the black hole and play the system coming back out. */}
       <a href="/?from=post" className="back">
