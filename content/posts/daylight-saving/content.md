@@ -829,10 +829,9 @@ So ask the people you live with how they have been sleeping. You may find you ar
 
 1. **Sign the petition for a vote.** I started it alongside this post. It asks every Premier and Chief Minister to put one question on daylight saving at each state and territory election, with the majority deciding. It takes no side. [Sign it here](https://www.change.org/p/for-it-or-against-it-let-us-vote-on-daylight-saving).
 2. **Write to your state MP.** Daylight saving is state law, so your state MP can act on it.[2] Your federal MP cannot. Your state parliament's website lists members by electorate. A short email is enough. There is one below that you can copy.
-3. **In NSW and want it ended? There is a separate petition.** This post does not ask to end daylight saving. It asks for a say. A petition asking NSW leaders to abolish it started on change.org in October 2024.[25] Sign it only if ending daylight saving is what you want. [Read it here](https://www.change.org/p/abolish-daylight-saving-time-in-new-south-wales).
-4. **Sign an official petition too, if there is one.** Parliaments count their own petitions formally. In NSW, an online petition with 500 signatures needs a government response. One with 20,000 is debated in Parliament.[24]
-5. **Ask your candidates.** If you are in Victoria or NSW, an election is months away. Ask each candidate whether they would support a vote on daylight saving.
-6. **Tell your family and friends.** Send them this post, or just the short version. Tell them how the change made you feel. Ask how it made them feel.
+3. **Sign a parliament petition too, if there is one.** Parliament does not count petitions on change.org formally. It counts its own. In NSW, an online petition with 500 signatures needs a government response. One with 20,000 is debated in Parliament.[24]
+4. **Ask your candidates.** If you are in Victoria or NSW, an election is months away. Ask each candidate whether they would support a vote on daylight saving.
+5. **Tell your family and friends.** Send them this post, or just the short version. Tell them how the change made you feel. Ask how it made them feel.
 
 #### A message you can send
 
@@ -873,7 +872,6 @@ Sending that message takes less time than changing the clock on the oven. And un
 22. de Lange et al., 2024, UK Biobank. See section 1, source 9.
 23. Kantermann et al., 2007. See section 6, source 5.
 24. Parliament of NSW, Legislative Assembly, "About petitions". [parliament.nsw.gov.au](https://www.parliament.nsw.gov.au/la/petitions/Pages/About-petitions.aspx)
-25. Milad Milani, "Abolish Daylight Saving Time in New South Wales", change.org, started 6 October 2024. [change.org](https://www.change.org/p/abolish-daylight-saving-time-in-new-south-wales)
 
 
 ## Have your say: interactive pieces
