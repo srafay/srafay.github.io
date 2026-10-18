@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
+import { gzipSync } from "node:zlib";
 import { getPost } from "@/lib/posts";
 
 /*
@@ -44,6 +45,19 @@ async function pageHtml(slug: string, fromCosmosDev: boolean) {
   );
 }
 
+/*
+  GitHub Pages sends the page compressed. `next dev` sends a route's response as it is, so there the page is compressed
+  here, and a speed test on the dev server sees it at the size the live site sends. The exported file stays plain.
+*/
+function sentLikeGitHubPages(page: string) {
+  if (process.env.NODE_ENV !== "development")
+    return { body: page, encoding: {} as Record<string, string> };
+  return {
+    body: new Uint8Array(gzipSync(page)),
+    encoding: { "Content-Encoding": "gzip" },
+  };
+}
+
 /** The post's own page. A draft has none outside `next dev`, so a draft never reaches the live site. */
 export async function ownPageResponse(slug: string): Promise<Response> {
   const post = await getPost(slug);
@@ -56,7 +70,8 @@ export async function ownPageResponse(slug: string): Promise<Response> {
     (_match, attribute: string, name: string) =>
       `${attribute}="${builtFileAddress(name, fromCosmosDev)}"`,
   );
-  return new Response(page, {
-    headers: { "Content-Type": "text/html; charset=utf-8" },
+  const { body, encoding } = sentLikeGitHubPages(page);
+  return new Response(body, {
+    headers: { "Content-Type": "text/html; charset=utf-8", ...encoding },
   });
 }
