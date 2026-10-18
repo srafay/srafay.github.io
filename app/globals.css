@@ -223,6 +223,13 @@
     border-radius: 0;
   }
 }
+/* Phones and tablets have no sky behind a post (src/backdrop/loader.js in cosmos), so nothing to blur. */
+@media (hover: none) and (pointer: coarse) {
+  .post {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
 .post .back {
   color: var(--muted-foreground);
   font-size: 0.95rem;
