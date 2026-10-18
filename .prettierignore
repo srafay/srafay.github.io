@@ -1,3 +1,9 @@
 # Built by the cosmos repo, not edited by hand.
 public/cosmos/
 bun.lock
+
+# Built by the cosmos repo from the post's words and numbers, not edited by hand.
+content/posts/*/page.html
+# The daylight saving post's words. Its source lists are numbered as the text cites them, sometimes with gaps,
+# and Prettier would renumber them.
+content/posts/daylight-saving/content.md

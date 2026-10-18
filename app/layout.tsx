@@ -25,6 +25,8 @@ export const metadata: Metadata = {
   description: site.description,
   alternates: { types: { "application/rss+xml": site.rss } },
   openGraph: { siteName: site.name, type: "website" },
+  // The black hole: app/favicon.ico (16, 32 and 48 px), and a larger one for phones' home screens.
+  icons: { apple: "/apple-touch-icon.png" },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

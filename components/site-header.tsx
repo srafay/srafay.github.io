@@ -8,11 +8,11 @@ export function SiteHeader() {
   return (
     <header className="bar">
       <a href="/" className="mark">
-        srafay
+        srafay<span>.github.io</span>
       </a>
       <nav aria-label="Site">
         <a href="/">Home</a>
-        <a href="/#writing">Writing</a>
+        <a href="/#posts">Posts</a>
         <ThemeToggle />
       </nav>
     </header>

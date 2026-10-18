@@ -1,0 +1,618 @@
+{
+  "note": "Times are minutes after midnight on the clock unless named otherwise. Offsets are minutes ahead of UTC.",
+  "energyChanges": [
+    {
+      "label": "US goal for the 2007 extension",
+      "kind": "promised",
+      "changePercent": -1,
+      "basis": "over the extension"
+    },
+    {
+      "label": "California model",
+      "kind": "promised",
+      "changePercent": -0.6,
+      "basis": "over the extension"
+    },
+    {
+      "label": "Victoria, Olympic extension, 2000",
+      "kind": "measured",
+      "changePercent": 0.09,
+      "standardError": 0.4,
+      "basis": "over the extension"
+    },
+    {
+      "label": "Indiana households",
+      "kind": "measured",
+      "changePercent": 1,
+      "basis": "over the season"
+    },
+    {
+      "label": "US Department of Energy, 2007",
+      "kind": "measured",
+      "changePercent": -0.5,
+      "basis": "per day of the extension"
+    },
+    {
+      "label": "44 studies combined",
+      "kind": "measured",
+      "changePercent": -0.34,
+      "basis": "per day"
+    }
+  ],
+  "eveningLightStats": [
+    {
+      "value": "−27%",
+      "label": "Robberies in the hour after sunset",
+      "topic": "crime",
+      "setting": "United States, weeks after the spring change"
+    },
+    {
+      "value": "−24%",
+      "label": "Pedestrian and cyclist deaths",
+      "topic": "walking",
+      "setting": "United States, five weeks after the spring change"
+    },
+    {
+      "value": "+13%",
+      "label": "Pedestrian and cyclist deaths after clocks go back",
+      "topic": "walking",
+      "setting": "United States, five weeks after the autumn change"
+    },
+    {
+      "value": "Fewer",
+      "label": "Evening crashes in Australia",
+      "topic": "driving",
+      "setting": "1989 to 2015, no change overall"
+    },
+    {
+      "value": "80%",
+      "label": "Support for daylight saving",
+      "topic": "opinion",
+      "setting": "Australia, 2024 survey of about 1,100 people"
+    },
+    {
+      "value": "+12%",
+      "label": "Driver and passenger deaths",
+      "topic": "driving",
+      "setting": "United States, after the spring change",
+      "counterEvidence": true
+    }
+  ],
+  "gapPeriodDays": 212,
+  "historyEvents": [
+    {
+      "when": "26 April 1784",
+      "year": 1784,
+      "event": "Franklin's joke about candles, in the Journal de Paris"
+    },
+    {
+      "when": "16 October 1895",
+      "year": 1895,
+      "event": "George Vernon Hudson proposes a two-hour shift in Wellington",
+      "australian": true
+    },
+    {
+      "when": "July 1907",
+      "year": 1907,
+      "event": "William Willett publishes The Waste of Daylight"
+    },
+    {
+      "when": "30 April 1916",
+      "year": 1916,
+      "event": "Germany and Austria-Hungary move their clocks to save coal"
+    },
+    {
+      "when": "1 October 1916",
+      "year": 1916,
+      "event": "Tasmania starts, the first in Australia",
+      "australian": true
+    },
+    {
+      "when": "1917",
+      "year": 1917,
+      "event": "One federal summer, then repeal",
+      "australian": true
+    },
+    {
+      "when": "1942 to 1944",
+      "year": 1942,
+      "event": "Three wartime summers",
+      "australian": true
+    },
+    {
+      "when": "1 October 1967",
+      "year": 1967,
+      "event": "Tasmania brings it back in a drought",
+      "australian": true
+    },
+    {
+      "when": "31 October 1971",
+      "year": 1971,
+      "event": "NSW, Victoria, SA, the ACT and Queensland follow",
+      "australian": true
+    },
+    {
+      "when": "1972",
+      "year": 1972,
+      "event": "Queensland drops it after one summer",
+      "australian": true
+    },
+    {
+      "when": "2008",
+      "year": 2008,
+      "event": "Common dates: first Sunday in October to first Sunday in April",
+      "australian": true
+    }
+  ],
+  "lastVotes": [
+    {
+      "code": "WA",
+      "name": "Western Australia",
+      "column": 1,
+      "row": 1,
+      "rowSpan": 2,
+      "lastVote": "2009",
+      "result": "No, 54.6%"
+    },
+    {
+      "code": "NT",
+      "name": "Northern Territory",
+      "column": 2,
+      "row": 1,
+      "lastVote": null,
+      "result": null
+    },
+    {
+      "code": "QLD",
+      "name": "Queensland",
+      "column": 3,
+      "row": 1,
+      "columnSpan": 2,
+      "lastVote": "1992",
+      "result": "No, 54.5%"
+    },
+    {
+      "code": "SA",
+      "name": "South Australia",
+      "column": 2,
+      "row": 2,
+      "lastVote": null,
+      "result": null
+    },
+    {
+      "code": "NSW",
+      "name": "New South Wales",
+      "column": 3,
+      "row": 2,
+      "lastVote": "1976",
+      "result": "Yes, about 68%"
+    },
+    {
+      "code": "ACT",
+      "name": "Australian Capital Territory",
+      "column": 4,
+      "row": 2,
+      "lastVote": null,
+      "result": null
+    },
+    {
+      "code": "VIC",
+      "name": "Victoria",
+      "column": 3,
+      "row": 3,
+      "lastVote": null,
+      "result": null
+    },
+    {
+      "code": "TAS",
+      "name": "Tasmania",
+      "column": 3,
+      "row": 4,
+      "lastVote": null,
+      "result": null
+    }
+  ],
+  "melbourneSolarNoon": {
+    "label": "Melbourne, sun highest, 11 October 2026",
+    "standard": 726,
+    "daylightSaving": 786
+  },
+  "midsummerDaylight": [
+    {
+      "city": "Brisbane",
+      "clockName": "as now",
+      "sunrise": 290,
+      "sunset": 1122
+    },
+    {
+      "city": "Brisbane",
+      "clockName": "with daylight saving",
+      "sunrise": 350,
+      "sunset": 1182,
+      "hypothetical": true
+    },
+    {
+      "city": "Perth",
+      "clockName": "as now",
+      "sunrise": 307,
+      "sunset": 1162
+    },
+    {
+      "city": "Perth",
+      "clockName": "with daylight saving",
+      "sunrise": 367,
+      "sunset": 1222,
+      "hypothetical": true
+    },
+    {
+      "city": "Sydney",
+      "clockName": "daylight saving",
+      "sunrise": 341,
+      "sunset": 1205
+    },
+    {
+      "city": "Hobart",
+      "clockName": "daylight saving",
+      "sunrise": 328,
+      "sunset": 1249
+    }
+  ],
+  "referendums": [
+    {
+      "place": "WA",
+      "date": "8 March 1975",
+      "yesPercent": 46.34
+    },
+    {
+      "place": "NSW",
+      "date": "1 May 1976",
+      "yesPercent": 68.4
+    },
+    {
+      "place": "WA",
+      "date": "7 April 1984",
+      "yesPercent": 45.65
+    },
+    {
+      "place": "QLD",
+      "date": "22 February 1992",
+      "yesPercent": 45.5
+    },
+    {
+      "place": "WA",
+      "date": "4 April 1992",
+      "yesPercent": 46.86
+    },
+    {
+      "place": "WA",
+      "date": "16 May 2009",
+      "yesPercent": 45.44
+    }
+  ],
+  "springRisks": [
+    {
+      "measure": "Heart attacks treated in hospital",
+      "where": "Michigan, 2010 to 2013",
+      "window": "Monday after",
+      "risePercent": 24,
+      "note": "Weekly total unchanged: they came earlier, not extra"
+    },
+    {
+      "measure": "Cardiac arrests outside hospital",
+      "where": "Victoria, 2000 to 2020",
+      "window": "Sunday and Monday",
+      "risePercent": 17,
+      "australian": true
+    },
+    {
+      "measure": "Stroke admissions",
+      "where": "Finland, 2004 to 2013",
+      "window": "First two days",
+      "risePercent": 8
+    },
+    {
+      "measure": "Fatal road crashes",
+      "where": "United States, 1996 to 2017",
+      "window": "Days after the change",
+      "risePercent": 6
+    },
+    {
+      "measure": "Heart attacks",
+      "where": "Sweden, from 1987",
+      "window": "First week",
+      "risePercent": 5
+    },
+    {
+      "measure": "Heart attacks",
+      "where": "United States, 2013 to 2022",
+      "window": "Week of the change",
+      "risePercent": 0
+    },
+    {
+      "measure": "Fatal road crashes",
+      "where": "Australia, 1989 to 2015",
+      "window": "Whole season",
+      "risePercent": 0,
+      "australian": true
+    }
+  ],
+  "summerZones": [
+    {
+      "place": "Western Australia",
+      "summerOffset": 480
+    },
+    {
+      "place": "Eucla and the Nullarbor roadhouses",
+      "summerOffset": 525,
+      "note": "Unofficial",
+      "unofficial": true
+    },
+    {
+      "place": "Northern Territory",
+      "summerOffset": 570
+    },
+    {
+      "place": "Queensland",
+      "summerOffset": 600,
+      "note": "Includes Coolangatta"
+    },
+    {
+      "place": "South Australia",
+      "summerOffset": 630,
+      "note": "Includes Broken Hill, NSW"
+    },
+    {
+      "place": "NSW, Victoria, ACT, Tasmania",
+      "summerOffset": 660,
+      "note": "Includes Tweed Heads"
+    },
+    {
+      "place": "Lord Howe Island",
+      "summerOffset": 660,
+      "note": "Moves only 30 minutes"
+    },
+    {
+      "place": "Norfolk Island",
+      "summerOffset": 720
+    }
+  ],
+  "sydneyGaps": [
+    {
+      "from": "1 Oct 2026",
+      "dayOfPeriod": 0,
+      "aheadOfLondon": 9,
+      "aheadOfNewYork": 14,
+      "change": ""
+    },
+    {
+      "from": "4 Oct 2026",
+      "dayOfPeriod": 3,
+      "aheadOfLondon": 10,
+      "aheadOfNewYork": 15,
+      "change": "Sydney forward"
+    },
+    {
+      "from": "25 Oct 2026",
+      "dayOfPeriod": 24,
+      "aheadOfLondon": 11,
+      "aheadOfNewYork": 15,
+      "change": "London back"
+    },
+    {
+      "from": "1 Nov 2026",
+      "dayOfPeriod": 31,
+      "aheadOfLondon": 11,
+      "aheadOfNewYork": 16,
+      "change": "New York back"
+    },
+    {
+      "from": "14 Mar 2027",
+      "dayOfPeriod": 164,
+      "aheadOfLondon": 11,
+      "aheadOfNewYork": 15,
+      "change": "New York forward"
+    },
+    {
+      "from": "28 Mar 2027",
+      "dayOfPeriod": 178,
+      "aheadOfLondon": 10,
+      "aheadOfNewYork": 15,
+      "change": "London forward"
+    },
+    {
+      "from": "4 Apr 2027",
+      "dayOfPeriod": 185,
+      "aheadOfLondon": 9,
+      "aheadOfNewYork": 14,
+      "change": "Sydney back"
+    }
+  ],
+  "sydneySummerOffset": 660,
+  "winterSunrises": [
+    {
+      "label": "Melbourne, late June sunrise",
+      "standard": 456,
+      "daylightSaving": 516
+    },
+    {
+      "label": "Hobart, late June sunrise",
+      "standard": 462,
+      "daylightSaving": 522
+    }
+  ],
+  "worldStatus": [
+    {
+      "place": "NSW, Victoria, SA, Tasmania, ACT",
+      "usesItNow": true,
+      "proposal": "NSW: one month less at each end",
+      "status": "NSW bill lapsed, 18 September 2026",
+      "nextChange": "Sunday 4 April 2027"
+    },
+    {
+      "place": "Queensland, WA, NT",
+      "usesItNow": false,
+      "proposal": "Queensland petition for a south-east vote",
+      "status": "Premier says “hard no”",
+      "nextChange": "None"
+    },
+    {
+      "place": "United States",
+      "usesItNow": true,
+      "proposal": "Permanent daylight saving",
+      "status": "Passed the House 308 to 117. Senate returns 9 November",
+      "nextChange": "Sunday 1 November 2026"
+    },
+    {
+      "place": "European Union",
+      "usesItNow": true,
+      "proposal": "End the clock changes",
+      "status": "Parliament agreed in 2019. Governments have not",
+      "nextChange": "Sunday 25 October 2026"
+    },
+    {
+      "place": "Mexico",
+      "usesItNow": false,
+      "proposal": "",
+      "status": "Ended 30 October 2022, except near the US border",
+      "nextChange": "Border towns only"
+    },
+    {
+      "place": "Brazil",
+      "usesItNow": false,
+      "proposal": "",
+      "status": "Ended by decree, 25 April 2019",
+      "nextChange": "None"
+    }
+  ],
+  "letterStates": [
+    {
+      "code": "NSW",
+      "name": "NSW",
+      "fullName": "New South Wales",
+      "kind": "state",
+      "capital": "Sydney",
+      "latitude": -33.8688,
+      "longitude": 151.2093,
+      "standardOffset": 600,
+      "usesSaving": true,
+      "timeZones": [
+        "Australia/Sydney",
+        "Australia/NSW",
+        "Australia/Broken_Hill",
+        "Australia/Lord_Howe"
+      ],
+      "voteHistory": "NSW last voted on daylight saving in 1976. Anyone here younger than about 68 has never had a say.",
+      "nextElection": "13 March 2027",
+      "membersPage": "https://www.parliament.nsw.gov.au/members/Pages/all-members.aspx"
+    },
+    {
+      "code": "VIC",
+      "name": "Victoria",
+      "fullName": "Victoria",
+      "kind": "state",
+      "capital": "Melbourne",
+      "latitude": -37.8136,
+      "longitude": 144.9631,
+      "standardOffset": 600,
+      "usesSaving": true,
+      "timeZones": ["Australia/Melbourne", "Australia/Victoria"],
+      "voteHistory": "As far as I can find, Victorians have never had a vote on it.",
+      "evidence": "Here in Victoria, cardiac arrests rose 17 per cent over the first two days of the spring change.",
+      "nextElection": "28 November 2026",
+      "membersPage": "https://www.parliament.vic.gov.au/members"
+    },
+    {
+      "code": "QLD",
+      "name": "Queensland",
+      "fullName": "Queensland",
+      "kind": "state",
+      "capital": "Brisbane",
+      "latitude": -27.4678,
+      "longitude": 153.0281,
+      "standardOffset": 600,
+      "usesSaving": false,
+      "timeZones": [
+        "Australia/Brisbane",
+        "Australia/Lindeman",
+        "Australia/Queensland"
+      ],
+      "voteHistory": "Queensland last voted on it in 1992. In the government's own 2010 consultation, 63 per cent wanted another referendum.",
+      "membersPage": "https://www.parliament.qld.gov.au/Members/Current-Members"
+    },
+    {
+      "code": "SA",
+      "name": "South Australia",
+      "fullName": "South Australia",
+      "kind": "state",
+      "capital": "Adelaide",
+      "latitude": -34.9285,
+      "longitude": 138.6007,
+      "standardOffset": 570,
+      "usesSaving": true,
+      "timeZones": ["Australia/Adelaide", "Australia/South"],
+      "voteHistory": "As far as I can find, South Australians have never had a vote on it.",
+      "membersPage": "https://www.parliament.sa.gov.au/en/Members"
+    },
+    {
+      "code": "WA",
+      "name": "Western Australia",
+      "fullName": "Western Australia",
+      "kind": "state",
+      "capital": "Perth",
+      "latitude": -31.9523,
+      "longitude": 115.8613,
+      "standardOffset": 480,
+      "usesSaving": false,
+      "timeZones": ["Australia/Perth", "Australia/West", "Australia/Eucla"],
+      "voteHistory": "Western Australia has voted on it four times, most recently in 2009. Opinion can change, and a vote is how we would know.",
+      "membersPage": "https://www.parliament.wa.gov.au/parliament/memblist.nsf/WAllMembers"
+    },
+    {
+      "code": "TAS",
+      "name": "Tasmania",
+      "fullName": "Tasmania",
+      "kind": "state",
+      "capital": "Hobart",
+      "latitude": -42.8821,
+      "longitude": 147.3272,
+      "standardOffset": 600,
+      "usesSaving": true,
+      "timeZones": [
+        "Australia/Hobart",
+        "Australia/Tasmania",
+        "Australia/Currie"
+      ],
+      "voteHistory": "As far as I can find, Tasmanians have never had a vote on it.",
+      "membersPage": "https://www.parliament.tas.gov.au/house-of-assembly/currentmembers"
+    },
+    {
+      "code": "ACT",
+      "name": "the ACT",
+      "fullName": "Australian Capital Territory",
+      "kind": "territory",
+      "capital": "Canberra",
+      "latitude": -35.2809,
+      "longitude": 149.13,
+      "standardOffset": 600,
+      "usesSaving": true,
+      "timeZones": ["Australia/ACT", "Australia/Canberra"],
+      "voteHistory": "As far as I can find, people in the ACT have never had a vote on it.",
+      "membersPage": "https://www.parliament.act.gov.au/members"
+    },
+    {
+      "code": "NT",
+      "name": "the Northern Territory",
+      "fullName": "Northern Territory",
+      "kind": "territory",
+      "capital": "Darwin",
+      "latitude": -12.4637,
+      "longitude": 130.8444,
+      "standardOffset": 570,
+      "usesSaving": false,
+      "timeZones": ["Australia/Darwin", "Australia/North"],
+      "voteHistory": "As far as I can find, Territorians have never had a vote on it.",
+      "membersPage": "https://parliament.nt.gov.au/members"
+    }
+  ],
+  "sunMaths": "Sunrise and sunset come from the NOAA solar position equations. Use this function (returns minutes after midnight UTC; add the clock's offset from UTC in minutes):\n\n  const DEGREES = Math.PI / 180;\n  const SUNRISE_ZENITH = 90.833; // the sun's upper edge on an ideal horizon, with refraction\n\n  /** Sunrise and sunset in minutes after midnight UTC, from the NOAA solar position equations. */\n  function sunriseAndSetInUtc(latitude, longitude, year, monthIndex, day) {\n    const noonUtc = Date.UTC(year, monthIndex, day, 12);\n    const julianCentury = (noonUtc / 86400000 + 2440587.5 - 2451545) / 36525;\n    const meanLongitude =\n      (280.46646 + julianCentury * (36000.76983 + julianCentury * 0.0003032)) %\n      360;\n    const meanAnomaly =\n      357.52911 + julianCentury * (35999.05029 - 0.0001537 * julianCentury);\n    const eccentricity =\n      0.016708634 -\n      julianCentury * (0.000042037 + 0.0000001267 * julianCentury);\n    const equationOfCentre =\n      Math.sin(meanAnomaly * DEGREES) *\n        (1.914602 - julianCentury * (0.004817 + 0.000014 * julianCentury)) +\n      Math.sin(2 * meanAnomaly * DEGREES) *\n        (0.019993 - 0.000101 * julianCentury) +\n      Math.sin(3 * meanAnomaly * DEGREES) * 0.000289;\n    const nutation = 125.04 - 1934.136 * julianCentury;\n    const apparentLongitude =\n      meanLongitude +\n      equationOfCentre -\n      0.00569 -\n      0.00478 * Math.sin(nutation * DEGREES);\n    const obliquity =\n      23 +\n      (26 +\n        (21.448 -\n          julianCentury *\n            (46.815 + julianCentury * (0.00059 - julianCentury * 0.001813))) /\n          60) /\n        60 +\n      0.00256 * Math.cos(nutation * DEGREES);\n    const declination =\n      Math.asin(\n        Math.sin(obliquity * DEGREES) * Math.sin(apparentLongitude * DEGREES),\n      ) / DEGREES;\n    const obliquityTerm = Math.tan((obliquity / 2) * DEGREES) ** 2;\n    const equationOfTime =\n      (4 / DEGREES) *\n      (obliquityTerm * Math.sin(2 * meanLongitude * DEGREES) -\n        2 * eccentricity * Math.sin(meanAnomaly * DEGREES) +\n        4 *\n          eccentricity *\n          obliquityTerm *\n          Math.sin(meanAnomaly * DEGREES) *\n          Math.cos(2 * meanLongitude * DEGREES) -\n        0.5 *\n          obliquityTerm *\n          obliquityTerm *\n          Math.sin(4 * meanLongitude * DEGREES) -\n        1.25 *\n          eccentricity *\n          eccentricity *\n          Math.sin(2 * meanAnomaly * DEGREES));\n    const hourAngle =\n      Math.acos(\n        Math.cos(SUNRISE_ZENITH * DEGREES) /\n          (Math.cos(latitude * DEGREES) * Math.cos(declination * DEGREES)) -\n          Math.tan(latitude * DEGREES) * Math.tan(declination * DEGREES),\n      ) / DEGREES;\n    const solarNoon = 720 - 4 * longitude - equationOfTime;\n    return {\n      sunrise: solarNoon - 4 * hourAngle,\n      sunset: solarNoon + 4 * hourAngle,\n    };\n  }\n"
+}

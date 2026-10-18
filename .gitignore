@@ -51,3 +51,6 @@ CLAUDE.md
 
 # cosmos homepage source: its own private git repo; only its build, public/cosmos/, is committed here
 /cosmos/
+
+# Pages saved while researching a post: someone else's content, kept out of the repo.
+/drafts/**/*.html

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { formatDate, getPosts } from "@/lib/posts";
 
 export const metadata: Metadata = {
-  title: "Writing",
+  title: "Posts",
   description: "Everything written so far, newest first.",
   alternates: { canonical: "/posts/" },
 };
@@ -14,10 +14,9 @@ export default async function PostsPage() {
   return (
     <>
       <section className="page-intro">
-        <h1>Writing</h1>
+        <h1>Posts</h1>
         <p>
-          Everything written so far, newest first. Each note is a real
-          exoplanet.
+          Everything written so far, newest first. Each note is a real planet.
         </p>
       </section>
       <ul className="entries">

@@ -2,71 +2,17 @@
 
 Personal site and blog for Syed Rafay, live at https://srafay.github.io.
 
-Built with Next.js (static export) and Tailwind CSS. Posts are MDX.
+The homepage is a black hole with the real Solar System and each post's star system orbiting it.
 
-The homepage is a black hole with the real Solar System and each post's star system orbiting it. Its page is
-rendered from the posts by `app/route.ts` and `lib/home.ts`; the script and stylesheet that draw it,
-`public/cosmos/cosmos.js` and `cosmos.css`, are built from a separate source and committed here.
+## Posts
 
-## Requirements
+Each post belongs to a planet on the homepage. It is a real, confirmed exoplanet, drawn the way it is known to look, unless the post is about one of the Sun's own planets.
 
-- Node 26+
-- Bun 1.4+
+- **[Nobody asked us about daylight saving](https://srafay.github.io/posts/daylight-saving/)** (Earth, 12 October 2026). Most Australians who change their clocks have never voted on it. One question at each state election would fix that.
+- **[Hello, world (again)](https://srafay.github.io/posts/hello-world/)** (Proxima Cen b, 26 July 2026). In 2018 this site said two words and stopped. Here is why, and what comes next.
 
-## Commands
+## Following and reading
 
-| Command             | What it does                                                    |
-| ------------------- | --------------------------------------------------------------- |
-| `bun install`       | Install dependencies                                            |
-| `bun run dev`       | Run the site locally at http://localhost:3000 (drafts included) |
-| `bun run build`     | Build the static site into `out/`                               |
-| `bun run start`     | Serve the built `out/` folder                                   |
-| `bun run lint`      | Lint with ESLint                                                |
-| `bun run typecheck` | Type-check with TypeScript 7                                    |
-
-TypeScript is installed twice on purpose: `@typescript/native` is TypeScript 7 (`tsc`), and `typescript` is the TypeScript 6 API package, which ESLint still needs until TypeScript 7.1 adds an API.
-
-## Writing a post
-
-Add a file to `content/posts/`. The file name becomes the URL: `my-post.mdx` is published at `/posts/my-post/`.
-
-```mdx
-export const metadata = {
-  title: "My post",
-  date: "2026-10-10",
-  planet: "Kepler-452 b",
-  summary: "One line for the post list and link previews.",
-};
-
-Write Markdown here. You can also use JSX and import React components.
-```
-
-Every post is named after a real, confirmed exoplanet (`planet`), written exactly as the NASA Exoplanet Archive lists
-it, and never reused. Its planet appears on the homepage once its look has been added to the cosmos source; until
-then the post is listed as a plain link to its page.
-
-Set `draft: true` to keep a post out of the published site. Drafts still show in `bun run dev`.
-
-### Giving a post its own style
-
-Every option below applies to that post's own page only (not to the homepage's reader).
-
-- **`theme`** overrides the colour tokens, separately for light and dark mode:
-
-  ```js
-  theme: {
-    light: { "--signal": "#2f9e6a", "--background": "#f1f6f2" },
-    dark: { "--signal": "#4cc38a", "--background": "#0c1a15" },
-  },
-  ```
-
-  Tokens: `--background`, `--surface`, `--foreground`, `--muted-foreground`, `--border`, `--signal` (dots and marks), `--link` (link text).
-
-- **`css`** adds any CSS. Use `[data-post="my-post"]` to target only the article.
-- **Components:** import a React component in the MDX file and use it inline. Put components used by a single post in `content/posts/_components/`.
-
-See `content/posts/styling-a-post.mdx` for a working example.
-
-## Deploying
-
-Every push to `master` runs `.github/workflows/deploy.yml`. It lints, type-checks and builds the site, then publishes `out/` to GitHub Pages.
+- [RSS feed](https://srafay.github.io/rss.xml): every post, newest first.
+- [Sitemap](https://srafay.github.io/sitemap.xml): every page on the site.
+- [llms.txt](https://srafay.github.io/llms.txt): for language models. It says how to read the site, lists the posts, and sets the terms for using them.
