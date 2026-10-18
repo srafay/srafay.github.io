@@ -6,7 +6,7 @@ Stance: neutral. The post does not ask to end daylight saving or to keep it. It 
 
 The opening moment: at 2 am on Sunday 4 October 2026 the clocks in south-east Australia (NSW, Victoria, South Australia, Tasmania and the ACT) jumped from 1:59:59 am to 3:00:00 am. Clocks go back on Sunday 4 April 2027.
 
-Disclaimer that must appear near the call to action, exactly: "This post does not ask to end daylight saving. It asks for a say. If you want it ended in NSW, there is a separate petition for that." The words "a separate petition for that" link to https://www.change.org/p/abolish-daylight-saving-time-in-new-south-wales
+Disclaimer that must appear near the call to action, exactly: "This post does not ask to end daylight saving. It asks for a say."
 
 The post's own address, for share links and the letter: https://srafay.github.io/posts/daylight-saving/
 
@@ -63,7 +63,7 @@ It is not a new idea. NSW held its 1976 vote on the same day as the state electi
 
 Ten short sections follow. They cover what the spring change does to our bodies, and how a clerk who collected insects started all this. They cover the votes, the power bills, the case for lighter evenings and the case for darker ones. There are a few cows, and one roadhouse sign that says it best.
 
-If you already agree, [section 10](#have-your-say) has a short message you can send to your state MP. This post does not ask to end daylight saving. It asks for a say. If you live in NSW and want it ended, there is a separate petition for that. If you want the detail first, read on.
+If you already agree, [sign the petition for a vote](https://www.change.org/p/for-it-or-against-it-let-us-vote-on-daylight-saving). [Section 10](#have-your-say) also has a short message you can send to your state MP. This post does not ask to end daylight saving. It asks for a say. If you want the detail first, read on.
 
 And if you have felt off since October, tell the people you live with. Ask how they slept. You may not be the only one.
 
@@ -827,11 +827,12 @@ So ask the people you live with how they have been sleeping. You may find you ar
 
 #### How to have your say
 
-1. **Write to your state MP.** Daylight saving is state law, so your state MP can act on it.[2] Your federal MP cannot. Your state parliament's website lists members by electorate. A short email is enough. There is one below that you can copy.
-2. **In NSW and want it ended? There is a separate petition.** This post does not ask to end daylight saving. It asks for a say. A petition asking NSW leaders to abolish it started on change.org in October 2024.[25] Sign it only if ending daylight saving is what you want. [Read it here](https://www.change.org/p/abolish-daylight-saving-time-in-new-south-wales).
-3. **Sign an official petition too, if there is one.** Parliaments count their own petitions formally. In NSW, an online petition with 500 signatures needs a government response. One with 20,000 is debated in Parliament.[24]
-4. **Ask your candidates.** If you are in Victoria or NSW, an election is months away. Ask each candidate whether they would support a vote on daylight saving.
-5. **Tell your family and friends.** Send them this post, or just the short version. Tell them how the change made you feel. Ask how it made them feel.
+1. **Sign the petition for a vote.** I started it alongside this post. It asks every Premier and Chief Minister to put one question on daylight saving at each state and territory election, with the majority deciding. It takes no side. [Sign it here](https://www.change.org/p/for-it-or-against-it-let-us-vote-on-daylight-saving).
+2. **Write to your state MP.** Daylight saving is state law, so your state MP can act on it.[2] Your federal MP cannot. Your state parliament's website lists members by electorate. A short email is enough. There is one below that you can copy.
+3. **In NSW and want it ended? There is a separate petition.** This post does not ask to end daylight saving. It asks for a say. A petition asking NSW leaders to abolish it started on change.org in October 2024.[25] Sign it only if ending daylight saving is what you want. [Read it here](https://www.change.org/p/abolish-daylight-saving-time-in-new-south-wales).
+4. **Sign an official petition too, if there is one.** Parliaments count their own petitions formally. In NSW, an online petition with 500 signatures needs a government response. One with 20,000 is debated in Parliament.[24]
+5. **Ask your candidates.** If you are in Victoria or NSW, an election is months away. Ask each candidate whether they would support a vote on daylight saving.
+6. **Tell your family and friends.** Send them this post, or just the short version. Tell them how the change made you feel. Ask how it made them feel.
 
 #### A message you can send
 
@@ -880,7 +881,7 @@ Sending that message takes less time than changing the clock on the oven. And un
 ### Pretend ballot
 
 Question: "Should your state use daylight saving for the next term of Parliament?" Answers: Yes, No.
-After voting, show: "That took about one second. Most Australians who change their clocks have never been asked this question for real. Make it real: ask your state MP for a vote."
+After voting, show: "That took about one second. Most Australians who change their clocks have never been asked this question for real. Make it real: sign the petition for a vote, and ask your state MP."
 
 ### Mood check
 
