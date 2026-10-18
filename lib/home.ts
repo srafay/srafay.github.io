@@ -117,6 +117,7 @@ function homeHead(posts: Post[]) {
     `<meta name="theme-color" content="#07060b" media="(prefers-color-scheme: dark)">`,
     `<meta name="theme-color" content="#e5e5df" media="(prefers-color-scheme: light)">`,
     `<link rel="icon" href="/favicon.ico" sizes="any">`,
+    `<link rel="apple-touch-icon" href="/apple-touch-icon.png">`,
     `<link rel="alternate" type="application/rss+xml" title="${t}" href="${site.rss}">`,
     `<script type="application/ld+json">${JSON.stringify(ld).replace(/</g, "\\u003c")}</script>`,
   ].join("\n");
@@ -282,6 +283,7 @@ export async function lostPage() {
       `<meta name="theme-color" content="#07060b" media="(prefers-color-scheme: dark)">`,
       `<meta name="theme-color" content="#e5e5df" media="(prefers-color-scheme: light)">`,
       `<link rel="icon" href="/favicon.ico" sizes="any">`,
+      `<link rel="apple-touch-icon" href="/apple-touch-icon.png">`,
     ].join("\n"),
     nav: "away",
     posts: await getPosts(),
