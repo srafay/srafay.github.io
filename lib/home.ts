@@ -15,6 +15,7 @@ import path from "node:path";
 import { fontFaceCss, preloadedFonts } from "@/lib/fonts";
 import { formatDate, getPosts, type Post } from "@/lib/posts";
 import { site } from "@/lib/site";
+import { visitCounterScript } from "@/lib/visit-counter";
 
 const esc = (s: string) =>
   s
@@ -182,6 +183,10 @@ const fontsFor = (view?: CosmosView) =>
     : `${preloadedFonts.map((href) => `<link rel="preload" href="${href}" as="font" type="font/woff2" crossorigin>`).join("\n")}
 <style>${fontFaceCss}</style>`;
 
+/** Counts the visit (lib/visit-counter.ts). The sky page is only seen in a post's frame, and the post counts it. */
+const visitCounterFor = (view?: CosmosView) =>
+  view === "backdrop" ? "" : `<script>${visitCounterScript}</script>\n`;
+
 async function cosmosPage(o: {
   head: string;
   nav: keyof typeof nav;
@@ -256,7 +261,7 @@ ${list(o.posts)}
     <div class="prose readable" id="rdBody"></div>
   </article>
 </div>
-</body>
+${visitCounterFor(o.view)}</body>
 </html>
 `;
 }

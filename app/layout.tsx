@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import { JetBrains_Mono } from "next/font/google";
 import { ThemeProvider } from "next-themes";
+import { PageChangeCounter } from "@/components/page-change-counter";
 import { SiteHeader } from "@/components/site-header";
 import { fontFaceCss } from "@/lib/fonts";
 import { site } from "@/lib/site";
+import { visitCounterScript } from "@/lib/visit-counter";
 import "./globals.css";
 
 /*
@@ -58,6 +60,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <a href={site.rss}>RSS</a>
           </footer>
         </ThemeProvider>
+        <PageChangeCounter />
+        <script dangerouslySetInnerHTML={{ __html: visitCounterScript }} />
       </body>
     </html>
   );
