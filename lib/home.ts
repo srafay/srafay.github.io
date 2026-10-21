@@ -176,6 +176,17 @@ function themeScript(view?: CosmosView) {
   return `<script>try{const t=${chosen};if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch{}</script>`;
 }
 
+/*
+  On a phone or tablet the homepage scrolls inside its body and the document itself never scrolls, so the browser's
+  bars stay where they are (the cosmos script's 01-scroller.js says why). Chosen here, before anything is painted,
+  with the touch test the script uses. Only the homepage has a page to scroll: the 404 page fits the screen, and the
+  sky page is only seen in a post's frame.
+*/
+const scrollBoxScript = (view?: CosmosView) =>
+  view
+    ? ""
+    : `\n<script>if(matchMedia("(hover: none) and (pointer: coarse)").matches)document.documentElement.classList.add("scrolls-in-a-box")</script>`;
+
 /** The fonts, preloaded. The sky page has no words, so it loads none. */
 const fontsFor = (view?: CosmosView) =>
   view === "backdrop"
@@ -203,7 +214,7 @@ async function cosmosPage(o: {
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, viewport-fit=cover">
 ${o.head}
-${themeScript(o.view)}
+${themeScript(o.view)}${scrollBoxScript(o.view)}
 ${fontsFor(o.view)}
 ${styles}
 <script src="${js}" data-surfaces="${worker}" defer></script>
