@@ -26,7 +26,7 @@ export const chapters: Chapter[] = [
     left: 2020,
     lines: [
       "I studied computer and information systems at NED University.",
-      "For years I also ran a GTA San Andreas server, scripted in PAWN.",
+      "I also ran a GTA San Andreas multiplayer server, scripted in PAWN.",
       "Then I built payment APIs in Python at Foree Pay.",
     ],
     more: [
