@@ -249,3 +249,17 @@ export const profilePurposes: Record<string, string> = {
 
 /** The public repositories the account had when the pinned six were read: GitHub's user API, public_repos, 25 October 2026. */
 export const publicRepositoryCount = 44;
+
+/** A city the roles took place in, as a point on the map, in degrees (south and west are negative). */
+export type City = { name: string; latitude: number; longitude: number };
+
+/*
+  The three cities the introduction names, in the order the career reached them. Each is the city centre's coordinates
+  as Wikipedia gives them (Karachi 24.8607 N 67.0011 E, Darwin 12.4637 S 130.8444 E, Sydney 33.8688 S 151.2093 E).
+  Version 2 of the About page draws the career as a constellation with the cities at these places.
+*/
+export const cities: City[] = [
+  { name: "Karachi", latitude: 24.8607, longitude: 67.0011 },
+  { name: "Darwin", latitude: -12.4637, longitude: 130.8444 },
+  { name: "Sydney", latitude: -33.8688, longitude: 151.2093 },
+];

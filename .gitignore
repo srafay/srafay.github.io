@@ -57,3 +57,6 @@ CLAUDE.md
 
 # the site's menu, built from lib/site-menu/ by scripts/build-site-menu.ts
 /public/site-menu.js
+
+# the About page versions' scene scripts, built by scripts/build-about-scenes.ts
+/public/about-v*.js
