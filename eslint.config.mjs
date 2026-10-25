@@ -17,8 +17,8 @@ const eslintConfig = defineConfig([
     "public/cosmos/**",
     // The site's menu, built from lib/site-menu/ by scripts/build-site-menu.ts.
     "public/site-menu.js",
-    // The About page versions' scene scripts, built by scripts/build-about-scenes.ts.
-    "public/about-v*.js",
+    // The About page's script and its versions' scene scripts, built by scripts/build-about-scenes.ts.
+    "public/about*.js",
   ]),
   {
     // The homepage is plain HTML from a route handler (app/route.ts), not a React page, so links to it are plain <a>s

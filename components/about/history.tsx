@@ -1,4 +1,7 @@
 import { education, experience, type Role } from "@/content/about/profile";
+import { YearRuler } from "@/components/about/year-ruler";
+import { roleAnchor, roleAttributes } from "@/lib/about/roles";
+import { pageSections } from "@/lib/about/sections";
 import { formatMonthInFull } from "@/lib/format";
 
 /** A month as a <time>, written out: "September 2025". */
@@ -23,16 +26,28 @@ function roleDates(role: Role) {
 
 const isCurrent = (role: Role) => !role.ended;
 
-/** Every role, newest first: the role, the company, when and where, and one line of what it was. */
+/**
+ * Every role, newest first: the role, the company, when and where, and one line of what it was. Above them, the
+ * ruler of the years they took. Each role carries its months and skills for the page's script, which lights the
+ * roles a pressed skill was used in.
+ */
 export function Experience() {
+  const { id, label } = pageSections.experience;
   return (
-    <section className="profile-section" aria-labelledby="experience-heading">
-      <h2 id="experience-heading">Experience</h2>
+    <section
+      id={id}
+      className="profile-section"
+      aria-labelledby="experience-heading"
+    >
+      <h2 id="experience-heading">{label}</h2>
+      <YearRuler />
       <ol className="timeline">
         {experience.map((role) => (
           <li
             key={`${role.organisation} ${role.started}`}
+            id={roleAnchor(role)}
             className={isCurrent(role) ? "is-current" : undefined}
+            {...roleAttributes(role)}
           >
             <p className="timeline-meta">
               {roleDates(role)}
@@ -49,9 +64,14 @@ export function Experience() {
 }
 
 export function Education() {
+  const { id, label } = pageSections.education;
   return (
-    <section className="profile-section" aria-labelledby="education-heading">
-      <h2 id="education-heading">Education</h2>
+    <section
+      id={id}
+      className="profile-section"
+      aria-labelledby="education-heading"
+    >
+      <h2 id="education-heading">{label}</h2>
       <ol className="timeline">
         {education.map((degree) => (
           <li key={degree.title}>

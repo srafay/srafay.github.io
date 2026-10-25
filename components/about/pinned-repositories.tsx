@@ -6,6 +6,7 @@ import {
   type Repository,
 } from "@/content/about/profile";
 import { DayInFull } from "@/components/about/day-in-full";
+import { pageSections } from "@/lib/about/sections";
 import { formatCount } from "@/lib/format";
 
 /** "1 star", "399 stars": the word a screen reader hears after the number. */
@@ -75,10 +76,15 @@ function RepositoryCard({ repository }: { repository: Repository }) {
 
 /** Six repositories in two columns, as on a GitHub profile; one column on a phone. */
 export function PinnedRepositories() {
+  const { id, label } = pageSections.pinned;
   return (
-    <section className="profile-section" aria-labelledby="pinned-heading">
+    <section
+      id={id}
+      className="profile-section"
+      aria-labelledby="pinned-heading"
+    >
       <div className="section-heading">
-        <h2 id="pinned-heading">Pinned</h2>
+        <h2 id="pinned-heading">{label}</h2>
         <p className="section-note">
           Stars and forks as of <DayInFull day={repositoriesReadOn} />
         </p>

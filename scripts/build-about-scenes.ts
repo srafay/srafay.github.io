@@ -22,6 +22,11 @@ const { Bun } = globalThis as unknown as { Bun: Bundler };
 type Scene = { entry: string; output: string };
 
 const SCENES: Scene[] = [
+  // The About page itself: a pressed skill lights its roles, the ruler, the calendar's days, the time in Sydney.
+  {
+    entry: path.join("lib", "about", "script", "main.ts"),
+    output: path.join("public", "about.js"),
+  },
   // Version 2, "A year of nights": the contribution year as a night sky.
   {
     entry: path.join("lib", "year-of-nights", "scene", "main.ts"),

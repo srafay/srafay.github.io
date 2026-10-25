@@ -521,6 +521,91 @@
   text-decoration-thickness: 1px;
   text-underline-offset: 3px;
 }
+/* The time where the place is, added by the page's script under the place's name. */
+.profile-local-time {
+  display: block;
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/*
+  "On this page". On a computer it sits in the profile column and stays in view as the page scrolls. On a phone it
+  sits once at the top of the main column, as a row that wraps. The script marks the section being read. With the
+  list in it the column is taller than most laptop screens, so the list alone stays in view.
+*/
+.section-links ul {
+  list-style: none;
+}
+.section-links a {
+  color: var(--muted-foreground);
+  text-decoration: none;
+}
+.section-links a:hover,
+.section-links a[aria-current] {
+  color: var(--foreground);
+}
+.section-links-column {
+  display: none;
+}
+.section-links-row ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 18px;
+  margin-bottom: -20px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.9rem;
+}
+.section-links-row a {
+  display: inline-block;
+  padding-block: 7px;
+  text-decoration-color: var(--signal);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 6px;
+}
+.section-links-row a[aria-current] {
+  text-decoration-line: underline;
+}
+@media (min-width: 880px) {
+  .section-links-row {
+    display: none;
+  }
+  .profile-card {
+    align-self: stretch;
+  }
+  .section-links-column {
+    position: sticky;
+    top: 24px;
+    display: block;
+    margin-top: 18px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+    font-size: 0.9rem;
+  }
+  .section-links-heading {
+    padding-bottom: 4px;
+    color: var(--muted-foreground);
+    font-size: 0.8rem;
+  }
+  .section-links-column a {
+    display: block;
+    margin-left: -12px;
+    padding: 3px 0 3px 10px;
+    border-left: 2px solid transparent;
+  }
+  .section-links-column a[aria-current] {
+    border-left-color: var(--signal);
+  }
+}
+/* A section or a role reached by a link stops a little below the top of the screen, and the way there glides. */
+.profile :is(section[id], li[id]) {
+  scroll-margin-top: 24px;
+}
+@media (prefers-reduced-motion: no-preference) {
+  html:has(.profile) {
+    scroll-behavior: smooth;
+  }
+}
 
 /* The opening lines. */
 .profile-intro h1 {
@@ -686,10 +771,43 @@
   margin-top: 12px;
 }
 .calendar-box {
+  position: relative;
   margin-top: 12px;
   padding: 16px 16px 12px;
   border: 1px solid var(--border);
   border-radius: 6px;
+}
+/* The day under the pointer, a finger or the keys, as GitHub names it, above its square and never cut off. */
+.calendar-tooltip {
+  position: absolute;
+  z-index: 2;
+  padding: 5px 9px;
+  border-radius: 6px;
+  background: var(--foreground);
+  color: var(--background);
+  font-size: 0.75rem;
+  line-height: 1.35;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  pointer-events: none;
+  transform: translate(-50%, calc(-100% - 6px));
+}
+.calendar-tooltip[data-edge="start"] {
+  transform: translate(-16px, calc(-100% - 6px));
+}
+.calendar-tooltip[data-edge="end"] {
+  transform: translate(calc(-100% + 16px), calc(-100% - 6px));
+}
+.calendar-ring {
+  fill: none;
+  stroke: var(--foreground);
+  stroke-width: 1.5;
+  pointer-events: none;
+}
+/* While the year lights up, the total counts in a box held at its final width. */
+.section-lead b.is-counting {
+  display: inline-block;
+  text-align: right;
 }
 /*
   Where the screen is narrower than the calendar, its box scrolls sideways. Laid out right to left, the box starts
@@ -789,6 +907,135 @@
   color: var(--muted-foreground);
 }
 
+/*
+  A pressed skill, or a role pointed at, keeps the roles it concerns at full strength and dims the rest, here and on
+  the ruler. Dimmed words stay readable.
+*/
+#experience .timeline > li {
+  transition: opacity 0.2s;
+}
+#experience.is-answering .timeline > li:not(.is-lit) {
+  opacity: 0.45;
+}
+#experience .timeline > li.is-lit::before {
+  border-color: var(--signal);
+  background: var(--signal);
+}
+
+/*
+  The ruler of years over the timeline. Each role is a bar, hollow like the timeline's dots and filled for the role
+  that goes on. The cities sit under the bars, with a mark at each January. Each bar is a link to its role. Room above
+  the bars holds the label the script puts over a bar.
+*/
+.ruler {
+  position: relative;
+  margin-top: 12px;
+  padding-top: 24px;
+}
+.ruler-label {
+  position: absolute;
+  top: 0;
+  font-size: 0.8rem;
+  line-height: 20px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.ruler-label[data-edge="middle"] {
+  transform: translateX(-50%);
+}
+.ruler-bars {
+  position: relative;
+  height: 10px;
+  list-style: none;
+}
+.ruler-bars li {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  padding-inline: 1px;
+}
+.ruler-bars a {
+  position: relative;
+  display: block;
+  height: 100%;
+  border: 1px solid var(--muted-foreground);
+  border-radius: 2px;
+  transition:
+    opacity 0.2s,
+    border-color 0.2s,
+    background-color 0.2s;
+}
+/* Wide and tall enough to point at or tap, whatever the bar's own length. The shortest roles lie on top. */
+.ruler-bars a::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: max(100%, 24px);
+  height: 30px;
+  transform: translate(-50%, -50%);
+}
+.ruler-bars li.is-short {
+  z-index: 1;
+}
+.ruler-bars .is-current a {
+  border-color: var(--signal);
+  background: var(--signal);
+}
+.ruler-bars .is-lit a {
+  border-color: var(--signal);
+  background: color-mix(in oklab, var(--signal) 45%, transparent);
+}
+.ruler-bars .is-current.is-lit a {
+  background: var(--signal);
+}
+.ruler.is-answering .ruler-bars li:not(.is-lit) a {
+  opacity: 0.45;
+}
+.ruler-cities,
+.ruler-years {
+  position: relative;
+  color: var(--muted-foreground);
+  pointer-events: none;
+}
+.ruler-cities {
+  height: 20px;
+  margin-top: 6px;
+}
+.ruler-cities span {
+  position: absolute;
+  top: 0;
+  padding-top: 2px;
+  border-top: 1px solid var(--muted-foreground);
+  font-size: 0.75rem;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+.ruler-years {
+  height: 16px;
+  margin-top: 2px;
+}
+.ruler-years span {
+  position: absolute;
+  top: 0;
+  padding-left: 4px;
+  border-left: 1px solid var(--border);
+  font-size: 0.7rem;
+  line-height: 16px;
+  font-variant-numeric: tabular-nums;
+}
+@media (pointer: coarse) {
+  .ruler-bars {
+    height: 12px;
+  }
+  .ruler-bars a::after {
+    height: 44px;
+  }
+  .ruler-label {
+    font-size: 0.75rem;
+  }
+}
+
 /* Languages and tools: a few groups, each a row of hairline chips. */
 .skill-groups {
   display: grid;
@@ -816,12 +1063,47 @@
   gap: 6px;
   list-style: none;
 }
-.chips li {
+.chip {
+  display: block;
   padding: 1px 10px;
   border: 1px solid var(--border);
   border-radius: 999px;
   color: var(--muted-foreground);
   font-size: 0.85rem;
+  transition:
+    border-color 0.2s,
+    color 0.2s;
+}
+/* A chip that answers: pressed, it names the roles that used it (the page's script). */
+button.chip {
+  cursor: pointer;
+}
+button.chip:hover {
+  border-color: var(--muted-foreground);
+  color: var(--foreground);
+}
+.chip.is-lit {
+  border-color: var(--signal);
+  color: var(--foreground);
+}
+.chip[aria-pressed="true"] {
+  border-color: var(--signal);
+  box-shadow: inset 0 0 0 1px var(--signal);
+  color: var(--signal);
+}
+.chips-answer {
+  max-width: 62ch;
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+}
+.chips-answer:not(:empty) {
+  margin-top: 8px;
+}
+.chips-answer a {
+  color: var(--link);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
 }
 
 /* Elsewhere: the profiles, a line each. */
@@ -862,7 +1144,10 @@
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  body {
+  body,
+  .chip,
+  .ruler-bars a,
+  #experience .timeline > li {
     transition: none;
   }
 }

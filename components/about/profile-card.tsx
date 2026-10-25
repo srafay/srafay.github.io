@@ -1,16 +1,19 @@
 import { BuildingIcon, LinkIcon, PlaceIcon } from "@/components/about/icons";
+import { SectionLinks } from "@/components/about/section-links";
 import {
   avatar,
   bio,
   currentRole,
   handle,
   location,
+  timeZone,
 } from "@/content/about/profile";
 import { site } from "@/lib/site";
 
 /**
  * The narrow column, as on a GitHub profile: the picture, the name and handle, one line, then the facts and links.
- * The picture is a plain <img>: a static export cannot resize images, so next/image would only add script.
+ * On a computer the page's sections follow. The picture is a plain <img>: a static export cannot resize images, so
+ * next/image would only add script. The place names its time zone, and the page's script adds the time there now.
  */
 export function ProfileCard() {
   return (
@@ -40,7 +43,7 @@ export function ProfileCard() {
         </li>
         <li>
           <PlaceIcon />
-          <span>{location}</span>
+          <span data-time-zone={timeZone}>{location}</span>
         </li>
         {site.links.map((link) => (
           <li key={link.href}>
@@ -51,6 +54,7 @@ export function ProfileCard() {
           </li>
         ))}
       </ul>
+      <SectionLinks layout="column" />
     </aside>
   );
 }

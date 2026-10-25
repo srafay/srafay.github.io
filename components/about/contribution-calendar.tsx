@@ -3,25 +3,34 @@ import {
   type CalendarCell,
   type Level,
 } from "@/lib/contribution-calendar";
+import {
+  CELL_ROUNDING,
+  CELL_SIZE,
+  CELL_STEP,
+  CELL_GAP,
+  MONTH_NAME_HEIGHT,
+  calendarHeight,
+  calendarWidth,
+  cellLeft,
+  cellTop,
+  square,
+} from "@/lib/about/calendar-geometry";
+import { pageSections } from "@/lib/about/sections";
 import { DayInFull } from "@/components/about/day-in-full";
 import { formatCount, formatDayInFull } from "@/lib/format";
 
 /*
   A year of GitHub contributions, drawn as GitHub draws it: a column a week, a row a weekday, a square a day in five
-  shades of the signal colour. Plain SVG drawn at build time, so nothing runs in the browser. It keeps its own width,
-  and where the screen is narrower its box scrolls sideways, starting at the latest weeks (globals.css).
+  shades of the signal colour. Plain SVG drawn at build time. It keeps its own width, and where the screen is narrower
+  its box scrolls sideways, starting at the latest weeks (globals.css).
 
   Each shade is one path with a small square for each of its days, about a quarter of the bytes of a shape per day
   (the page carries its markup twice, once as HTML and once for React). The squares get their round corners from a
   stroke with round joins, twice as wide as the rounding, drawn in the shade's own colour.
+
+  The page's script (lib/about/script/) names the day under a pointer or a finger, so the SVG carries each day's
+  count in order from the first day, in data-counts.
 */
-const CELL_SIZE = 10;
-const CELL_GAP = 3;
-const CELL_STEP = CELL_SIZE + CELL_GAP;
-const CELL_ROUNDING = 2;
-const DAY_NAME_WIDTH = 30;
-const MONTH_NAME_HEIGHT = 18;
-const DAYS_IN_A_WEEK = 7;
 // GitHub names every other row, from Monday.
 const NAMED_WEEKDAYS = [
   { weekday: 1, name: "Mon" },
@@ -30,17 +39,7 @@ const NAMED_WEEKDAYS = [
 ];
 const LEVELS: Level[] = [0, 1, 2, 3, 4];
 
-const cellLeft = (week: number) => DAY_NAME_WIDTH + week * CELL_STEP;
-const cellTop = (weekday: number) => MONTH_NAME_HEIGHT + weekday * CELL_STEP;
-const calendarWidth = (weeks: number) => cellLeft(weeks) - CELL_GAP;
-const calendarHeight = () => cellTop(DAYS_IN_A_WEEK) - CELL_GAP;
 const shadeClass = (level: Level) => `shade-${level}`;
-
-/** A day's square, drawn inside its cell by the rounding, which the stroke then fills back out to the cell's edge. */
-function square(left: number, top: number) {
-  const side = CELL_SIZE - 2 * CELL_ROUNDING;
-  return `M${left + CELL_ROUNDING} ${top + CELL_ROUNDING}h${side}v${side}h-${side}z`;
-}
 
 function ShadePath({ level, squares }: { level: Level; squares: string }) {
   return (
@@ -95,17 +94,19 @@ export function ContributionCalendar() {
   const lastDay = formatDayInFull(year.lastDay);
   const busiestDay = formatDayInFull(year.busiest.date);
   const summary = `Contributions each day from ${formatDayInFull(year.firstDay)} to ${lastDay}. The busiest day was ${busiestDay}, with ${year.busiest.count}.`;
+  const { id, label } = pageSections.contributions;
 
   return (
     <section
+      id={id}
       className="profile-section"
       aria-labelledby="contributions-heading"
     >
-      <h2 id="contributions-heading">Contributions</h2>
+      <h2 id="contributions-heading">{label}</h2>
       <figure className="contribution-calendar">
         <figcaption className="section-lead">
-          <b>{formatCount(year.total)}</b> contributions on GitHub in the year
-          to <DayInFull day={year.lastDay} />
+          <b data-calendar-total="">{formatCount(year.total)}</b> contributions
+          on GitHub in the year to <DayInFull day={year.lastDay} />
         </figcaption>
         <div className="calendar-box">
           <div
@@ -120,6 +121,8 @@ export function ContributionCalendar() {
               height={height}
               style={{ minWidth: width }}
               role="img"
+              data-first-day={year.firstDay}
+              data-counts={year.cells.map((cell) => cell.count).join(" ")}
             >
               <title>{summary}</title>
               {year.months.map((month) => (

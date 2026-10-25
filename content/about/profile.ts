@@ -10,6 +10,8 @@ export type Month = `${number}-${number}`;
 export type Role = {
   title: string;
   organisation: string;
+  /** The name the introduction calls it by, for short lines such as the ruler's label. */
+  shortName: string;
   started: Month;
   /** Left out while the role is current. */
   ended?: Month;
@@ -17,6 +19,8 @@ export type Role = {
   place?: string;
   /** One line about the work, not a list of duties. */
   summary: string;
+  /** What the role was built with, in the words the Languages and tools chips use where a chip names it. */
+  skills: string[];
 };
 
 export type Degree = {
@@ -52,6 +56,9 @@ export const bio =
 
 export const location = "Sydney, Australia";
 
+/** The time zone of that place, for the time there now beside it. */
+export const timeZone = "Australia/Sydney";
+
 /** The opening lines, first person. */
 export const introduction = [
   "Since August 2026 I have been a senior software engineer at Twin Technology. I work closely with the Chief AI & Intelligence Officer on .NET, Blazor and Azure, building the next generation of an AI platform.",
@@ -69,70 +76,114 @@ export const currentRole = {
   started: "2026-08",
   description:
     "Working closely with the Chief AI & Intelligence Officer on .NET, Blazor and Azure, creating the next generation of an AI platform.",
-} as const satisfies Omit<Role, "summary"> & { description: string };
+} as const satisfies Pick<Role, "title" | "organisation" | "started"> & {
+  description: string;
+};
 
-/** Newest first. */
+/*
+  Newest first. Each role's skills are its stack as the CV gives it (the "Stack:" lines and the tools each role's
+  points name), and for the current role the owner's own words (.NET, Blazor and Azure, with C#, which the page's "Now"
+  group already names). A skill is listed only where the CV backs it.
+*/
 export const experience: Role[] = [
   {
     title: currentRole.title,
     organisation: currentRole.organisation,
+    shortName: "Twin Technology",
     started: currentRole.started,
     summary:
       "The next generation of an AI platform, on .NET, Blazor and Azure.",
+    skills: ["C#", ".NET", "Blazor", "Azure"],
   },
   {
     title: "Senior Software Engineer",
     organisation: "Atelier",
+    shortName: "Atelier",
     started: "2025-09",
     ended: "2026-06",
     place: "Sydney",
     summary:
       "Serverless backends on AWS, and a multi-agent AI assistant built with LangChain and LangGraph.",
+    skills: [
+      "AWS Lambda",
+      "AppSync",
+      "Aurora",
+      "DynamoDB",
+      "OpenSearch",
+      "SAM",
+      "React",
+      "Next.js",
+      "TypeScript",
+      "Python",
+      "LangChain",
+      "LangGraph",
+      "RAG",
+      "Agents",
+      "Tool calling",
+    ],
   },
   {
     title: "Senior Software Engineer",
     organisation: "Commonwealth Bank of Australia",
+    shortName: "CommBank",
     started: "2025-06",
     ended: "2025-09",
     place: "Sydney",
     summary:
       "Full-stack tools that automate banking work, tested with Pytest, Vitest and Playwright.",
+    skills: ["Python", "React", "Next.js"],
   },
   {
     title: "Senior Software Engineer",
     organisation: "Australian Institute of Marine Science",
+    shortName: "AIMS",
     started: "2022-11",
     ended: "2025-05",
     place: "Remote and Darwin",
     summary:
       "ReefCloud and new science apps, with Python and Java APIs on AWS serverless.",
+    skills: [
+      "Python",
+      "Java",
+      "Angular",
+      "Tailwind CSS",
+      "CDK",
+      "SAM",
+      "AWS Lambda",
+    ],
   },
   {
     title: "Software Developer",
     organisation: "Northern Land Council",
+    shortName: "Northern Land Council",
     started: "2021-12",
     ended: "2022-11",
     place: "Darwin",
     summary:
       "Web apps and REST APIs in C# on .NET Core, with Blazor and SQL Server.",
+    skills: ["C#", ".NET", "Blazor", "SQL Server", "React"],
   },
   {
     title: "Software Engineer",
     organisation: "Foree Pay",
+    shortName: "Foree Pay",
     started: "2018-10",
     ended: "2020-02",
     place: "Karachi, Pakistan",
     summary:
       "Python payment APIs for web, Android and iOS apps, built to PCI-DSS.",
+    skills: ["Python"],
   },
   {
     title: "Software Engineering Intern",
     organisation: "Media Research & Innovations",
+    shortName: "Media Research & Innovations",
     started: "2018-02",
     ended: "2018-09",
     place: "Remote",
     summary:
       "The Android app and Flask APIs for a broadcast monitoring startup.",
+    skills: ["Python", "Android"],
   },
 ];
 
@@ -214,7 +265,11 @@ export const pinnedRepositories: Repository[] = [
   },
 ];
 
-/** A few groups from the CV, not the whole list. */
+/**
+ * A few groups from the CV, not the whole list. A chip that some role in Experience lists among its skills answers
+ * with those roles when pressed (lib/about/skills.ts). SQL is the one that does not. No role's stack names plain SQL
+ * (the Northern Land Council's names SQL Server), so it stays a plain word.
+ */
 export const skillGroups: SkillGroup[] = [
   { name: "Now", skills: ["C#", ".NET", "Blazor", "Azure"] },
   {

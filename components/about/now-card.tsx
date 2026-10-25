@@ -1,11 +1,13 @@
 import { currentRole } from "@/content/about/profile";
+import { pageSections } from "@/lib/about/sections";
 import { formatMonthInFull } from "@/lib/format";
 
 /** The current role, in the owner's own words. */
 export function NowCard() {
+  const { id, label } = pageSections.now;
   return (
-    <section className="profile-section" aria-labelledby="now-heading">
-      <h2 id="now-heading">Now</h2>
+    <section id={id} className="profile-section" aria-labelledby="now-heading">
+      <h2 id="now-heading">{label}</h2>
       <div className="now-card">
         <p className="now-dates">
           <span className="now-marker" aria-hidden="true" />
