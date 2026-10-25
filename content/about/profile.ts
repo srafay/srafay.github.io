@@ -246,3 +246,6 @@ export const profilePurposes: Record<string, string> = {
   LinkedIn: "Work history.",
   "Stack Overflow": "Questions and answers.",
 };
+
+/** The public repositories the account had when the pinned six were read: GitHub's user API, public_repos, 25 October 2026. */
+export const publicRepositoryCount = 44;

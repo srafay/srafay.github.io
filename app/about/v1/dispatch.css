@@ -1,0 +1,384 @@
+/*
+  Version 1 of the About page, "Dispatch": a magazine profile in the site's own ink. A stylesheet imported by a page is
+  still global, so every rule here starts at .about-v1 and every class carries the dispatch- prefix, which no other
+  page uses. Colours and faces are the site's tokens (app/globals.css). Nothing here adds a colour of its own.
+
+  Type scale: 16 px for small matter (notes, captions, the index's facts), 18 px body on phones and 20 px on
+  computers, section titles a step above, a 20 to 24 px deck, and the name at the size of the screen.
+*/
+
+/*
+  The face the name shows while Fraunces is still on its way: a serif already on the phone or computer, scaled so that
+  "Rafay" takes the same width as it will in Fraunces. Georgia measured 2.3268 of its size against Fraunces' 2.0199,
+  so 86.6 percent. Noto Serif, Android's serif, is about as wide. Without it the wider face is cut at the edge.
+*/
+@font-face {
+  font-family: "Dispatch name fallback";
+  src:
+    local("Georgia"), local("Noto Serif"), local("NotoSerif-Regular"),
+    local("Times New Roman");
+  size-adjust: 86.6%;
+}
+
+.about-v1 {
+  /* "Rafay", the wider of the two words, is 2.02 times as wide as the name's font size at the name's own settings
+     (Fraunces, weight 460, optical size 144, letter-spacing -0.04em), measured in the built page in Chromium on 25
+     October 2026 as 2.0199. The name's size is the column's width over this, so the longer word fills the line. */
+  --dispatch-name-width-ratio: 2.02;
+  /* Kept a little under the column, so a browser that sets the word a hair wider never pushes it over the edge. */
+  --dispatch-name-room: 0.97;
+  /* On a computer the name stops growing at about a third of the screen's height. */
+  --dispatch-name-largest: 11.5rem;
+  --dispatch-margin-width: 11rem;
+  --dispatch-gutter: 2.5rem;
+  --dispatch-indent: 0px;
+
+  width: min(100%, 60rem);
+  margin-inline: auto;
+  padding: 0 20px 56px;
+  font-family: var(--face-display);
+}
+
+/* The opening: the name, the deck, the role. The rule under it is where the article begins. */
+.about-v1 .dispatch-opening {
+  container-type: inline-size;
+  display: flex;
+  flex-direction: column;
+  padding-block: 16px 28px;
+  border-bottom: 1px solid var(--foreground);
+}
+.about-v1 .dispatch-name {
+  font-family: "Fraunces", "Dispatch name fallback", Georgia, serif;
+  font-weight: 460;
+  font-variation-settings: "opsz" 144;
+  font-size: min(
+    calc(
+      (100vw - 40px) * var(--dispatch-name-room) /
+        var(--dispatch-name-width-ratio)
+    ),
+    var(--dispatch-name-largest)
+  );
+  font-size: min(
+    calc(100cqi * var(--dispatch-name-room) / var(--dispatch-name-width-ratio)),
+    var(--dispatch-name-largest)
+  );
+  line-height: 0.8;
+  letter-spacing: -0.04em;
+  /* The S's own side bearing, taken back, so the name's left edge meets the text's. */
+  margin-inline-start: -0.04em;
+  /* Room for the tail of the y, which hangs below the tight lines. */
+  padding-bottom: 0.2em;
+  /* A fallback face still wider than Fraunces is cut at the edge rather than widening the page. */
+  overflow-x: clip;
+}
+.about-v1 .dispatch-name-line {
+  display: block;
+  white-space: nowrap;
+}
+.about-v1 .dispatch-standfirst {
+  padding-top: 28px;
+}
+.about-v1 .dispatch-deck {
+  max-width: 30ch;
+  font-size: 1.25rem;
+  font-weight: 400;
+  line-height: 1.35;
+  letter-spacing: -0.005em;
+  text-wrap: balance;
+}
+.about-v1 .dispatch-standing {
+  margin-top: 16px;
+  font: 500 1rem/1.5 var(--face-text);
+}
+
+/* The article: a heading, then passages, each a paragraph with its note. */
+.about-v1 .dispatch-section {
+  margin-top: 3.25rem;
+}
+.about-v1 .dispatch-opening + .dispatch-section {
+  margin-top: 2.25rem;
+}
+.about-v1 .dispatch-heading {
+  margin-bottom: 0.75rem;
+  font-size: 1.375rem;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+.about-v1 .dispatch-passage + .dispatch-passage {
+  margin-top: 1.5rem;
+}
+.about-v1 .dispatch-text > p {
+  max-width: 34em;
+  font-size: 1.125rem;
+  line-height: 1.62;
+  text-wrap: pretty;
+}
+.about-v1 .dispatch-text > p + p {
+  margin-top: 0.9em;
+}
+.about-v1 .dispatch-note {
+  margin-bottom: 0.25rem;
+  color: var(--muted-foreground);
+  font: 400 1rem/1.5 var(--face-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.about-v1 .dispatch-whole-word {
+  white-space: nowrap;
+}
+
+/* Light words on the night ground look heavier than dark words on paper, so the dark theme sets them a step lighter. */
+[data-theme="dark"] .about-v1 .dispatch-name {
+  font-weight: 430;
+}
+[data-theme="dark"] .about-v1 .dispatch-deck,
+[data-theme="dark"] .about-v1 .dispatch-text > p,
+[data-theme="dark"] .about-v1 .dispatch-entry-line {
+  font-weight: 360;
+}
+[data-theme="dark"] .about-v1 .dispatch-heading {
+  font-weight: 560;
+}
+
+/* Links in the words: underlined in a quiet colour, with room above and below so a finger finds them. */
+.about-v1 .dispatch-text > p a,
+.about-v1 .dispatch-versions a {
+  padding-block: 0.25em;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+  text-decoration-color: var(--muted-foreground);
+}
+.about-v1 .dispatch-text > p a:hover,
+.about-v1 .dispatch-versions a:hover {
+  color: var(--link);
+  text-decoration-color: currentColor;
+}
+
+/* Every role, behind a tap. */
+.about-v1 .dispatch-roles {
+  margin-top: 1.5rem;
+}
+.about-v1 .dispatch-roles summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6em;
+  min-height: 2rem;
+  list-style: none;
+  cursor: pointer;
+  font: 500 1rem/1.5 var(--face-text);
+}
+.about-v1 .dispatch-roles summary::-webkit-details-marker {
+  display: none;
+}
+/* A small mark that turns from pointing right to pointing down as the list opens. */
+.about-v1 .dispatch-roles summary::before {
+  content: "";
+  width: 0.45em;
+  height: 0.45em;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  rotate: -45deg;
+  transition: rotate 0.25s ease;
+}
+.about-v1 .dispatch-roles[open] summary::before {
+  rotate: 45deg;
+}
+.about-v1 .dispatch-roles summary:hover {
+  color: var(--link);
+}
+.about-v1 .dispatch-roles-list {
+  display: grid;
+  gap: 0.75rem;
+  padding: 0.75rem 0 0 1.05em;
+}
+.about-v1 .dispatch-role {
+  font: 500 1rem/1.45 var(--face-text);
+}
+.about-v1 .dispatch-role-when {
+  color: var(--muted-foreground);
+  font: 400 1rem/1.45 var(--face-text);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Code: six repositories set as an index, each name with its lines hung under it. */
+.about-v1 .dispatch-index {
+  display: grid;
+  gap: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--foreground);
+}
+.about-v1 .dispatch-entry-name {
+  display: inline-block;
+  padding-block: 2px;
+  font-size: 1.125rem;
+  font-weight: 500;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+  text-decoration-color: var(--muted-foreground);
+}
+.about-v1 .dispatch-entry-name:hover {
+  color: var(--link);
+  text-decoration-color: currentColor;
+}
+.about-v1 .dispatch-entry-line,
+.about-v1 .dispatch-entry-facts {
+  padding-left: 1.25rem;
+}
+.about-v1 .dispatch-entry-line {
+  font-size: 1.0625rem;
+  line-height: 1.5;
+}
+.about-v1 .dispatch-entry-facts {
+  color: var(--muted-foreground);
+  font: 400 1rem/1.5 var(--face-text);
+  font-variant-numeric: tabular-nums;
+}
+
+/* The year of contributions: one strip of weeks across the whole text block, the busiest in the signal colour. */
+.about-v1 .dispatch-strip {
+  margin-top: 2.5rem;
+}
+.about-v1 .dispatch-strip-caption,
+.about-v1 .dispatch-strip-ends {
+  color: var(--muted-foreground);
+  font: 400 1rem/1.5 var(--face-text);
+  font-variant-numeric: tabular-nums;
+}
+.about-v1 .dispatch-strip-caption {
+  margin-bottom: 0.75rem;
+}
+/* The bottom border is the strip's nought: a week with no bar had no contributions. */
+.about-v1 .dispatch-strip-drawing {
+  display: block;
+  width: 100%;
+  height: 3.5rem;
+  border-bottom: 1px solid var(--muted-foreground);
+}
+.about-v1 .dispatch-strip-weeks {
+  fill: var(--muted-foreground);
+}
+.about-v1 .dispatch-strip-busiest {
+  fill: var(--signal);
+}
+.about-v1 .dispatch-strip-ends {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0 1rem;
+  margin-top: 0.5rem;
+}
+.about-v1 .dispatch-strip-busiest-label {
+  margin-inline-start: auto;
+  color: var(--signal);
+}
+
+/* For the owner: which version this is, under the article. */
+.about-v1 .dispatch-versions {
+  margin-top: 5rem;
+  color: var(--muted-foreground);
+  font: 400 1rem/1.6 var(--face-text);
+}
+
+/* Tablets and up: more room around the text, a larger deck. */
+@media (min-width: 40rem) {
+  .about-v1 {
+    padding-inline: 32px;
+  }
+  .about-v1 .dispatch-opening {
+    padding-block: 40px 36px;
+  }
+  .about-v1 .dispatch-deck {
+    font-size: 1.5rem;
+  }
+}
+
+/* Computers: the margin column opens, and each note stands beside the first line of its paragraph. */
+@media (min-width: 60rem) {
+  .about-v1 {
+    --dispatch-indent: calc(
+      var(--dispatch-margin-width) + var(--dispatch-gutter)
+    );
+  }
+  .about-v1 .dispatch-heading,
+  .about-v1 .dispatch-roles {
+    margin-inline-start: var(--dispatch-indent);
+  }
+  .about-v1 .dispatch-heading {
+    font-size: 1.5rem;
+  }
+  .about-v1 .dispatch-passage {
+    display: grid;
+    grid-template-columns: var(--dispatch-margin-width) minmax(0, 1fr);
+    column-gap: var(--dispatch-gutter);
+    align-items: first baseline;
+  }
+  .about-v1 .dispatch-passage > .dispatch-text {
+    grid-column: 2;
+  }
+  .about-v1 .dispatch-note {
+    grid-column: 1;
+    margin: 0;
+    text-align: right;
+  }
+  .about-v1 .dispatch-note-part {
+    display: block;
+  }
+  /* The comma between a note's parts is for phones, where they share a line. A screen reader still reads it. */
+  .about-v1 .dispatch-note-joiner {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .about-v1 .dispatch-text > p {
+    font-size: 1.25rem;
+  }
+  .about-v1 .dispatch-entry-line {
+    font-size: 1.125rem;
+  }
+}
+
+/* The one moment that plays by itself: the name's second line closes up to the first, once, as the page opens. It
+   moves by transform only, so the compositor runs it even while the page's thread is busy. */
+@keyframes dispatch-close-up {
+  from {
+    transform: translateY(0.16em);
+  }
+}
+.about-v1 .dispatch-name-line + .dispatch-name-line {
+  animation: dispatch-close-up 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both;
+}
+
+/* Where the browser can animate to a height of auto, the list of roles opens by growing, to show what opened. */
+@supports (interpolate-size: allow-keywords) and selector(::details-content) {
+  .about-v1 .dispatch-roles {
+    interpolate-size: allow-keywords;
+  }
+  .about-v1 .dispatch-roles::details-content {
+    block-size: 0;
+    overflow: clip;
+    transition:
+      block-size 0.35s ease,
+      content-visibility 0.35s allow-discrete;
+  }
+  .about-v1 .dispatch-roles[open]::details-content {
+    block-size: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .about-v1 .dispatch-name-line + .dispatch-name-line {
+    animation: none;
+  }
+  .about-v1 .dispatch-roles summary::before,
+  .about-v1 .dispatch-roles::details-content {
+    transition: none;
+  }
+}
