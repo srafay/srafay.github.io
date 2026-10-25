@@ -27,6 +27,11 @@ const SCENES: Scene[] = [
     entry: path.join("lib", "year-of-nights", "scene", "main.ts"),
     output: path.join("public", "about-v2.js"),
   },
+  // Version 3, "Flight": the real Earth at night, flown from Karachi to Darwin to Sydney (three.js).
+  {
+    entry: path.join("lib", "flight", "main.ts"),
+    output: path.join("public", "about-v3.js"),
+  },
 ];
 
 async function buildScene({ entry, output }: Scene) {
