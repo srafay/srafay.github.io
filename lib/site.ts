@@ -12,4 +12,5 @@ export const site = {
     },
   ],
   rss: "/rss.xml",
+  about: "/about/",
 };

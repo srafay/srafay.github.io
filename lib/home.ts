@@ -145,9 +145,10 @@ const footer = () =>
   ].join("");
 
 const nav = {
-  // On the homepage the bar moves between its two sections; anywhere else it leads back to them.
-  home: { mark: "#home", home: "#home", posts: "#posts" },
-  away: { mark: "/", home: "/", posts: "/#posts" },
+  // On the homepage the bar moves between its two sections; anywhere else it leads back to them. About is a page of
+  // its own from everywhere.
+  home: { mark: "#home", home: "#home", posts: "#posts", about: site.about },
+  away: { mark: "/", home: "/", posts: "/#posts", about: site.about },
 };
 
 /** The name in the header, the same on every page, styled as on the daylight saving post. */
@@ -237,7 +238,7 @@ ${styles}
 <div class="page" id="page">
   <header class="bar" id="bar">
     <a class="mark" href="${n.mark}">${BRAND}</a>
-    <nav aria-label="Sections"><a href="${n.home}"${o.nav === "home" ? ' aria-current="true"' : ""}>Home</a><a href="${n.posts}">Posts</a>
+    <nav aria-label="Sections"><a href="${n.home}"${o.nav === "home" ? ' aria-current="true"' : ""}>Home</a><a href="${n.posts}">Posts</a><a href="${n.about}">About</a>
       ${themeButton(' id="flip"')}
     </nav>
   </header>
@@ -267,7 +268,7 @@ ${list(o.posts)}
 <div class="reader" id="reader" hidden role="dialog" aria-modal="true" aria-labelledby="rdTitle">
   <header class="bar reader-bar">
     <a class="mark" href="/" data-reader-leave="home">${BRAND}</a>
-    <nav aria-label="Site"><a href="/" data-reader-leave="home">Home</a><a href="/#posts" data-reader-leave="posts">Posts</a>
+    <nav aria-label="Site"><a href="/" data-reader-leave="home">Home</a><a href="/#posts" data-reader-leave="posts">Posts</a><a href="${site.about}">About</a>
       ${themeButton("")}
     </nav>
   </header>

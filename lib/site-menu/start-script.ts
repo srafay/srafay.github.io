@@ -3,9 +3,9 @@ import type { Post } from "@/lib/posts";
 import type { MenuLook, MenuStart } from "@/lib/site-menu/shared";
 
 /*
-  The site's menu: a right click on any page opens Navigate (Home, and Posts with every post) and Change theme. The sky
-  behind a post never has it (lib/home.ts leaves it out there). Computers only: on a phone or a tablet a long press
-  keeps the browser's own menu, and so does a right click in a text field, such as the letter on Earth's post.
+  The site's menu: a right click on any page opens Navigate (Home, Posts with every post, and About) and Change theme.
+  The sky behind a post never has it (lib/home.ts leaves it out there). Computers only: on a phone or a tablet a long
+  press keeps the browser's own menu, and so does a right click in a text field, such as the letter on Earth's post.
 
   Nothing may slow a page for it. This inline script is all a page carries before it has loaded. It remembers which
   kind of pointer pressed last, takes the right click, and adds the menu's script (public/site-menu.js, built from

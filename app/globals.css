@@ -143,6 +143,16 @@
 .bar nav a:hover {
   color: var(--foreground);
 }
+/*
+  On a narrow phone, Home, Posts, About and the theme button fit beside the name only a little closer together, at the
+  name's own size. The homepage's bar has the same rule, in the cosmos stylesheet.
+*/
+@media (max-width: 400px) {
+  .bar nav {
+    gap: 16px;
+    font-size: 15px;
+  }
+}
 .flip {
   display: grid;
   place-items: center;
@@ -399,6 +409,451 @@
   margin-top: 6px;
   color: var(--muted-foreground);
   max-width: 52ch;
+}
+
+/*
+  The About page: the shape of a GitHub profile in the site's own ink. A narrow column holds the person and a wide one
+  the rest; on a phone they stack, the person first. Hairline boxes, no fills, the signal colour for what is current.
+*/
+/* One column a track of minmax(0, 1fr), so a wide child (the calendar) scrolls in its own box, not the page. */
+.profile {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 40px;
+  width: min(100%, 72rem);
+  margin-inline: auto;
+  padding: 32px 20px 72px;
+}
+.profile-main {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 52px;
+}
+@media (min-width: 880px) {
+  .profile {
+    grid-template-columns: 15rem minmax(0, 1fr);
+    align-items: start;
+    column-gap: 56px;
+    padding-top: 48px;
+  }
+}
+
+.line-icon {
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.25;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* The person. */
+.profile-identity {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.avatar {
+  flex: none;
+  width: 96px;
+  height: 96px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--surface);
+}
+.profile-names {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.profile-name {
+  font: 400 1.75rem/1.1 var(--face-display);
+  letter-spacing: -0.01em;
+}
+.profile-handle {
+  margin-top: 4px;
+  color: var(--muted-foreground);
+}
+@media (min-width: 880px) {
+  .profile-identity {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+  }
+  .avatar {
+    width: 160px;
+    height: 160px;
+  }
+  .profile-name {
+    font-size: 2rem;
+  }
+}
+.profile-bio {
+  margin-top: 18px;
+}
+.profile-facts {
+  margin-top: 18px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  list-style: none;
+  color: var(--muted-foreground);
+  font-size: 0.95rem;
+}
+.profile-facts li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding-block: 5px;
+}
+.profile-facts .line-icon {
+  margin-top: 0.25em;
+}
+/* Links tall enough to tap, without spacing the list out. */
+.profile-facts a {
+  margin-block: -6px;
+  padding-block: 6px;
+  color: var(--foreground);
+  text-decoration: none;
+}
+.profile-facts a:hover {
+  color: var(--link);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+/* The opening lines. */
+.profile-intro h1 {
+  font: italic 400 clamp(2.4rem, 5vw, 3.6rem) / 1 var(--face-display);
+}
+.profile-intro p {
+  max-width: 62ch;
+  margin-top: 14px;
+}
+.profile-intro h1 + p {
+  margin-top: 22px;
+}
+.profile-intro .profile-aside {
+  color: var(--muted-foreground);
+}
+
+.day-in-full {
+  white-space: nowrap;
+}
+
+/* Each section: a heading in the display face, then its box or list. */
+.profile-section h2 {
+  font: 400 1.45rem/1.2 var(--face-display);
+}
+.section-heading {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 4px 16px;
+}
+.section-note {
+  color: var(--muted-foreground);
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+}
+.profile-section > .section-note {
+  margin-top: 12px;
+  max-width: 62ch;
+}
+.section-lead {
+  color: var(--muted-foreground);
+  font-variant-numeric: tabular-nums;
+}
+.section-lead b {
+  color: var(--foreground);
+  font-weight: 600;
+}
+
+/* Now: the current role. */
+.now-card {
+  margin-top: 16px;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+.now-dates {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+}
+.now-marker {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--signal);
+}
+.now-card h3 {
+  margin-top: 8px;
+  font: 400 1.5rem/1.2 var(--face-display);
+}
+.now-organisation {
+  margin-top: 4px;
+  color: var(--signal);
+  font-weight: 600;
+}
+.now-description {
+  max-width: 60ch;
+  margin-top: 12px;
+}
+
+/* Pinned: six repositories, two to a row, each card a link as a whole. */
+.repositories {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
+  gap: 16px;
+  margin-top: 16px;
+  list-style: none;
+}
+.repository {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  transition: border-color 0.3s;
+}
+.repository:hover {
+  border-color: var(--muted-foreground);
+}
+.repository h3 {
+  font: 600 1rem/1.35 var(--face-text);
+  overflow-wrap: anywhere;
+}
+.repository h3 a {
+  color: var(--link);
+  text-decoration: none;
+}
+.repository h3 a::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+.repository:hover h3 a {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+/* The focus ring goes round the whole card, which is what the link covers. */
+.repository h3 a:focus-visible {
+  outline: none;
+}
+.repository h3 a:focus-visible::after {
+  outline: 2px solid var(--signal);
+  outline-offset: 2px;
+}
+.repository-description {
+  flex: 1;
+  color: var(--muted-foreground);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+.repository-numbers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  color: var(--muted-foreground);
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+}
+.repository-numbers > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+/* GitHub's colour for the language, with a hairline so a pale one still shows on the paper. */
+.language-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--language-colour);
+  box-shadow: inset 0 0 0 1px
+    color-mix(in oklab, var(--foreground) 20%, transparent);
+}
+
+/* Contributions: GitHub's calendar of the year. */
+.contribution-calendar {
+  margin-top: 12px;
+}
+.calendar-box {
+  margin-top: 12px;
+  padding: 16px 16px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+/*
+  Where the screen is narrower than the calendar, its box scrolls sideways. Laid out right to left, the box starts
+  scrolled to its end, so the latest weeks show first, as on GitHub; the calendar inside reads left to right.
+*/
+.calendar-scroll {
+  direction: rtl;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+.calendar-scroll svg {
+  display: block;
+  direction: ltr;
+  width: 100%;
+  height: auto;
+}
+.calendar-scroll text {
+  fill: var(--muted-foreground);
+  font-size: 10px;
+}
+/* Each shade fills and strokes its squares in one colour. Its opacity applies to the path as a whole, so where the
+   stroke lies over the fill the colour is not laid on twice. */
+.contribution-calendar .shade-0 {
+  fill: var(--border);
+  stroke: var(--border);
+}
+.contribution-calendar :is(.shade-1, .shade-2, .shade-3, .shade-4) {
+  fill: var(--signal);
+  stroke: var(--signal);
+}
+.contribution-calendar .shade-1 {
+  opacity: 0.3;
+}
+.contribution-calendar .shade-2 {
+  opacity: 0.55;
+}
+.contribution-calendar .shade-3 {
+  opacity: 0.8;
+}
+.calendar-key {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  color: var(--muted-foreground);
+  font-size: 0.8rem;
+}
+
+/* Experience and Education: a hairline down the side, a dot for each, filled for the role that goes on. */
+.timeline {
+  margin: 16px 0 0 4px;
+  border-left: 1px solid var(--border);
+  list-style: none;
+}
+.timeline li {
+  position: relative;
+  padding: 0 0 26px 24px;
+}
+.timeline li:last-child {
+  padding-bottom: 0;
+}
+.timeline li::before {
+  content: "";
+  position: absolute;
+  top: 7px;
+  left: -5px;
+  width: 9px;
+  height: 9px;
+  border: 1px solid var(--muted-foreground);
+  border-radius: 50%;
+  background: var(--background);
+}
+.timeline li.is-current::before {
+  border-color: var(--signal);
+  background: var(--signal);
+}
+.timeline-meta {
+  color: var(--muted-foreground);
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+}
+.timeline h3 {
+  margin-top: 2px;
+  font: 400 1.25rem/1.25 var(--face-display);
+}
+.timeline-organisation {
+  margin-top: 2px;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+.timeline-summary {
+  max-width: 60ch;
+  margin-top: 4px;
+  color: var(--muted-foreground);
+}
+
+/* Languages and tools: a few groups, each a row of hairline chips. */
+.skill-groups {
+  display: grid;
+  gap: 14px;
+  margin-top: 16px;
+}
+.skill-groups > div {
+  display: grid;
+  gap: 6px;
+}
+@media (min-width: 600px) {
+  .skill-groups > div {
+    grid-template-columns: 7rem minmax(0, 1fr);
+    align-items: baseline;
+    gap: 16px;
+  }
+}
+.skill-groups dt {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  list-style: none;
+}
+.chips li {
+  padding: 1px 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--muted-foreground);
+  font-size: 0.85rem;
+}
+
+/* Elsewhere: the profiles, a line each. */
+.elsewhere {
+  margin-top: 8px;
+  list-style: none;
+}
+.elsewhere li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 14px;
+  padding-block: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.elsewhere li:last-child {
+  border-bottom: 0;
+}
+.elsewhere a {
+  margin-block: -6px;
+  padding-block: 6px;
+  font-weight: 600;
+  text-decoration: none;
+}
+.elsewhere a:hover {
+  color: var(--link);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+.elsewhere span {
+  color: var(--muted-foreground);
 }
 
 @media (max-width: 720px) {
