@@ -4,6 +4,8 @@ Personal site and blog for Syed Rafay, live at https://srafay.github.io.
 
 The homepage is a black hole with the real Solar System and each post's star system orbiting it.
 
+The [About page](https://srafay.github.io/about/) is laid out like a GitHub profile: the current role, earlier roles, pinned repositories and a year of contributions.
+
 ## Posts
 
 Each post belongs to a planet on the homepage. It is a real, confirmed exoplanet, drawn the way it is known to look, unless the post is about one of the Sun's own planets.
