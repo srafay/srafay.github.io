@@ -1,8 +1,9 @@
-import { createHash } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { gzipSync } from "node:zlib";
-import { getPost } from "@/lib/posts";
+import { addressWithContentHash } from "@/lib/content-hash";
+import { getPost, getPosts } from "@/lib/posts";
+import { menuStartScript, ownPageLook } from "@/lib/site-menu/start-script";
 
 /*
   A post that is a page of its own (see ownPage in lib/posts.ts). Its finished page is built by the cosmos repo into
@@ -27,10 +28,18 @@ const cosmosDevIsUp = () =>
 /** A built file's address: the readable dev build's, or the committed file's with its content hash. */
 function builtFileAddress(name: string, fromCosmosDev: boolean) {
   if (fromCosmosDev) return `${COSMOS_DEV}/${name}`;
-  const built = fs.readFileSync(
-    path.join(process.cwd(), "public", "cosmos", name),
-  );
-  return `/cosmos/${name}?v=${createHash("sha256").update(built).digest("hex").slice(0, 10)}`;
+  return addressWithContentHash(`cosmos/${name}`);
+}
+
+/*
+  The site's right-click menu (lib/site-menu), as on every other page. Its start goes at the end of the page's head,
+  so it listens from the start; the post's own script is in the cosmos repo and knows nothing of it.
+*/
+async function withTheMenu(page: string) {
+  const start = menuStartScript({ posts: await getPosts(), look: ownPageLook });
+  const headEnd = page.indexOf("</head>");
+  if (headEnd < 0) throw new Error("A post's own page has no </head>");
+  return `${page.slice(0, headEnd)}<script>${start}</script>\n${page.slice(headEnd)}`;
 }
 
 /** The page's HTML: from the cosmos dev server while it runs, or the committed build. */
@@ -70,7 +79,7 @@ export async function ownPageResponse(slug: string): Promise<Response> {
     (_match, attribute: string, name: string) =>
       `${attribute}="${builtFileAddress(name, fromCosmosDev)}"`,
   );
-  const { body, encoding } = sentLikeGitHubPages(page);
+  const { body, encoding } = sentLikeGitHubPages(await withTheMenu(page));
   return new Response(body, {
     headers: { "Content-Type": "text/html; charset=utf-8", ...encoding },
   });

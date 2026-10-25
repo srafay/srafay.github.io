@@ -3,8 +3,11 @@ import { JetBrains_Mono } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import { PageChangeCounter } from "@/components/page-change-counter";
 import { SiteHeader } from "@/components/site-header";
+import { SiteTheme } from "@/components/site-theme";
 import { fontFaceCss } from "@/lib/fonts";
+import { getPosts } from "@/lib/posts";
 import { site } from "@/lib/site";
+import { menuStartScript, nextPageLook } from "@/lib/site-menu/start-script";
 import { visitCounterScript } from "@/lib/visit-counter";
 import "./globals.css";
 
@@ -31,7 +34,8 @@ export const metadata: Metadata = {
   icons: { apple: "/apple-touch-icon.png" },
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  const posts = await getPosts();
   return (
     <html
       lang="en"
@@ -40,6 +44,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <head>
         <style dangerouslySetInnerHTML={{ __html: fontFaceCss }} />
+        {/* The right-click menu, listening from the start (lib/site-menu/start-script.ts). */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: menuStartScript({ posts, look: nextPageLook }),
+          }}
+        />
       </head>
       <body className="flex min-h-full flex-col">
         {/* Same attribute and storage key as the homepage, so the theme carries across the whole site. */}
@@ -50,6 +60,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           disableTransitionOnChange={false}
         >
           <SiteHeader />
+          <SiteTheme />
           <main className="flex-1">{children}</main>
           <footer className="site-footer">
             {site.links.map((link) => (

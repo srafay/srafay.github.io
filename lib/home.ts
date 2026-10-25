@@ -9,12 +9,13 @@
   script and its stylesheet, public/cosmos/cosmos.js and cosmos.css, only draw and animate it. Each post's text stays
   on its own page, and the script fetches it from there when the post is opened.
 */
-import { createHash } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
+import { addressWithContentHash } from "@/lib/content-hash";
 import { fontFaceCss, preloadedFonts } from "@/lib/fonts";
 import { formatDate, getPosts, type Post } from "@/lib/posts";
 import { site } from "@/lib/site";
+import { cosmosPageLook, menuStartScript } from "@/lib/site-menu/start-script";
 import { visitCounterScript } from "@/lib/visit-counter";
 
 const esc = (s: string) =>
@@ -28,8 +29,7 @@ const postUrl = (post: Post) => `${site.url}/posts/${post.slug}/`;
 const built = (name: string) =>
   fs.readFileSync(path.join(process.cwd(), "public", "cosmos", name));
 /** A committed script, with a content hash so a new build is never served from cache. */
-const builtScript = (name: string) =>
-  `/cosmos/${name}?v=${createHash("sha256").update(built(name)).digest("hex").slice(0, 10)}`;
+const builtScript = (name: string) => addressWithContentHash(`cosmos/${name}`);
 
 /*
   Nothing blocks the first paint: the stylesheet is inlined (it's small and only this page uses it), the fonts are
@@ -194,6 +194,12 @@ const fontsFor = (view?: CosmosView) =>
     : `${preloadedFonts.map((href) => `<link rel="preload" href="${href}" as="font" type="font/woff2" crossorigin>`).join("\n")}
 <style>${fontFaceCss}</style>`;
 
+/** The right-click menu (lib/site-menu). The sky page is only seen in a post's frame, and the post has the menu. */
+const menuFor = (view: CosmosView | undefined, posts: Post[]) =>
+  view === "backdrop"
+    ? ""
+    : `\n<script>${menuStartScript({ posts, look: cosmosPageLook })}</script>`;
+
 /** Counts the visit (lib/visit-counter.ts). The sky page is only seen in a post's frame, and the post counts it. */
 const visitCounterFor = (view?: CosmosView) =>
   view === "backdrop" ? "" : `<script>${visitCounterScript}</script>\n`;
@@ -214,7 +220,7 @@ async function cosmosPage(o: {
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, viewport-fit=cover">
 ${o.head}
-${themeScript(o.view)}${scrollBoxScript(o.view)}
+${themeScript(o.view)}${scrollBoxScript(o.view)}${menuFor(o.view, o.posts)}
 ${fontsFor(o.view)}
 ${styles}
 <script src="${js}" data-surfaces="${worker}" defer></script>

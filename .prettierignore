@@ -7,3 +7,6 @@ content/posts/*/page.html
 # The daylight saving post's words. Its source lists are numbered as the text cites them, sometimes with gaps,
 # and Prettier would renumber them.
 content/posts/daylight-saving/content.md
+
+# Built from lib/site-menu/ by scripts/build-site-menu.ts.
+public/site-menu.js

@@ -54,3 +54,6 @@ CLAUDE.md
 
 # drafts
 /drafts/
+
+# the site's menu, built from lib/site-menu/ by scripts/build-site-menu.ts
+/public/site-menu.js

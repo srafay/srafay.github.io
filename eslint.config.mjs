@@ -15,6 +15,8 @@ const eslintConfig = defineConfig([
     // The cosmos homepage source lives in its own private repo; public/cosmos/ is its build.
     "cosmos/**",
     "public/cosmos/**",
+    // The site's menu, built from lib/site-menu/ by scripts/build-site-menu.ts.
+    "public/site-menu.js",
   ]),
   {
     // The homepage is plain HTML from a route handler (app/route.ts), not a React page, so links to it are plain <a>s
