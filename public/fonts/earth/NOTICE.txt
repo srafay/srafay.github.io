@@ -1,0 +1,5 @@
+The font files in this folder are modified versions of the Latin files Google Fonts serves for Archivo,
+Newsreader and Permanent Marker (Archivo Version 2.001, Newsreader Version 1.003, Permanent Marker Version 1.001).
+Each keeps only the characters the daylight saving post uses, with a margin, and Newsreader italic is fixed at weight 400.
+They were cut with HarfBuzz's subsetter. Their licences are beside them: OFL-archivo.txt and
+OFL-newsreader.txt (SIL Open Font License 1.1), and LICENSE-permanent-marker.txt (Apache License 2.0).
