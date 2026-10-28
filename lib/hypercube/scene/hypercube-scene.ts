@@ -47,6 +47,7 @@ import { Focus } from "./focus";
 import {
   boundOf,
   distanceToFrame,
+  restingAcross,
   ridingDown,
   screenPlaceFor,
   SMALLEST_FRAMED_RADIUS,
@@ -87,11 +88,12 @@ const PRESENT_KEEPS_CLEAR = 22;
   The cube the object rests as: how far it leans toward the camera and how far it is turned round, and the radius the
   camera frames for it. As the cube turns, its corners sweep out to 0.93 of its shell across and 0.94 up and down
   (CUBE_FIT times root two, and with the lean), so these keep every corner clear of the rail and the controls: on a
-  phone it fills from about half to three quarters of the width as it turns.
+  phone it rests a little left of the middle, in the open span, and fills from about three fifths to three quarters
+  of the width as it turns.
 */
 const CUBE_LEAN = (20 * Math.PI) / 180;
 const CUBE_TURN = (32 * Math.PI) / 180;
-const CUBE_FRAMED_RADIUS = { phone: 1.08, computer: 1.22 };
+const CUBE_FRAMED_RADIUS = { phone: 1.1, computer: 1.32 };
 
 export const prefersReducedMotion = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
 export const isTouchScreen = () => matchMedia("(hover: none) and (pointer: coarse)").matches;
@@ -134,6 +136,7 @@ export class HypercubeScene {
   private readonly cameraTarget = [new Follower(0, 40), new Follower(0, 40), new Follower(0, 40)];
   /** Where the object's middle sits down the screen, eased as a ride moves it. */
   private readonly placeDown = new Follower(0.5, 40);
+  private readonly placeAcross = new Follower(0.5, 40);
   private riding = false;
   private place: ScreenPlace = screenPlaceFor(1, 1);
   private width = 1;
@@ -603,16 +606,20 @@ export class HypercubeScene {
     const target = looked.map((value) => value * (1 - flatten)) as [number, number, number];
     let moving = false;
     // A ride, and the cube at rest, sit a little higher on a phone, in the open space between the title and the controls.
-    const higher = ridingDown(this.place, this.height > this.width);
+    const portrait = this.height > this.width;
+    const higher = ridingDown(this.place, portrait);
     const down = this.riding ? higher : this.place.down + (higher - this.place.down) * flatten;
+    const across = this.place.across + (restingAcross(this.place, portrait) - this.place.across) * flatten;
     if (!this.hasFramed || this.reducedMotion) {
       this.placeDown.jump(down);
+      this.placeAcross.jump(across);
       this.cameraDistance.jump(distance);
       target.forEach((value, axis) => this.cameraTarget[axis].jump(value));
       this.hasFramed = true;
     } else {
       moving = this.cameraDistance.step(distance, seconds);
       moving = this.placeDown.step(down, seconds) || moving;
+      moving = this.placeAcross.step(across, seconds) || moving;
       target.forEach((value, axis) => {
         moving = this.cameraTarget[axis].step(value, seconds) || moving;
       });
@@ -625,7 +632,7 @@ export class HypercubeScene {
     this.camera.setViewOffset(
       this.width,
       this.height,
-      -(this.place.across - 0.5) * this.width,
+      -(this.placeAcross.value - 0.5) * this.width,
       -(this.placeDown.value - 0.5) * this.height,
       this.width,
       this.height,

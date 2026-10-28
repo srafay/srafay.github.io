@@ -64,6 +64,12 @@ export function screenPlaceFor(width: number, height: number): ScreenPlace {
 */
 export const ridingDown = (place: ScreenPlace, portrait: boolean) => (portrait ? 0.5 : place.down);
 
+/**
+  Where the cube rests on a phone: as high as a ride, and a little left of the middle, in the middle of the open span
+  between the left gutter and the year rail down the right edge, so the cube can be as wide as that span allows.
+*/
+export const restingAcross = (place: ScreenPlace, portrait: boolean) => (portrait ? 0.455 : place.across);
+
 /** How far the camera stands from a ball of a radius so it fills the share of the screen asked for. */
 export function distanceToFrame(radius: number, verticalFieldDegrees: number, aspect: number, place: ScreenPlace) {
   const halfHeight = Math.tan((verticalFieldDegrees * Math.PI) / 360);
