@@ -3,10 +3,7 @@
   folder and gives each one an address with a hash of its contents. Then it writes the markup that shows it. That is the still
   over the scene while it loads, the haze under it at the first screen, and the share image's meta tags.
 */
-import { createHash } from "node:crypto";
-import fs from "node:fs";
 import path from "node:path";
-import { site } from "@/lib/site";
 import {
   artFiles,
   hazePlates,
@@ -20,26 +17,15 @@ import {
 } from "@/lib/world-lines/art/manifest";
 import { overviewPose } from "@/lib/world-lines/scene/camera";
 import { vaultFor } from "@/lib/world-lines/scene/layout";
+import { copyArt as copyArtFiles, shareMeta as shareMetaTags, type ArtAddresses } from "./standalone-page";
 
 const ART_SOURCE = path.join("lib", "world-lines", "art");
 const PAGE_ADDRESS = "/about/v4/";
 
-type Addresses = Map<string, string>;
-
-const escapeHtml = (text: string) =>
-  text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
+type Addresses = ArtAddresses;
 
 /** Copies every art file into the page's folder. The answer is each file's address, with a hash of its contents. */
-export function copyArt(output: string): Addresses {
-  const addresses: Addresses = new Map();
-  for (const file of artFiles()) {
-    const contents = fs.readFileSync(path.join(ART_SOURCE, file));
-    fs.writeFileSync(path.join(output, file), contents);
-    const hash = createHash("sha256").update(contents).digest("hex").slice(0, 10);
-    addresses.set(file, `${PAGE_ADDRESS}${file}?v=${hash}`);
-  }
-  return addresses;
-}
+export const copyArt = (output: string): Addresses => copyArtFiles(ART_SOURCE, artFiles(), output, PAGE_ADDRESS);
 
 /**
   Where a plate's picture centre sits across the screen, as a share of its width. The page's computer camera shifts
@@ -90,19 +76,5 @@ export const stageArtAttributes = (addresses: Addresses) =>
   `style="--lines-desktop-plate-centre: ${plateCentre("desktop")}" data-lines-present-glow="${addresses.get(presentGlowSprite)}"`;
 
 /** What a link to the page shows when it is posted: the share image, at its size, with words for it. */
-export function shareMeta(addresses: Addresses, title: string, description: string) {
-  const image = `${site.url}${addresses.get(shareImage.file)}`;
-  return [
-    `<meta property="og:type" content="profile">`,
-    `<meta property="og:url" content="${site.url}${PAGE_ADDRESS}">`,
-    `<meta property="og:title" content="${escapeHtml(title)}">`,
-    `<meta property="og:description" content="${escapeHtml(description)}">`,
-    `<meta property="og:image" content="${image}">`,
-    `<meta property="og:image:width" content="${shareImage.width}">`,
-    `<meta property="og:image:height" content="${shareImage.height}">`,
-    `<meta property="og:image:alt" content="${escapeHtml(shareImage.alt)}">`,
-    `<meta name="twitter:card" content="summary_large_image">`,
-    `<meta name="twitter:image" content="${image}">`,
-    `<meta name="twitter:image:alt" content="${escapeHtml(shareImage.alt)}">`,
-  ].join("\n");
-}
+export const shareMeta = (addresses: Addresses, title: string, description: string) =>
+  shareMetaTags(addresses, shareImage, PAGE_ADDRESS, title, description);
