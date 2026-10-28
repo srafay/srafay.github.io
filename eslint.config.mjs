@@ -23,6 +23,8 @@ const eslintConfig = defineConfig([
     "public/about/v4/**",
     // Version 5, built whole by scripts/build-hypercube-page.ts.
     "public/about/v5/**",
+    // Version 6, built whole by scripts/build-guide-page.ts.
+    "public/about/v6/**",
   ]),
   {
     // The homepage is plain HTML from a route handler (app/route.ts), not a React page, so links to it are plain <a>s

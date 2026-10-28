@@ -8,6 +8,7 @@
 */
 import fs from "node:fs";
 import path from "node:path";
+import { buildGuidePage } from "./build-guide-page";
 import { buildHypercubePage } from "./build-hypercube-page";
 import { buildWorldLinesPage } from "./build-world-lines-page";
 
@@ -61,3 +62,6 @@ await buildWorldLinesPage();
 
 // Version 5, "Hypercube": the life as one object in four dimensions, also a page of its own (scripts/build-hypercube-page.ts).
 await buildHypercubePage();
+
+// Version 6, "Guide": a python tours the whole CV down flat fields of colour, a page of its own (scripts/build-guide-page.ts).
+await buildGuidePage();

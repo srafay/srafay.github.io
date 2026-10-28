@@ -64,3 +64,5 @@ CLAUDE.md
 /public/about/v4/
 # version 5 of the About page, built whole by scripts/build-hypercube-page.ts
 /public/about/v5/
+# version 6 of the About page, built whole by scripts/build-guide-page.ts
+/public/about/v6/
