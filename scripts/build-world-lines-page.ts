@@ -17,6 +17,13 @@ import { checkGlyphTables } from "@/lib/world-lines/icons";
 import { checkSkillMarks } from "@/lib/world-lines/skill-marks";
 import { checkThreads, skillWords } from "@/lib/world-lines/skills";
 import { presentTime } from "@/lib/world-lines/time";
+import {
+  copyArt,
+  hazeMarkup,
+  shareMeta,
+  stageArtAttributes,
+  stillMarkup,
+} from "./world-lines-art";
 
 type Bundler = {
   build(options: {
@@ -32,6 +39,7 @@ const SOURCE = path.join("lib", "world-lines");
 const OUTPUT = path.join("public", "about", "v4");
 const DESCRIPTION =
   "Syed Rafay, senior software engineer at Twin Technology: every role, degree, project, course and skill, drawn as lines through the years.";
+const TITLE = "About me · Syed Rafay";
 
 const hashOf = (contents: string) =>
   createHash("sha256").update(contents).digest("hex").slice(0, 10);
@@ -81,18 +89,22 @@ export async function buildWorldLinesPage() {
   );
   const script = await bundleScene();
   const style = fs.readFileSync(path.join(SOURCE, "styles.css"), "utf8");
-  const standIn = fs.existsSync(path.join(SOURCE, "stand-in.html"))
-    ? fs.readFileSync(path.join(SOURCE, "stand-in.html"), "utf8")
-    : "";
+  fs.mkdirSync(OUTPUT, { recursive: true });
+  // The Blender art: copied beside the page with hashed addresses, and the markup that shows it.
+  const art = copyArt(OUTPUT);
   const page = fillTemplate(
     fs.readFileSync(path.join(SOURCE, "page.html"), "utf8"),
     {
+      title: escapeHtml(TITLE),
       description: escapeHtml(DESCRIPTION),
+      shareMeta: shareMeta(art, TITLE, DESCRIPTION),
+      stageArt: stageArtAttributes(art),
+      haze: hazeMarkup(art),
+      still: stillMarkup(art),
       fontPreloads: fontPreloads(),
       fontFaces: fontFaceCss,
       styleHash: hashOf(style),
       scriptHash: hashOf(script),
-      standIn,
       name: escapeHtml(site.name),
       bio: escapeHtml(bio),
     },

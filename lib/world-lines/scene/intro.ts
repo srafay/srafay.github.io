@@ -20,6 +20,9 @@ const ARRIVAL_START = 0.55;
 const ARRIVAL_SECONDS = 1.15;
 const NAME_SECONDS = 1.3;
 
+/** When the light has run back to 2014 on every line: the last line starts four beats after the first. */
+export const LIGHT_RUN_ENDS_SECONDS = RUN_SECONDS + (worlds.length - 1) * LINE_BEAT;
+
 /** Labels, years, line names and the cities appear as the light reaches their depth. */
 function revealWordsUpTo(scene: WorldLinesScene, frontZ: number) {
   for (const layer of [scene.words, scene.cityWords]) {

@@ -6,20 +6,22 @@
 <meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="#000000">
 <meta name="description" content="{{description}}">
-<title>About me · Syed Rafay</title>
+<title>{{title}}</title>
+{{shareMeta}}
 {{fontPreloads}}
 <style>{{fontFaces}}</style>
 <link rel="stylesheet" href="/about/v4/world-lines.css?v={{styleHash}}">
 <script src="/about/v4/world-lines.js?v={{scriptHash}}" defer></script>
 </head>
 <body class="about-v4">
-<main class="lines-stage" data-lines-stage>
+<main class="lines-stage" data-lines-stage {{stageArt}}>
   <a class="lines-home" href="/?from=post">Home</a>
   <nav class="lines-versions" aria-label="Versions of this page">
     <p>Version 4. Also: <a href="/about/">first draft</a>, <a href="/about/v1/" aria-label="version 1">1</a>, <a href="/about/v2/" aria-label="version 2">2</a>, <a href="/about/v3/" aria-label="version 3">3</a></p>
   </nav>
-  {{standIn}}
+  {{haze}}
   <canvas class="lines-canvas" data-lines-canvas aria-hidden="true"></canvas>
+  {{still}}
   <div class="lines-title" data-lines-title>
     <h1 class="lines-name">{{name}}</h1>
     <p class="lines-bio">{{bio}}</p>

@@ -1,7 +1,7 @@
 /*
   Where the camera is at each point of the scroll. The travel has five stretches. First the whole spacetime from above
   the present (the first screen). Then the descent into the vault at now, and the travel back through the years to
-  2014. Then a short look into the faint years before, and the pull back out to the present, where the links are.
+  2014. Then a short look into the faint years before, and the pull back out to the first screen's view.
   Each stretch is a share of the scroll. Each pose depends on the screen's shape, so a narrow screen frames it tall.
 */
 import * as THREE from "three";

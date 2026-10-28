@@ -10,10 +10,11 @@
 import { allEvents } from "@/lib/world-lines/events";
 import { skillWords } from "@/lib/world-lines/skills";
 import { presentTime } from "@/lib/world-lines/time";
+import { addArt } from "./art";
 import { Controls } from "./controls";
 import { listenForGestures, listenForKeys, type GestureHandlers } from "./gestures";
 import { Interaction } from "./interaction";
-import { playIntro } from "./intro";
+import { LIGHT_RUN_ENDS_SECONDS, playIntro } from "./intro";
 import { addKeys } from "./keys";
 import { Lighting } from "./lighting";
 import { WorldLinesScene, type SceneData, type SceneElements } from "./mount";
@@ -178,6 +179,7 @@ export async function mountWorldLines(root: HTMLElement, data: SceneData) {
     return { x: (left + right) / 2, y: (top + bottom) / 2 };
   };
   introTime = playIntro(scene, elements.title);
+  addArt(scene, () => introTime() >= LIGHT_RUN_ENDS_SECONDS);
   window.setTimeout(() => controls.showHintOnce(), scene.reducedMotion ? 0 : HINT_AFTER_MILLISECONDS);
   elements.stage.dataset.linesState = "drawing";
   scene.requestFrame();

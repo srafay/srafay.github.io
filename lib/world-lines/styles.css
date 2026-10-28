@@ -107,17 +107,55 @@ body.about-v4 {
   opacity: 1;
 }
 
-.about-v4 .lines-stand-in {
+/*
+  The Blender plates fill the screen's height with their picture centre on the page camera's. On a phone that is the
+  middle. On a computer it sits right of it by the camera's lens shift, which the build works out
+  (scripts/world-lines-art.ts).
+*/
+.about-v4 .lines-plate {
+  --lines-plate-centre: 50%;
   position: absolute;
-  inset: 0;
-  width: 100%;
+  top: 0;
+  left: var(--lines-plate-centre);
+  display: block;
   height: 100%;
-  transition: opacity 700ms ease;
+  transform: translateX(calc(-1 * var(--lines-plate-centre)));
   pointer-events: none;
 }
 
-.about-v4 .lines-stage[data-lines-state="drawing"] .lines-stand-in {
+@media (min-aspect-ratio: 8/5) {
+  .about-v4 .lines-plate {
+    --lines-plate-centre: var(--lines-desktop-plate-centre, 50%);
+  }
+}
+
+.about-v4 .lines-plate img {
+  display: block;
+  width: auto;
+  max-width: none;
+  height: 100%;
+}
+
+/* The still: over the scene while it loads, then it fades once the live lines stand where it has them. */
+.about-v4 .lines-still {
+  z-index: 1;
+  transition: opacity 600ms ease;
+}
+
+.about-v4 .lines-still[data-lines-gone] {
   opacity: 0;
+}
+
+/* The haze: under the scene at the first screen only. Its opacity follows the camera (art.ts). */
+.about-v4 .lines-haze {
+  z-index: 0;
+  opacity: 0;
+}
+
+/* While the haze shows, the scene is added to it, the way the plates were made to be shown. */
+.about-v4 .lines-stage[data-lines-haze-shown] .lines-canvas {
+  mix-blend-mode: screen;
+  mix-blend-mode: plus-lighter;
 }
 
 /* The name and the one line under it: over the scene, on its open side. */
@@ -450,7 +488,7 @@ body.about-v4 {
 
 @media (prefers-reduced-motion: reduce) {
   .about-v4 .lines-canvas,
-  .about-v4 .lines-stand-in,
+  .about-v4 .lines-still,
   .about-v4 .lines-title,
   .about-v4 .lines-year {
     transition: none;
@@ -944,3 +982,7 @@ body.about-v4 {
   }
 }
 
+
+.about-v4 .lines-plate[hidden] {
+  display: none;
+}

@@ -91,6 +91,14 @@ const PHONE_DRIFT_INTERVAL = 1000 / 30;
 const LABEL_REACH_INSIDE = 5.5;
 /** A clipping plane's constant that keeps every depth in the scene. */
 const KEEP_EVERYTHING = 1e6;
+/** How far the pointer leans the view on a computer, as a share of the distance to what it looks at, across and up. */
+const LEAN_SHARE = 0.05;
+const LEAN_UP_SHARE = 0.5;
+/** The first screen's pose holds this far into the travel, and from here at the end, where the pose is the same. */
+const REST_POSE_HOLDS_UNTIL = STRETCHES.overview;
+const REST_POSE_RETURNS_FROM = 0.98;
+/** A turn or zoom this large (radians, or a share of the zoom) has left the first screen's pose behind. */
+const REST_POSE_VIEW_REACH = 0.06;
 /** How many skills read as words at rest and while travelling, on a phone and on a computer. */
 const READABLE_SKILLS_ON_A_PHONE = [PHONE_READABLE, 15];
 const READABLE_SKILLS_ON_A_COMPUTER = [COMPUTER_READABLE, 26];
@@ -217,10 +225,10 @@ export class WorldLinesScene {
     );
     this.scene.add(this.beads.object);
     const presentIndex = data.events.findIndex((event) => event.isPresent);
-    if (presentIndex >= 0)
-      this.scene.add(
-        presentGlow(this.beads.points[presentIndex], this.colours),
-      );
+    if (presentIndex >= 0) {
+      this.presentLight = presentGlow(this.beads.points[presentIndex], this.colours);
+      this.scene.add(this.presentLight);
+    }
     this.attachFronts();
     this.skillPoints = skillPlaces(
       data.skills,
@@ -371,6 +379,37 @@ export class WorldLinesScene {
   viewIsChanged() {
     return this.view.isChanged();
   }
+
+  /**
+    How fully the camera stands at the first screen's pose, from 0 to 1. The Blender plates were rendered from it.
+    It holds at the start or the end of the travel, when the view is not turned, zoomed or leaning toward a world.
+  */
+  restPoseShare() {
+    const progress = this.progress.value;
+    const fromTheStart = 1 - smoothStep((progress - REST_POSE_HOLDS_UNTIL) / 0.02);
+    const atTheEnd = smoothStep((progress - REST_POSE_RETURNS_FROM) / (1 - REST_POSE_RETURNS_FROM));
+    const view = this.view.now();
+    const viewMoved = Math.max(Math.abs(view.across), Math.abs(view.up), Math.abs(view.zoom));
+    const notMoved = 1 - smoothStep(viewMoved / REST_POSE_VIEW_REACH);
+    // Leaning toward an isolated world, the pose has left the plates' by half way.
+    const notLeaning = 1 - smoothStep(this.isolationLean.value / 0.5);
+    return Math.max(fromTheStart, atTheEnd) * notMoved * notLeaning;
+  }
+
+  /**
+    How far the pointer's lean on a computer has moved the picture, in pixels across and down. A plate laid under the
+    scene moves by as much, so it stays with the lines.
+  */
+  leanPixels() {
+    const focal = this.height / 2 / Math.tan(((this.pose.fov / 2) * Math.PI) / 180);
+    return {
+      x: -this.lookAcross.value * LEAN_SHARE * focal,
+      y: -this.lookUp.value * LEAN_SHARE * LEAN_UP_SHARE * focal,
+    };
+  }
+
+  /** The present's warm glow, which a rendered sprite may replace. */
+  presentLight: THREE.Sprite | null = null;
 
   /** The view now, for the checks: its turn across and up, and its zoom from -1 (nearest) to 1 (the whole). */
   viewNow() {
@@ -756,10 +795,10 @@ export class WorldLinesScene {
     // The pose is in the squashed space, the camera's own. Its holder stretches that space back out to the scene.
     this.squashedTime.scale.set(1, 1, squash);
     this.camera.position.copy(this.pose.position);
-    const lean = 0.05 * this.pose.position.distanceTo(this.pose.target);
+    const lean = LEAN_SHARE * this.pose.position.distanceTo(this.pose.target);
     this.lookPoint.set(
       this.pose.target.x + this.lookAcross.value * lean,
-      this.pose.target.y - this.lookUp.value * lean * 0.5,
+      this.pose.target.y - this.lookUp.value * lean * LEAN_UP_SHARE,
       this.pose.target.z,
     );
     this.lookMatrix.lookAt(this.camera.position, this.lookPoint, this.camera.up);
