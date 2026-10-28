@@ -419,11 +419,16 @@ export class PythonView {
     const reach = this.length * 0.4;
     // With nothing to follow it looks across the screen, toward the side its bubble opens on, so the reader sees its
     // face three-quarters: the wedge of the head and one eye clearly, never both eyes end-on like a cartoon.
-    const target = this.lookAt ?? this.restingGaze(neck);
+    // Held, it looks across the screen as at rest, not at the hand: a head turned end-on to the reader shows both eyes
+    // on top, the cartoon face. Three-quarters shows one eye and the lip line.
+    const target = this.rope?.held !== null && this.rope ? this.restingGaze(neck) : (this.lookAt ?? this.restingGaze(neck));
     const toward = normalise({ x: target.x - neck.x, y: target.y - neck.y, z: reach });
     const held = this.rope?.held !== null && this.rope !== null;
     const leaning = normalise(add(scale(along, held ? 0.6 : 0.25), scale(toward, held ? 0.4 : 0.75)));
-    const wanted = levelled(leaning);
+    // Held, the curled neck would tip the head end-on to the reader, both eyes on top: the cartoon face. So a held
+    // head keeps a set three-quarter turn, mostly toward the roomier side and a little toward the reader.
+    const threeQuarters = normalise({ x: neck.x > this.stage.width / 2 ? -0.88 : 0.88, y: 0.12, z: 0.42 });
+    const wanted = held ? threeQuarters : levelled(leaning);
     let forward: Point;
     if (seconds > 0 && !this.reducedMotion) {
       this.gaze.x.step(wanted.x, seconds);

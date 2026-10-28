@@ -76,10 +76,10 @@ body.about-v6 {
   color: inherit;
 }
 
+/* The ring follows each control's own shape: a pill stays a pill when it has the focus. */
 .about-v6 :focus-visible {
   outline: 2px solid currentColor;
   outline-offset: 3px;
-  border-radius: 6px;
 }
 
 .guide-hidden {
@@ -820,8 +820,59 @@ body.about-v6 {
   gap: 6px;
 }
 
-.guide-play-button {
-  border-color: currentColor;
+/*
+  The trick and costume buttons, in the trays and at the end: the skill chips' family, a pill with a line round it in
+  the words' own colour and no fill, the glyph apart from the label, 44 px tall to a finger. They take the colours of
+  where they sit: the panel's in a tray, the field's at the end. The costume being worn is the filled pill.
+*/
+.guide-tray-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.2;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.guide-tray-button .guide-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.guide-tray .guide-tray-button[aria-pressed="true"] {
+  background: var(--guide-panel-words);
+  border-color: var(--guide-panel-words);
+  color: var(--guide-panel);
+}
+
+.guide-playground .guide-tray-button[aria-pressed="true"] {
+  background: var(--words);
+  border-color: var(--words);
+  color: var(--field);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .guide-tray-button {
+    min-height: 40px;
+  }
+}
+
+/* A tray's heading sits on its own row above its buttons. */
+.guide-tray h2 {
+  flex-basis: 100%;
+  margin: 0 0 2px;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.3;
 }
 
 /* The python's answer about a skill: the places it names, each a button. */

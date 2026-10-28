@@ -133,8 +133,11 @@ export class Bars {
     return open;
   }
 
+  /** Every costume button on the page, in the tray and at the end, says whether its costume is being worn. */
   showWorn(worn: CostumeKey | null) {
     for (const [key, button] of this.costumeButtons) button.setAttribute("aria-pressed", String(key === worn));
+    for (const button of document.querySelectorAll<HTMLElement>(".guide-playground [data-costume]"))
+      button.setAttribute("aria-pressed", String(button.dataset.costume === worn));
   }
 
   showSound(on: boolean) {

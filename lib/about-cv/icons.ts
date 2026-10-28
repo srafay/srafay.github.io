@@ -15,6 +15,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Cloud,
+  ContactRound,
   CodeXml,
   Container,
   Database,
@@ -207,9 +208,14 @@ export const controlGlyphs = {
   search: lineGlyph("search", Search),
 };
 
-/** The profiles under Find me, by their marks. Simple Icons has no LinkedIn mark, so LinkedIn goes by its name alone. */
+/**
+ * The profiles under Find me. GitHub and Stack Overflow carry their own marks from Simple Icons. Neither Simple Icons
+ * nor lucide has a LinkedIn mark, so LinkedIn carries a plain lucide line glyph as a stand-in, a profile card, the way
+ * the skill groups without a mark carry one: a blank slot beside the name read as a broken icon.
+ */
 export const linkGlyphs: Record<string, Glyph> = {
   GitHub: markGlyph(siGithub),
+  LinkedIn: lineGlyph("contact-round", ContactRound),
   "Stack Overflow": markGlyph(siStackoverflow),
 };
 

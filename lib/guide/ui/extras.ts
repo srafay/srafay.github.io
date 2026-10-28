@@ -64,6 +64,7 @@ export function playgroundBlock(onTrick: (key: TrickKey) => void, onCostume: (ke
   for (const [key, name] of Object.entries(COSTUME_NAMES) as [CostumeKey, string][]) {
     const button = controlButton(name, costumeGlyphs[key], "guide-tray-button guide-play-button");
     button.dataset.costume = key;
+    button.setAttribute("aria-pressed", "false");
     button.addEventListener("click", () => onCostume(key));
     costumes.append(button);
   }
