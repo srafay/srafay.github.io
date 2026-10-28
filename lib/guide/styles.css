@@ -150,7 +150,7 @@ body.about-v6 {
 
 /* A little more room before each number, so neighbouring 24 px targets do not overlap; the commas stay tight. */
 .guide-versions a[aria-label] {
-  margin-left: calc(0.95em - 9.5px);
+  margin-left: calc(1.15em - 9.5px);
 }
 
 .guide-top-right {

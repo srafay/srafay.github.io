@@ -476,14 +476,19 @@ body.about-v4 {
   font-size: 13px;
   line-height: 24px;
   color: var(--lines-light-muted);
+  white-space: nowrap;
 }
 
+/* Each link is a 24 px target by its padding, taken back by margin, so the commas stay tight against the numbers. */
 .about-v4 .lines-versions a {
-  display: inline-flex;
-  justify-content: center;
-  min-width: 24px;
-  min-height: 24px;
+  padding: 6px 9.5px;
+  margin: -6px -9.5px;
   text-decoration-color: rgba(148, 139, 128, 0.55);
+}
+
+/* A little more room before each number, so neighbouring targets do not overlap (version 7's measure for WebKit). */
+.about-v4 .lines-versions a[aria-label] {
+  margin-left: calc(1.15em - 9.5px);
 }
 
 @media (prefers-reduced-motion: reduce) {
