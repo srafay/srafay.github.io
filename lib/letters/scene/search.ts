@@ -1,8 +1,10 @@
 /*
   Search. The world is made of letters, so letters search it. On a computer, typing anywhere starts a search; on a
-  phone the Search control opens the keyboard. Every letter on the land that spells what is typed lights near white,
-  every skill in the sky that holds it lights too, and so does a city it names. The camera frames the
-  events that hold it, one quiet line says how many, Enter goes to the first and the arrows step through them.
+  phone the Search control opens the keyboard. What the query finds is the shared matcher's (lib/about-cv/search.ts,
+  as every version finds it): the events whose card holds it, the skills and the cities that do. Here every letter on
+  the land that spells it lights near white, the skills it found light in the sky, and so does a city it names. The
+  camera frames the events that hold it, one quiet line says how many, Enter goes to the first and the arrows step
+  through them.
 
   A search starts only when no field has the focus and no card, sheet or Find me is open. On a phone the field sits
   just above the keyboard: iOS shrinks the visual viewport, not the layout one, so the field is placed by the visual
@@ -11,6 +13,7 @@
 import type { WorldEvent } from "@/lib/about-cv/events";
 import { controlGlyphs, glyphElement } from "@/lib/about-cv/icons";
 import { element } from "@/lib/about-cv/scene/dom";
+import { searchCv } from "@/lib/about-cv/search";
 import { closeButton } from "@/lib/about-cv/ui/event-card";
 import { cities } from "@/lib/letters/land/cities";
 import type { EventOnLand } from "@/lib/letters/land/land";
@@ -142,12 +145,16 @@ export class Search {
       this.interaction.applyOwnerStates();
       return;
     }
+    const found = searchCv(query, { events: land.events.map((item) => item.event), skills, cities: cities.map((city) => city.name) });
+    const foundIds = new Set(found.events.map((event) => event.id));
+    // Which of the found events' letters spell the query: every place it stands in the stream its land spells.
     const spelled = new Map<number, Set<number>>();
     for (const item of land.events) {
+      if (!foundIds.has(item.event.id)) continue;
       const indices = new Set<number>();
       for (let at = item.stream.text.indexOf(upper); at >= 0; at = item.stream.text.indexOf(upper, at + 1))
         for (let offset = 0; offset < upper.length; offset++) indices.add(at + offset);
-      if (indices.size) spelled.set(item.index, indices);
+      spelled.set(item.index, indices);
     }
     land.instances.cell.forEach((cell, index) => {
       const owner = land.owners[cell];
@@ -155,10 +162,9 @@ export class Search {
     });
     scene.landLayer.setLitCells(this.lit);
     const events = land.events.filter((item) => spelled.has(item.index)).sort(newestFirst);
-    const lower = query.toLowerCase();
-    const skillIndices = skills.map((skill, index) => (skill.word.toLowerCase().includes(lower) ? index : -1)).filter((index) => index >= 0);
+    const skillIndices = found.skills.map((skill) => skills.indexOf(skill));
     cities.forEach((city, index) => {
-      if (city.name.toLowerCase().includes(lower)) this.matchedCities.add(index);
+      if (found.cities.includes(city.name)) this.matchedCities.add(index);
     });
     scene.litWords = new Set(skillIndices);
     this.matchedIds = new Set(events.map((item) => item.event.id));
