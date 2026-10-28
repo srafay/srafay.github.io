@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#000000">
+<meta name="description" content="{{description}}">
+<title>About me · Syed Rafay</title>
+<script>{{headScript}}</script>
+{{fontPreloads}}
+<style>{{fontFaces}}</style>
+<link rel="stylesheet" href="/about/v4/world-lines.css?v={{styleHash}}">
+<script src="/about/v4/world-lines.js?v={{scriptHash}}" defer></script>
+</head>
+<body class="about-v4">
+<div class="lines-scroller" data-lines-scroller>
+  <div class="lines-track" data-lines-track>
+    <div class="lines-stage" data-lines-stage>
+      <a class="lines-home" href="/">Home</a>
+      {{standIn}}
+      <canvas class="lines-canvas" data-lines-canvas aria-hidden="true"></canvas>
+      <div class="lines-title" data-lines-title>
+        <h1 class="lines-name">{{name}}</h1>
+        <p class="lines-bio">{{bio}}</p>
+      </div>
+    </div>
+  </div>
+  <main class="lines-record" data-lines-record>
+    <noscript><p class="lines-plain">This version needs its script. <a href="/about/">The About page</a> reads without one.</p></noscript>
+  </main>
+  <nav class="lines-versions" aria-label="Versions of this page">
+    <p>Version 4. See <a href="/about/">the first draft</a>, <a href="/about/v1/">version 1</a>, <a href="/about/v2/">version 2</a> or <a href="/about/v3/">version 3</a>.</p>
+  </nav>
+</div>
+</body>
+</html>

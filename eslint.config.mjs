@@ -19,6 +19,8 @@ const eslintConfig = defineConfig([
     "public/site-menu.js",
     // The About page's script and its versions' scene scripts, built by scripts/build-about-scenes.ts.
     "public/about*.js",
+    // Version 4 of the About page, a page of its own, built whole by scripts/build-world-lines-page.ts.
+    "public/about/v4/**",
   ]),
   {
     // The homepage is plain HTML from a route handler (app/route.ts), not a React page, so links to it are plain <a>s

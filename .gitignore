@@ -60,3 +60,5 @@ CLAUDE.md
 
 # the About page's script and its versions' scene scripts, built by scripts/build-about-scenes.ts
 /public/about*.js
+# version 4 of the About page, a page of its own, built whole by scripts/build-world-lines-page.ts
+/public/about/v4/

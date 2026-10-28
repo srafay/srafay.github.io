@@ -8,6 +8,7 @@
 */
 import fs from "node:fs";
 import path from "node:path";
+import { buildWorldLinesPage } from "./build-world-lines-page";
 
 type Bundler = {
   build(options: {
@@ -53,3 +54,6 @@ async function buildScene({ entry, output }: Scene) {
 }
 
 for (const scene of SCENES) await buildScene(scene);
+
+// Version 4, "World lines": a page of its own, not a Next page, so it is built whole (scripts/build-world-lines-page.ts).
+await buildWorldLinesPage();
