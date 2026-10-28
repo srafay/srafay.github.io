@@ -103,6 +103,22 @@ function partsOf(root: HTMLElement): Parts | null {
   return { root, layer, canvas, top, topControls, bottom, tour };
 }
 
+/**
+ * Without graphics there is no python: the tour's lines show whole, since nobody is there to say them, and one plain
+ * line points to the page that reads without graphics.
+ */
+function sayThePythonCannotShow(root: HTMLElement, lines: HTMLElement[]) {
+  for (const line of lines) delete line.dataset.waiting;
+  const note = document.createElement("p");
+  note.className = "guide-plain";
+  note.append("This version needs graphics this browser cannot give it. ");
+  const link = document.createElement("a");
+  link.href = "/about/";
+  link.textContent = "The About page";
+  note.append(link, " reads without them.");
+  root.querySelector("[data-guide-tour]")?.prepend(note);
+}
+
 export function mountGuide(root: HTMLElement, data: GuideData) {
   const parts = partsOf(root);
   if (!parts) return null;
@@ -115,7 +131,8 @@ export function mountGuide(root: HTMLElement, data: GuideData) {
       ...parts.top.querySelectorAll<HTMLElement>(".guide-home, .guide-versions p, .guide-control"),
       ...root.querySelectorAll<HTMLElement>(".guide-panel:not([hidden]), .guide-dialog:not([hidden])"),
     ],
-    () => [...parts.bottom.querySelectorAll<HTMLElement>(".guide-control"), ...root.querySelectorAll<HTMLElement>(".guide-tray")],
+    // The whole bottom strip, not only its buttons: on a phone it is the python's den, never a place for a bubble.
+    () => [parts.bottom, ...root.querySelectorAll<HTMLElement>(".guide-tray")],
     () => [...parts.tour.querySelectorAll<HTMLElement>("button, a, input")],
   );
   const say = new Say(
@@ -175,10 +192,11 @@ export function mountGuide(root: HTMLElement, data: GuideData) {
       onTap: () => say.say(tapLines[tapCount++ % tapLines.length]),
       onPickedUp: () => say.say(asides.pickedUp[pickedCount++ % asides.pickedUp.length]),
       onDropped: () => say.say(asides.dropped[droppedCount++ % asides.dropped.length]),
-      onHeadMoved: (head, headLength) => say.follow(head, headLength),
+      onHeadMoved: (head, headLength, body) => say.follow(head, headLength, body),
       den: denSize,
     });
   } catch {
+    sayThePythonCannotShow(root, lines);
     return null;
   }
 

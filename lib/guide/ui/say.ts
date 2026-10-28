@@ -119,10 +119,14 @@ export class Say {
     return this.words.querySelector(".guide-hidden")?.textContent ?? "";
   }
 
-  /** The head moved: the bubble keeps beside it. */
-  follow(head: Point, headLength: number) {
+  /** The python's body, in stage space: a bubble keeps clear of it as well as of its face. */
+  private body = { left: 0, right: 0, bottom: 0, top: 0 };
+
+  /** The head moved: the bubble keeps beside it, and clear of the body. */
+  follow(head: Point, headLength: number, body?: { left: number; right: number; bottom: number; top: number }) {
     this.head = head;
     this.headLength = headLength;
+    if (body) this.body = body;
     if (this.shown) this.place();
   }
 
@@ -161,17 +165,31 @@ export class Say {
       top: centreY - bubbleHeight * 0.75,
     });
     const along = [0.85, 0.5, 0.15].map((share) => centreX - bubbleWidth * share);
+    // When every place by the head covers something (the python held up by the name), a clear place further off is
+    // better than words on words: the open band just above the bottom strip, at either side, or the middle.
+    const bottomStrip = this.keepClear(height).reduce((highest, box) => (box.bottom >= height - 2 ? Math.min(highest, box.top) : highest), height);
+    const farTop = Math.min(bottomStrip, height) - bubbleHeight - 16;
     const candidates = [
       beside(roomierOnLeft),
       ...along.map((left) => ({ left, top: centreY - reach - gap - bubbleHeight })),
       beside(!roomierOnLeft),
       ...along.map((left) => ({ left, top: centreY + reach + gap })),
+      { left: 16, top: farTop },
+      { left: width - bubbleWidth - 16, top: farTop },
+      { left: (width - bubbleWidth) / 2, top: height / 2 - bubbleHeight / 2 },
     ].map(({ left, top }) => {
       const clampedLeft = Math.min(Math.max(12, left), width - bubbleWidth - 12);
       const clampedTop = Math.min(Math.max(8, top), height - bubbleHeight - 8);
       return { left: clampedLeft, top: clampedTop, right: clampedLeft + bubbleWidth, bottom: clampedTop + bubbleHeight };
     });
-    const avoid = [face, ...this.keepClear(height)];
+    const thickness = this.headLength * 0.25;
+    const bodyBox: Box = {
+      left: this.body.left - thickness,
+      right: this.body.right + thickness,
+      top: height - this.body.top - thickness,
+      bottom: height - this.body.bottom + thickness,
+    };
+    const avoid = [face, bodyBox, ...this.keepClear(height)];
     let best = candidates[0];
     let bestOverlap = Infinity;
     for (const candidate of candidates) {

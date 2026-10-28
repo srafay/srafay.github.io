@@ -58,8 +58,8 @@ export type PythonViewOptions = {
   onPickedUp(): void;
   /** Called when it is let go after being held. */
   onDropped(): void;
-  /** Called when the head moves, with its place in stage space, for the bubble that follows it. */
-  onHeadMoved(head: Point, headLength: number): void;
+  /** Called when the head moves, with its place and the body's bounds in stage space, for the bubble that follows it. */
+  onHeadMoved(head: Point, headLength: number, body: { left: number; right: number; bottom: number; top: number }): void;
   /** The bottom strip, measured by the page: how tall it is and where its floor is, up from the screen's bottom. */
   den(): { top: number; floor: number };
   label: string;
@@ -407,7 +407,7 @@ export class PythonView {
     this.placeCanvasAndDraw(spine, headFrame);
     const headLength = headShape.lengthShare * this.length;
     this.hits.place(spine, headFrame.centre, this.length, Boolean(this.rope));
-    this.options.onHeadMoved(headFrame.centre, headLength);
+    this.options.onHeadMoved(headFrame.centre, headLength, boundsOf(spine));
     this.frames++;
   }
 

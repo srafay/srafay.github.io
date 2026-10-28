@@ -11,10 +11,12 @@ const GRAVITY = 5.2;
 const KEEP_SPEED = 0.986;
 /** How many passes are made over the constraints each step: more is stiffer. */
 const PASSES = 14;
-/** How many points from the neck end stand upright when held, the head looking at the reader. */
-const NECK_POINTS = 6;
-/** How strongly the neck is drawn upright each pass, from 0 to 1. */
-const NECK_PULL = 0.3;
+/**
+ * How many points at the neck end lift when held, and how hard, as a share of gravity: more than gravity, so the head
+ * half hangs below the hand like the rest, then curls up at its end into a J, the head raised to the reader.
+ */
+const LIFTING_POINTS = 5;
+const HEAD_LIFT = 1.3;
 /**
  * Bends sharper than this share of a straight pair of links are pushed open. A python is stiff with muscle, so held
  * in the middle it drapes as an upturned U, its two halves side by side, not folded flat on each other.
@@ -77,9 +79,10 @@ export class Rope {
     for (let index = 0; index < count; index++) {
       const here = this.points[index];
       const before = this.previous[index];
+      const lifting = this.held !== null && this.held < count - LIFTING_POINTS - 2 && index >= count - LIFTING_POINTS;
       const next = {
         x: here.x + (here.x - before.x) * KEEP_SPEED,
-        y: here.y + (here.y - before.y) * KEEP_SPEED - gravity,
+        y: here.y + (here.y - before.y) * KEEP_SPEED - (lifting ? -gravity * (HEAD_LIFT - 1) : gravity),
         z: here.z + (here.z - before.z) * KEEP_SPEED - here.z * 0.02,
       };
       movement += Math.abs(next.x - here.x) + Math.abs(next.y - here.y);
@@ -111,7 +114,7 @@ export class Rope {
 
   /**
    * The body lies level across the hand, the way it drapes over a finger, so both halves hang down either side and
-   * nothing folds at the hold. Then the neck end stands up, so the held python lifts its head to the reader.
+   * nothing folds at the hold.
    */
   private holdLevel(held: number) {
     const points = this.points;
@@ -122,16 +125,6 @@ export class Rope {
       if (!neighbour) continue;
       neighbour.x = this.hand.x + side * this.through * this.link;
       neighbour.y = this.hand.y;
-    }
-    const count = points.length;
-    const base = count - 1 - NECK_POINTS;
-    if (held >= base) return;
-    for (let step = 1; step <= NECK_POINTS; step++) {
-      const each = points[base + step];
-      const below = points[base];
-      const wanted = { x: below.x + this.through * this.link * 0.15 * step, y: below.y + this.link * step };
-      each.x += (wanted.x - each.x) * NECK_PULL;
-      each.y += (wanted.y - each.y) * NECK_PULL;
     }
   }
 
