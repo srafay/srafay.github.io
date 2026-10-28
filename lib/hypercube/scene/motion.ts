@@ -74,8 +74,6 @@ export class ObjectTurn {
   private swayClock = 0;
   /** Whether a held press is speeding the turntable. */
   speeding = false;
-  /** The share of its pace the turntable keeps: all of it, less while the object rests quietly. */
-  spinShare = 1;
 
   constructor(private readonly still: boolean) {
     if (still) this.spinRate.jump(0);
@@ -142,7 +140,7 @@ export class ObjectTurn {
     moving = this.leanAcross.step(this.wantedLeanAcross, seconds) || moving;
     moving = this.leanUp.step(this.wantedLeanUp, seconds) || moving;
     if (!this.still) {
-      this.spinRate.step(this.paused ? 0 : (this.speeding ? IDLE_SPIN * HELD_SPIN_SPEED : IDLE_SPIN) * this.spinShare, seconds);
+      this.spinRate.step(this.paused ? 0 : this.speeding ? IDLE_SPIN * HELD_SPIN_SPEED : IDLE_SPIN, seconds);
       this.spin += this.spinRate.value * seconds;
       this.swayClock += seconds;
     }

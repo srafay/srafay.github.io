@@ -1,23 +1,18 @@
 /*
   A rest when the page is left alone. After 40 seconds with no input, or at once when the reader switches tabs, the
-  object goes to rest (rest-motion.ts says how it looks), one quiet line shows under the bio and the tab's title says
-  so. Any input wakes it over about a second, at once under reduced motion. Reading is not idle: it never starts while
+  object drops a dimension and rests as a cube (rest-motion.ts says how it looks), one quiet line shows under the bio
+  and the tab's title says so. Any input wakes it over about a second, at once under reduced motion. Reading is not idle: it never starts while
   a card, the sheet, Find me, a search or a ride is open, while a finger or a button is down, or during the unfold.
   On a tab switch no frame is drawn, so the rest is formed at once and the reader comes back to it.
 */
-import { site } from "@/lib/site";
 import { element } from "@/lib/about-cv/scene/dom";
 import type { HypercubeScene } from "./hypercube-scene";
-import type { RestKind } from "./rest-motion";
 
 /** How long the page must be left alone before it rests, in milliseconds. */
 const IDLE_MILLISECONDS = 40_000;
 
-/** What each rest says, on the page and in the tab's title. */
-const REST_WORDS: Record<RestKind, { line: string; title: string }> = {
-  dimension: { line: "Resting in three dimensions.", title: "Resting in three dimensions" },
-  quiet: { line: "Resting. Anything you do wakes it.", title: `Resting · ${site.name}` },
-};
+/** What the rest says, on the page and in the tab's title. */
+const REST_WORDS = { line: "Resting in three dimensions.", title: "Resting in three dimensions" };
 
 export class Idle {
   readonly line = element("p", "cube-rest-line");
@@ -67,11 +62,10 @@ export class Idle {
   rest(hidden: boolean) {
     if (this.isResting()) return;
     if (!this.mayRest() || !this.scene.unfold.isDone()) return this.wait();
-    const words = REST_WORDS[this.scene.rest.kind];
     this.scene.rest.goTo(true, hidden);
-    this.line.textContent = words.line;
+    this.line.textContent = REST_WORDS.line;
     this.line.hidden = false;
-    document.title = words.title;
+    document.title = REST_WORDS.title;
     this.scene.elements.stage.setAttribute("data-cube-resting", "");
     this.onRest(true);
     this.scene.requestFrame();

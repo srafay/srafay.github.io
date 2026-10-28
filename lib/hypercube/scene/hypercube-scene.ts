@@ -34,6 +34,7 @@ import {
 } from "@/lib/hypercube/space";
 import {
   beadLayer,
+  CUBE_FIT,
   dotUniforms,
   dustLayer,
   headLayer,
@@ -55,7 +56,7 @@ import {
 import { LabelLayer, type Rectangle } from "./label-layer";
 import { labelAtlas, sceneLabels, type Label } from "./labels";
 import { ObjectTurn, Unfold, Zoom } from "./motion";
-import { RestMotion, type RestKind } from "./rest-motion";
+import { RestMotion } from "./rest-motion";
 
 export type HypercubeElements = {
   root: HTMLElement;
@@ -82,10 +83,15 @@ const HEAD_GLOW_COMPUTER = 38;
 const NARROW_STAGE = 400;
 /** How far round the present's point no other word may sit, in CSS pixels: its bright core and near glow. */
 const PRESENT_KEEPS_CLEAR = 22;
-/** The cube the object rests as: how far it leans toward the camera and how far it is turned round, and its frame. */
+/**
+  The cube the object rests as: how far it leans toward the camera and how far it is turned round, and the radius the
+  camera frames for it. As the cube turns, its corners sweep out to 0.93 of its shell across and 0.94 up and down
+  (CUBE_FIT times root two, and with the lean), so these keep every corner clear of the rail and the controls: on a
+  phone it fills from about half to three quarters of the width as it turns.
+*/
 const CUBE_LEAN = (20 * Math.PI) / 180;
 const CUBE_TURN = (32 * Math.PI) / 180;
-const CUBE_FRAMED_RADIUS = 0.85;
+const CUBE_FRAMED_RADIUS = { phone: 1.08, computer: 1.22 };
 
 export const prefersReducedMotion = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
 export const isTouchScreen = () => matchMedia("(hover: none) and (pointer: coarse)").matches;
@@ -149,7 +155,6 @@ export class HypercubeScene {
   constructor(
     readonly elements: HypercubeElements,
     readonly data: HypercubeData,
-    restKind: RestKind,
   ) {
     this.renderer = new THREE.WebGLRenderer({
       canvas: elements.canvas,
@@ -167,7 +172,7 @@ export class HypercubeScene {
     this.turn = new ObjectTurn(this.reducedMotion);
     this.zoom = new Zoom(this.reducedMotion);
     this.focus = new Focus(data.present, this.reducedMotion);
-    this.rest = new RestMotion(restKind, this.reducedMotion);
+    this.rest = new RestMotion(this.reducedMotion);
     this.matrixNow = this.turn.matrix();
     this.stops = rideStops(data);
 
@@ -461,7 +466,6 @@ export class HypercubeScene {
     this.lastFrame = now;
     let moving = this.unfold.step(seconds);
     moving = this.rest.step(seconds) || moving;
-    this.turn.spinShare = this.rest.spinShare();
     moving = this.turn.step(seconds) || moving;
     moving = this.zoom.step(seconds) || moving;
     moving = this.focus.step(seconds) || moving;
@@ -529,6 +533,19 @@ export class HypercubeScene {
     this.uniforms.restTurn.value.copy(this.restTurn);
   }
 
+  /** Where the cube's eight corners land on the stage now, at rest, in CSS pixels: for the checks. */
+  cubeCornersOnStage() {
+    const corners: { x: number; y: number }[] = [];
+    for (const across of [-1, 1])
+      for (const up of [-1, 1])
+        for (const depth of [-1, 1]) {
+          const corner = new THREE.Vector3(across, up, depth).multiplyScalar(CUBE_FIT).applyMatrix4(this.restTurn);
+          const place = this.stagePositionOf([corner.x, corner.y, corner.z]);
+          if (place) corners.push(place);
+        }
+    return corners;
+  }
+
   /** The reader's turn and zoom as last drawn, to tell a jump from a glide. */
   private lastView = { xw: 0, yw: 0, zoom: 0 };
 
@@ -574,8 +591,8 @@ export class HypercubeScene {
     const framing = this.turn.framingMatrix();
     const { reached: bound, whole: wholeBound } = this.boundsFor(framing, front);
     const flatten = this.rest.flatten();
-    const framedRadius =
-      Math.max(SMALLEST_FRAMED_RADIUS, bound.radius) * (1 - flatten) + CUBE_FRAMED_RADIUS * flatten;
+    const cubeRadius = this.touch ? CUBE_FRAMED_RADIUS.phone : CUBE_FRAMED_RADIUS.computer;
+    const framedRadius = Math.max(SMALLEST_FRAMED_RADIUS, bound.radius) * (1 - flatten) + cubeRadius * flatten;
     const aspect = this.width / this.height;
     // At rest the reader's zoom gives way too, so the whole cube is in view.
     const distance =
@@ -585,7 +602,9 @@ export class HypercubeScene {
     const looked = bound.centre.map((value, axis) => value + (seen[axis] - value) * this.followShare) as [number, number, number];
     const target = looked.map((value) => value * (1 - flatten)) as [number, number, number];
     let moving = false;
-    const down = this.riding ? ridingDown(this.place, this.height > this.width) : this.place.down;
+    // A ride, and the cube at rest, sit a little higher on a phone, in the open space between the title and the controls.
+    const higher = ridingDown(this.place, this.height > this.width);
+    const down = this.riding ? higher : this.place.down + (higher - this.place.down) * flatten;
     if (!this.hasFramed || this.reducedMotion) {
       this.placeDown.jump(down);
       this.cameraDistance.jump(distance);

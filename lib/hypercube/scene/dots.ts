@@ -83,7 +83,7 @@ export function dotUniforms(): DotUniforms {
 }
 
 /** How large the cube a shell squares into is against the shell, so its corners stay inside the frame of the object. */
-const CUBE_FIT = 0.66;
+export const CUBE_FIT = 0.66;
 
 /** The part every dot's vertex shader shares: from four dimensions to the screen, and how much light it keeps. */
 const SEEN = /* glsl */ `

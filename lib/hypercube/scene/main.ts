@@ -21,7 +21,6 @@ import { HypercubeScene, type HypercubeElements } from "./hypercube-scene";
 import { Interaction } from "./interaction";
 import { addKeyLayer, listenForKeys } from "./keys";
 import { Idle } from "./rest";
-import type { RestKind } from "./rest-motion";
 import { RideControls } from "./ride-controls";
 import { cityAt, RidePlayer } from "./ride-player";
 import { Search, startsASearch } from "./search";
@@ -53,7 +52,7 @@ declare global {
         gather: number;
         ride: ReturnType<RidePlayer["report"]>;
         search: ReturnType<Search["report"]>;
-        rest: { resting: boolean; share: number; kind: RestKind };
+        rest: { resting: boolean; share: number };
       };
       /** Sets the unfold to a share from 0 to 1, for crops of the opening at a set moment. */
       setUnfold(share: number): void;
@@ -71,14 +70,13 @@ declare global {
       ridePace(times: number): void;
       /** The ride's stops, in order, by event id. */
       rideStops(): string[];
-      /** Rests the object now, of a kind, or wakes it. */
-      rest(kind: RestKind | null, atOnce?: boolean): void;
+      /** Where the resting cube's corners land on the stage, in CSS pixels. */
+      cubeCorners(): { x: number; y: number }[];
+      /** Rests the object now, or wakes it. */
+      rest(resting: boolean, atOnce?: boolean): void;
     };
   }
 }
-
-/** Which rest the page shows when left alone. */
-const REST_KIND: RestKind = "dimension";
 
 export function hypercubeData(today = new Date()): HypercubeData {
   const present = presentTime(today);
@@ -232,7 +230,7 @@ export function mountHypercube(root: HTMLElement, data: HypercubeData) {
   if (!elements) return null;
   let scene: HypercubeScene;
   try {
-    scene = new HypercubeScene(elements, data, REST_KIND);
+    scene = new HypercubeScene(elements, data);
   } catch {
     sayTheSceneCannotShow(root);
     return null;
@@ -332,7 +330,7 @@ export function mountHypercube(root: HTMLElement, data: HypercubeData) {
         gather: scene.focus.gather(),
         ride: ride.report(),
         search: search.report(),
-        rest: { resting: idle.isResting(), share: scene.rest.share, kind: scene.rest.kind },
+        rest: { resting: idle.isResting(), share: scene.rest.share },
       };
     },
     setUnfold: (share) => {
@@ -353,11 +351,8 @@ export function mountHypercube(root: HTMLElement, data: HypercubeData) {
     rideTo: (stop) => ride.jumpTo(stop),
     ridePace: (times) => ride.runQuicker(times),
     rideStops: () => scene.stops.map((stop) => stop.event.id),
-    rest: (kind, atOnce = false) => {
-      if (!kind) return idle.wake();
-      scene.rest.kind = kind;
-      idle.rest(atOnce);
-    },
+    cubeCorners: () => scene.cubeCornersOnStage(),
+    rest: (resting, atOnce = false) => (resting ? idle.rest(atOnce) : idle.wake()),
   };
   scene.requestFrame();
   return scene;
