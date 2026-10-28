@@ -66,3 +66,5 @@ CLAUDE.md
 /public/about/v5/
 # version 6 of the About page, built whole by scripts/build-guide-page.ts
 /public/about/v6/
+# version 7 of the About page, built whole by scripts/build-letters-page.ts
+/public/about/v7/

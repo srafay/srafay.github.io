@@ -10,6 +10,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { buildGuidePage } from "./build-guide-page";
 import { buildHypercubePage } from "./build-hypercube-page";
+import { buildLettersPage } from "./build-letters-page";
 import { buildWorldLinesPage } from "./build-world-lines-page";
 
 type Bundler = {
@@ -65,3 +66,6 @@ await buildHypercubePage();
 
 // Version 6, "Guide": a python tours the whole CV down flat fields of colour, a page of its own (scripts/build-guide-page.ts).
 await buildGuidePage();
+
+// Version 7, "Letters": the life as a landscape drawn in the CV's own words, a page of its own (scripts/build-letters-page.ts).
+await buildLettersPage();

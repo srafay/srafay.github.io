@@ -1,0 +1,967 @@
+/*
+  Version 7 of the About page, "Letters". A page of its own, so nothing of the site's stylesheet reaches it. The page
+  is the stage alone, full screen, on one flat deep navy in both themes: the only light in the scene comes from the
+  letters. The panels (a card, the skills sheet, Find me, a skill's answer) follow the site's theme. Nothing scrolls:
+  every gesture on the stage handles the land, and a long press is the land's, never the text's.
+*/
+:root {
+  --letters-face-display: "Fraunces", Georgia, "Times New Roman", serif;
+  --letters-face-text: "Figtree", system-ui, sans-serif;
+  --letters-field: #070a20;
+  --letters-words: #f3f5ff;
+  --letters-quiet: #a9b4ec;
+  --letters-versions: #9aa6e0;
+  --letters-block: #2a3dff;
+  --letters-search: #121a4d;
+  --letters-search-line: #3a4796;
+  --letters-gutter: 16px;
+  --letters-top: max(10px, env(safe-area-inset-top));
+  --letters-bottom: max(6px, env(safe-area-inset-bottom));
+  --letters-panel: #f4f5fa;
+  --letters-panel-ink: #0e1330;
+  --letters-panel-quiet: #4b5274;
+  --letters-panel-accent: #2235d8;
+  --letters-panel-line: #9aa2c8;
+  --letters-panel-soft: #e3e6f3;
+  --letters-work: #7a92ff;
+  --letters-study: #9aa8ff;
+  --letters-projects: #7fb0ff;
+  --letters-courses: #a6b8ff;
+  --letters-offTheClock: #b4b0ff;
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --letters-panel: #0f1540;
+    --letters-panel-ink: #e9ecff;
+    --letters-panel-quiet: #a6aed8;
+    --letters-panel-accent: #9badff;
+    --letters-panel-line: #4a56a0;
+    --letters-panel-soft: #1a2258;
+  }
+}
+
+:root[data-theme="dark"] {
+  --letters-panel: #0f1540;
+  --letters-panel-ink: #e9ecff;
+  --letters-panel-quiet: #a6aed8;
+  --letters-panel-accent: #9badff;
+  --letters-panel-line: #4a56a0;
+  --letters-panel-soft: #1a2258;
+}
+
+@media (min-width: 900px) {
+  :root {
+    --letters-gutter: 64px;
+  }
+}
+
+.about-v7,
+.about-v7 * {
+  box-sizing: border-box;
+}
+
+html,
+body.about-v7 {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+body.about-v7 {
+  background: var(--letters-field);
+  color: var(--letters-words);
+  font-family: var(--letters-face-text);
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+.about-v7 a {
+  color: inherit;
+  text-underline-offset: 0.18em;
+  text-decoration-thickness: 1px;
+}
+
+.about-v7 :focus-visible {
+  outline: 2px solid var(--letters-words);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+.about-v7 [hidden] {
+  display: none !important;
+}
+
+/*
+  The stage takes every gesture itself: no page scroll, no pull to refresh, no page zoom. A long press must not select
+  text, show the loupe or the callout, so the press stays the land's.
+*/
+.about-v7 .letters-stage {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background: var(--letters-field);
+  touch-action: none;
+  overscroll-behavior: none;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* A band of the field under the top bar, so the land never runs under Home, the versions line or the controls. */
+.about-v7 .letters-stage::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 4;
+  height: calc(var(--letters-top) + 58px);
+  background: var(--letters-field);
+  pointer-events: none;
+}
+
+.about-v7 .letters-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.about-v7 .letters-stage[data-letters-hovering] {
+  cursor: pointer;
+}
+
+/* Back to the homepage, at the top left, and the other versions in one small line under it. */
+.about-v7 .letters-home {
+  position: absolute;
+  top: var(--letters-top);
+  left: var(--letters-gutter);
+  z-index: 5;
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 4px 2px;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--letters-words);
+  text-decoration: none;
+}
+
+@media (hover: hover) {
+  .about-v7 .letters-home:hover {
+    text-decoration: underline;
+  }
+}
+
+/* One line at 360 px. The commas sit tight against the numbers. Each link reaches 24 px by padding taken back by
+   margin, so the targets grow and the words do not move. */
+.about-v7 .letters-versions {
+  position: absolute;
+  top: calc(var(--letters-top) + 34px);
+  left: var(--letters-gutter);
+  z-index: 5;
+}
+
+.about-v7 .letters-versions p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--letters-versions);
+  white-space: nowrap;
+}
+
+.about-v7 .letters-versions a {
+  padding: 6px 9.5px;
+  margin: -6px -9.5px;
+  text-decoration-color: rgba(154, 166, 224, 0.6);
+}
+
+.about-v7 .letters-versions a[aria-label] {
+  margin-left: calc(1.15em - 9.5px);
+}
+
+/* The name and the line under it, over the sky, at the top on a phone and in the left third on a computer. */
+.about-v7 .letters-title {
+  position: absolute;
+  left: var(--letters-gutter);
+  right: var(--letters-gutter);
+  top: calc(var(--letters-top) + 74px);
+  z-index: 2;
+  pointer-events: none;
+}
+
+.about-v7 .letters-title {
+  transition: opacity 320ms ease;
+}
+
+.about-v7 .letters-stage[data-letters-away] .letters-title {
+  opacity: 0;
+}
+
+@media (min-width: 900px) {
+  .about-v7 .letters-title {
+    top: 13%;
+    right: auto;
+    max-width: 52rem;
+  }
+}
+
+.about-v7 .letters-name {
+  margin: 0;
+  font-family: var(--letters-face-display);
+  font-weight: 800;
+  font-variation-settings: "opsz" 72;
+  font-size: 96px;
+  line-height: 0.9;
+  letter-spacing: -0.02em;
+  color: var(--letters-words);
+}
+
+.about-v7 .letters-name span {
+  display: block;
+}
+
+@media (min-width: 900px) {
+  .about-v7 .letters-name {
+    font-size: 136px;
+  }
+  .about-v7 .letters-name span {
+    display: inline;
+  }
+}
+
+.about-v7 .letters-bio {
+  margin: 16px 0 0;
+  max-width: 21em;
+  font-size: 19px;
+  font-weight: 500;
+  line-height: 1.5;
+  color: var(--letters-words);
+}
+
+@media (min-width: 900px) {
+  .about-v7 .letters-bio {
+    margin-top: 22px;
+    max-width: 24em;
+    font-size: 24px;
+  }
+}
+
+/* A few of the bio's words on solid electric-blue blocks, white words on the blue. */
+.about-v7 .letters-block {
+  padding: 0.04em 0.18em;
+  color: #ffffff;
+  background: var(--letters-block);
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+/* Without a script or graphics: one line over the field, pointing to the page that needs neither. */
+.about-v7 .letters-plain {
+  position: absolute;
+  left: var(--letters-gutter);
+  right: var(--letters-gutter);
+  bottom: 18%;
+  z-index: 3;
+  margin: 0;
+  font-size: 17px;
+  color: var(--letters-words);
+}
+
+/* Glyphs in the HTML: the text's own colour, at about its cap height. */
+.about-v7 .letters-icon {
+  width: 1.05em;
+  height: 1.05em;
+  flex: none;
+  vertical-align: -0.17em;
+}
+
+.about-v7 .letters-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* The controls on the stage: quiet at rest, full strength when pressed, open or under the pointer. No boxes. */
+.about-v7 .letters-top {
+  position: absolute;
+  top: var(--letters-top);
+  right: 8px;
+  z-index: 6;
+  display: flex;
+  gap: 4px;
+}
+
+@media (min-width: 900px) {
+  .about-v7 .letters-top {
+    right: 56px;
+    gap: 18px;
+  }
+}
+
+.about-v7 .letters-control,
+.about-v7 .letters-world {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 4px 6px;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.15;
+  color: var(--letters-quiet);
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.about-v7 .letters-control[aria-pressed="true"],
+.about-v7 .letters-control[aria-expanded="true"],
+.about-v7 .letters-world[aria-pressed="true"] {
+  color: var(--letters-words);
+}
+
+@media (hover: hover) {
+  .about-v7 .letters-control:hover,
+  .about-v7 .letters-world:hover {
+    color: var(--letters-words);
+  }
+}
+
+/* The five worlds: a bar along the foot on a phone, a row at the bottom left on a computer. */
+.about-v7 .letters-worlds {
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  bottom: var(--letters-bottom);
+  z-index: 5;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 2px;
+  background: var(--letters-field);
+  border-radius: 12px;
+}
+
+.about-v7 .letters-world {
+  flex-direction: column;
+  justify-content: flex-start;
+  min-height: 54px;
+  padding: 4px 2px;
+  text-align: center;
+  font-size: 15px;
+}
+
+.about-v7 .letters-world .letters-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.about-v7 .letters-world[aria-pressed="true"] .letters-icon {
+  color: var(--letters-world-tint, var(--letters-words));
+}
+
+@media (min-width: 900px) {
+  .about-v7 .letters-worlds {
+    left: var(--letters-gutter);
+    right: auto;
+    bottom: 22px;
+    display: flex;
+    gap: 20px;
+  }
+  .about-v7 .letters-world {
+    flex-direction: row;
+    min-height: 40px;
+    font-size: 16px;
+  }
+}
+
+.about-v7 .letters-count {
+  position: fixed;
+  bottom: 76px;
+  z-index: 9;
+  margin: 0;
+  padding: 4px 10px;
+  font-size: 16px;
+  color: var(--letters-panel-ink);
+  background: var(--letters-panel);
+  border: 1px solid var(--letters-panel-line);
+  border-radius: 6px;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+
+/* The year rail: a thin line down the right edge, now at the top, 2014 at the foot, a tick for each event. */
+.about-v7 .letters-rail {
+  position: absolute;
+  top: calc(var(--letters-top) + 64px);
+  bottom: calc(var(--letters-bottom) + 160px);
+  right: 0;
+  z-index: 4;
+  width: 46px;
+  touch-action: none;
+  cursor: ns-resize;
+}
+
+@media (min-width: 900px) {
+  .about-v7 .letters-rail {
+    top: 84px;
+    bottom: 110px;
+    right: 8px;
+  }
+}
+
+.about-v7 .letters-rail-line {
+  position: absolute;
+  top: 10px;
+  bottom: 10px;
+  right: 16px;
+  width: 1px;
+  background: rgba(169, 180, 236, 0.32);
+}
+
+.about-v7 .letters-rail-tick {
+  position: absolute;
+  right: 1px;
+  width: 5px;
+  height: 1px;
+  background: rgba(169, 180, 236, 0.75);
+}
+
+.about-v7 .letters-rail-year {
+  position: absolute;
+  right: 8px;
+  font-size: 13px;
+  line-height: 1;
+  color: var(--letters-quiet);
+  transform: translateY(-50%);
+  white-space: nowrap;
+}
+
+.about-v7 .letters-rail-marker {
+  position: absolute;
+  right: -4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  line-height: 1;
+  color: var(--letters-words);
+  transform: translateY(-50%);
+  white-space: nowrap;
+}
+
+.about-v7 .letters-rail-marker::after {
+  content: "";
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  background: var(--letters-words);
+}
+
+/* Zoom and Reset view: at the rail's foot, above the worlds on a phone. */
+.about-v7 .letters-view {
+  position: absolute;
+  right: 4px;
+  bottom: calc(var(--letters-bottom) + 64px);
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: var(--letters-field);
+  border-radius: 12px;
+}
+
+@media (min-width: 900px) {
+  .about-v7 .letters-view {
+    right: 24px;
+    bottom: 22px;
+    gap: 10px;
+  }
+}
+
+.about-v7 .letters-zoom {
+  justify-content: center;
+  min-width: 40px;
+  min-height: 40px;
+}
+
+.about-v7 .letters-zoom .letters-icon {
+  width: 20px;
+  height: 20px;
+}
+
+/* The gestures in plain words, once, under the bio. */
+.about-v7 .letters-hint {
+  margin: 14px 0 0;
+  max-width: 23em;
+  font-size: 15px;
+  line-height: 1.45;
+  color: var(--letters-quiet);
+  transition: opacity 400ms ease;
+}
+
+.about-v7 .letters-hint[data-letters-leaving] {
+  opacity: 0;
+}
+
+/* The panels follow the site's theme: one solid surface, one hairline, no shadow. */
+.about-v7 .letters-panel {
+  color: var(--letters-panel-ink);
+  background: var(--letters-panel);
+  border: 1px solid var(--letters-panel-line);
+  border-radius: 12px;
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+.about-v7 .letters-panel a {
+  color: var(--letters-panel-accent);
+}
+
+/* Find me: the profiles and the way back, under its button. */
+.about-v7 .letters-find {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 230px;
+  padding: 6px;
+}
+
+.about-v7 .letters-find ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.about-v7 .letters-panel .letters-find-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 6px 10px;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--letters-panel-ink);
+  text-decoration: none;
+  border-radius: 8px;
+}
+
+@media (hover: hover) {
+  .about-v7 .letters-panel .letters-find-link:hover {
+    background: var(--letters-panel-soft);
+  }
+}
+
+/* One event's card, or a city's: a sheet from the foot on a phone, a panel at the right on a computer. */
+.about-v7 .letters-card {
+  position: absolute;
+  z-index: 8;
+  left: 10px;
+  right: 10px;
+  bottom: var(--letters-bottom);
+  max-height: 64svh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 18px 18px 16px;
+}
+
+@media (min-width: 900px) {
+  .about-v7 .letters-card {
+    left: auto;
+    right: 64px;
+    bottom: auto;
+    top: 76px;
+    width: 27rem;
+    max-height: calc(100vh - 170px);
+  }
+}
+
+.about-v7 .letters-card[data-letters-arriving] .letters-card-text {
+  opacity: 0;
+}
+
+.about-v7 .letters-card .letters-card-text {
+  transition: opacity 260ms ease;
+}
+
+/* A card opened without a flight (a key, Next, a city, reduced motion) simply fades in. */
+.about-v7 .letters-card[data-letters-fading] {
+  animation: letters-fade-in 220ms ease;
+}
+
+@keyframes letters-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+.about-v7 .letters-card h2 {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin: 0 40px 4px 0;
+  font-family: var(--letters-face-display);
+  font-weight: 700;
+  font-variation-settings: "opsz" 24;
+  font-size: 24px;
+  line-height: 1.15;
+}
+
+.about-v7 .letters-heading-icon {
+  width: 0.85em;
+  height: 0.85em;
+  color: var(--letters-panel-quiet);
+  transform: translateY(0.06em);
+}
+
+.about-v7 .letters-card p {
+  margin: 8px 0 0;
+  max-width: 60ch;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.about-v7 .letters-card .letters-card-meta {
+  color: var(--letters-panel-quiet);
+}
+
+.about-v7 .letters-card-skills,
+.about-v7 .letters-place-events {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.about-v7 .letters-skill-button,
+.about-v7 .letters-place-event {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 3px 11px;
+  font: inherit;
+  font-size: 16px;
+  color: var(--letters-panel-ink);
+  background: transparent;
+  border: 1px solid var(--letters-panel-line);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+@media (hover: hover) {
+  .about-v7 .letters-skill-button:hover,
+  .about-v7 .letters-place-event:hover {
+    background: var(--letters-panel-soft);
+  }
+}
+
+.about-v7 .letters-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  font: inherit;
+  color: var(--letters-panel-ink);
+  background: transparent;
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.about-v7 .letters-close .letters-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.about-v7 .letters-steps {
+  position: sticky;
+  bottom: -16px;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 16px -18px -16px;
+  padding: 8px 18px 10px;
+  background: var(--letters-panel);
+  border-top: 1px solid var(--letters-panel-line);
+}
+
+.about-v7 .letters-step {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 4px 4px;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--letters-panel-accent);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+.about-v7 .letters-step:disabled {
+  visibility: hidden;
+}
+
+/* Where a lit skill was used: above the worlds on a phone, at the bottom left on a computer. */
+.about-v7 .letters-answer {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: calc(var(--letters-bottom) + 64px);
+  z-index: 7;
+  margin: 0;
+  max-width: 40rem;
+  padding: 12px 14px;
+  font-size: 16px;
+  line-height: 1.45;
+}
+
+@media (min-width: 900px) {
+  .about-v7 .letters-answer {
+    left: var(--letters-gutter);
+    right: auto;
+    bottom: 76px;
+    width: 30rem;
+  }
+}
+
+.about-v7 .letters-answer strong {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+}
+
+.about-v7 .letters-clear {
+  margin-left: 8px;
+  min-height: 32px;
+  padding: 2px 12px;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--letters-panel-ink);
+  background: transparent;
+  border: 1px solid var(--letters-panel-line);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+/* The skills sheet: from the foot on a phone, a panel beside the land on a computer. */
+.about-v7 .letters-sheet {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: var(--letters-bottom);
+  z-index: 9;
+  max-height: 74svh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 16px 16px 20px;
+}
+
+@media (min-width: 900px) {
+  .about-v7 .letters-sheet {
+    left: auto;
+    right: 60px;
+    top: 64px;
+    bottom: 24px;
+    width: 390px;
+    max-height: none;
+  }
+}
+
+.about-v7 .letters-sheet h2 {
+  margin: 0 40px 12px 0;
+  font-family: var(--letters-face-display);
+  font-weight: 700;
+  font-variation-settings: "opsz" 24;
+  font-size: 24px;
+  line-height: 1.15;
+}
+
+.about-v7 .letters-filter-label {
+  position: relative;
+  display: block;
+}
+
+.about-v7 .letters-filter-label .letters-icon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--letters-panel-quiet);
+}
+
+.about-v7 .letters-filter {
+  width: 100%;
+  padding: 9px 10px 9px 36px;
+  font: inherit;
+  font-size: 16px;
+  color: var(--letters-panel-ink);
+  background: transparent;
+  border: 1px solid var(--letters-panel-line);
+  border-radius: 8px;
+}
+
+.about-v7 .letters-sheet-group h3 {
+  margin: 18px 0 8px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--letters-panel-quiet);
+}
+
+.about-v7 .letters-sheet-group ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* The search: a quiet field the typed letters show in, and one line under it. */
+.about-v7 .letters-search {
+  position: absolute;
+  left: 50%;
+  top: calc(var(--letters-top) + 64px);
+  z-index: 7;
+  width: min(30rem, calc(100% - 24px));
+  transform: translateX(-50%);
+}
+
+.about-v7 .letters-search-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 6px 0 12px;
+  color: var(--letters-words);
+  background: var(--letters-search);
+  border: 1px solid var(--letters-search-line);
+  border-radius: 10px;
+}
+
+.about-v7 .letters-search-field input {
+  flex: 1;
+  min-width: 0;
+  min-height: 44px;
+  padding: 0;
+  font: inherit;
+  font-size: 17px;
+  color: var(--letters-words);
+  background: transparent;
+  border: 0;
+  outline: none;
+}
+
+.about-v7 .letters-search-field input::placeholder {
+  color: var(--letters-quiet);
+}
+
+.about-v7 .letters-search-field .letters-control {
+  color: var(--letters-words);
+}
+
+.about-v7 .letters-search-line {
+  margin: 6px 4px 0;
+  font-size: 15px;
+  line-height: 1.4;
+  color: var(--letters-quiet);
+  text-shadow: 0 0 10px var(--letters-field), 0 0 3px var(--letters-field);
+}
+
+/* On a phone the search sits above the keyboard: its place comes from the visual viewport (letters/scene/search.ts). */
+@media (max-width: 899px) {
+  .about-v7 .letters-search {
+    top: auto;
+    bottom: var(--letters-search-bottom, calc(var(--letters-bottom) + 66px));
+  }
+}
+
+/* The keyboard's way in: a button per event, city and skill, out of sight; the focused one is ringed on the land. */
+.about-v7 .letters-keys {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+.about-v7 .letters-ring {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 3;
+  width: 36px;
+  height: 36px;
+  margin: -18px 0 0 -18px;
+  border: 2px solid var(--letters-words);
+  border-radius: 999px;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.about-v7 .letters-tag {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 4;
+  margin: 0;
+  padding: 3px 9px;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--letters-field);
+  background: var(--letters-words);
+  border-radius: 6px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.about-v7 .letters-tag span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* The letters' flight into a card: a canvas over everything, only while they fly. */
+.about-v7 .letters-flight {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .about-v7 .letters-hint,
+  .about-v7 .letters-card .letters-card-text {
+    transition: none;
+  }
+}
