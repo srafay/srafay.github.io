@@ -113,6 +113,14 @@ export class LabelLayer {
     return { x: (letters.left + letters.right) / 2, y: (letters.top + letters.bottom) / 2 };
   }
 
+  /** Every word drawn now with the rectangle of its letters, for the checks that no word is cut at a screen edge. */
+  shownRectangles() {
+    return this.labels.flatMap((label, index) => {
+      const letters = this.lettersNow[index];
+      return letters && this.quads.opacityOf(index) > 0.01 ? [{ key: label.key, ...letters }] : [];
+    });
+  }
+
   /** Places again on the next frame, after a change of what is lit, isolated or in focus. */
   placeSoon() {
     this.lastPlaced = -Infinity;

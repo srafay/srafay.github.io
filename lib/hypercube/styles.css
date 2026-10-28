@@ -165,14 +165,19 @@ body.about-v5 {
   font-size: 13px;
   line-height: 24px;
   color: var(--cube-light-muted);
+  white-space: nowrap;
 }
 
+/* Each link is a 24 px target by its padding, taken back by margin, so the commas stay tight against the numbers. */
 .about-v5 .cube-versions a {
-  display: inline-flex;
-  justify-content: center;
-  min-width: 24px;
-  min-height: 24px;
+  padding: 6px 9.5px;
+  margin: -6px -9.5px;
   text-decoration-color: rgba(148, 139, 128, 0.55);
+}
+
+/* A little more room before each number, so neighbouring targets do not overlap (version 7's measure for WebKit). */
+.about-v5 .cube-versions a[aria-label] {
+  margin-left: calc(1.15em - 9.5px);
 }
 
 /* The name and the line under it, over the object, at the top on a phone and in the left third on a computer. */
@@ -187,6 +192,13 @@ body.about-v5 {
   text-shadow:
     0 0 18px #000,
     0 0 4px #000;
+}
+
+/* On a phone the title keeps clear of the year rail and its marker down the right edge. */
+@media (max-width: 899px) {
+  .about-v5 .cube-title {
+    right: 52px;
+  }
 }
 
 @media (min-width: 900px) {
@@ -447,7 +459,7 @@ body.about-v5 {
 .about-v5 .cube-rail {
   position: absolute;
   top: calc(var(--cube-top) + 58px);
-  bottom: calc(var(--cube-bottom) + 170px);
+  bottom: calc(var(--cube-bottom) + 222px);
   right: 0;
   z-index: 4;
   width: 44px;
@@ -491,6 +503,10 @@ body.about-v5 {
   white-space: nowrap;
 }
 
+.about-v5 .cube-rail-year[hidden] {
+  display: none;
+}
+
 .about-v5 .cube-rail-marker {
   position: absolute;
   right: -4px;
@@ -502,6 +518,11 @@ body.about-v5 {
   color: var(--cube-light);
   transform: translateY(-50%);
   white-space: nowrap;
+}
+
+/* Level with the name and bio on a phone, the marker shows its dot alone, so its year never reads as part of them. */
+.about-v5 .cube-rail-marker[data-cube-quiet] {
+  color: transparent;
 }
 
 .about-v5 .cube-rail-marker::after {
@@ -528,6 +549,25 @@ body.about-v5 {
   display: flex;
   align-items: center;
   gap: 10px;
+}
+
+/* The ride: Ride through time by Lay out time, a row of its own on a phone; Previous and Next beside it while it rides. */
+.about-v5 .cube-ride-row {
+  gap: 4px;
+}
+
+.about-v5 .cube-ride-step {
+  justify-content: center;
+  min-width: 40px;
+}
+
+.about-v5 .cube-ride-step .cube-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.about-v5 .cube-ride-row[data-cube-riding] .cube-ride {
+  color: var(--cube-light);
 }
 
 @media (min-width: 900px) {
@@ -560,7 +600,7 @@ body.about-v5 {
   white-space: nowrap;
 }
 
-/* The year in focus, set large, over the object's lower left. */
+/* The year in focus, set large, over the object's lower left. On a phone the controls at its right stay clear of it. */
 .about-v5 .cube-year {
   position: absolute;
   left: var(--cube-gutter);
@@ -580,6 +620,12 @@ body.about-v5 {
 
 .about-v5 .cube-year[hidden] {
   display: none;
+}
+
+@media (max-width: 399px) {
+  .about-v5 .cube-year {
+    font-size: 64px;
+  }
 }
 
 @media (min-width: 900px) {
@@ -1007,6 +1053,185 @@ body.about-v5 {
 
 @media (prefers-reduced-motion: reduce) {
   .about-v5 .cube-hint {
+    transition: none;
+  }
+}
+
+/* The ride's peek: the event the moving point has reached, under the bio where the hint was. A tap opens its card. */
+.about-v5 .cube-peek {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  margin: 14px 0 0;
+  max-width: 100%;
+  padding: 8px 12px 9px;
+  font: inherit;
+  text-align: left;
+  color: var(--cube-light);
+  background: var(--cube-panel);
+  border: 1px solid var(--cube-panel-line);
+  border-radius: 10px;
+  pointer-events: auto;
+  cursor: pointer;
+  text-shadow: none;
+  transition: opacity 150ms ease;
+}
+
+.about-v5 .cube-peek[hidden] {
+  display: none;
+}
+
+.about-v5 .cube-peek[data-cube-peek-changing] {
+  opacity: 0;
+}
+
+.about-v5 .cube-peek strong {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.about-v5 .cube-peek-when {
+  font-size: 14px;
+  line-height: 1.35;
+  color: var(--cube-light-muted);
+}
+
+@media (min-width: 900px) {
+  .about-v5 .cube-peek {
+    margin-top: 22px;
+  }
+}
+
+/*
+  The search: a quiet field and its line on one panel, as the skill answer is, at the bottom left on a computer and
+  above the keyboard on a phone.
+*/
+.about-v5 .cube-search {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: var(--cube-search-bottom, calc(var(--cube-bottom) + 84px));
+  z-index: 7;
+  max-width: 30rem;
+  padding: 8px;
+  background: var(--cube-panel);
+  border: 1px solid var(--cube-panel-line);
+  border-radius: 10px;
+}
+
+.about-v5 .cube-search[hidden] {
+  display: none;
+}
+
+@media (min-width: 900px) {
+  .about-v5 .cube-search {
+    left: var(--cube-gutter);
+    right: auto;
+    bottom: 76px;
+    width: 30rem;
+  }
+}
+
+.about-v5 .cube-search-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 4px 0 10px;
+  color: var(--cube-light);
+  border: 1px solid #3a352f;
+  border-radius: 8px;
+}
+
+.about-v5 .cube-search-field input {
+  flex: 1;
+  min-width: 0;
+  min-height: 44px;
+  padding: 0;
+  font: inherit;
+  font-size: 17px;
+  color: var(--cube-light);
+  background: transparent;
+  border: 0;
+  outline: none;
+}
+
+.about-v5 .cube-search-field input::placeholder {
+  color: var(--cube-light-muted);
+}
+
+.about-v5 .cube-search-field input::-webkit-search-cancel-button {
+  display: none;
+}
+
+.about-v5 .cube-search-field:focus-within {
+  border-color: var(--cube-light-muted);
+}
+
+.about-v5 .cube-search .cube-search-close {
+  position: static;
+  flex: none;
+}
+
+.about-v5 .cube-search-line {
+  margin: 8px 4px 2px;
+  font-size: 15px;
+  line-height: 1.4;
+  color: var(--cube-light);
+}
+
+.about-v5 .cube-search-line:empty {
+  display: none;
+}
+
+/* Under 400 px wide the Search control shows its glyph alone, so the top row fits beside Home. */
+@media (max-width: 399px) {
+  .about-v5 .cube-search-button {
+    justify-content: center;
+    min-width: 32px;
+  }
+  .about-v5 .cube-search-button span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+/* At rest the words, the readouts and the hint sleep, and one quiet line shows under the bio. */
+.about-v5 .cube-readouts,
+.about-v5 .cube-hint,
+.about-v5 .cube-year {
+  transition: opacity 600ms ease;
+}
+
+.about-v5 .cube-stage[data-cube-resting] .cube-readouts,
+.about-v5 .cube-stage[data-cube-resting] .cube-hint,
+.about-v5 .cube-stage[data-cube-resting] .cube-year {
+  opacity: 0;
+}
+
+.about-v5 .cube-rest-line {
+  margin: 16px 0 0;
+  font-size: 15px;
+  line-height: 1.4;
+  color: var(--cube-light-muted);
+}
+
+.about-v5 .cube-rest-line[hidden] {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .about-v5 .cube-peek,
+  .about-v5 .cube-readouts,
+  .about-v5 .cube-year {
     transition: none;
   }
 }

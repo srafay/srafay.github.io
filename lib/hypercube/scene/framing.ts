@@ -58,6 +58,12 @@ export function screenPlaceFor(width: number, height: number): ScreenPlace {
   return { across: 0.665, down: 0.52, fillWidth: 0.6, fillHeight: 0.86 };
 }
 
+/**
+  Where a ride holds the object on a phone: a little higher, in the open space between the peek under the bio and the
+  big year and controls at the foot, so the moving point and the events it meets stay clear of both.
+*/
+export const ridingDown = (place: ScreenPlace, portrait: boolean) => (portrait ? 0.5 : place.down);
+
 /** How far the camera stands from a ball of a radius so it fills the share of the screen asked for. */
 export function distanceToFrame(radius: number, verticalFieldDegrees: number, aspect: number, place: ScreenPlace) {
   const halfHeight = Math.tan((verticalFieldDegrees * Math.PI) / 360);

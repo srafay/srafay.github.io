@@ -1,8 +1,8 @@
 /*
-  What the reader has brought into focus: the slice through time, the isolated world, the lit skill and the open
-  event. The travel through time is version 4's reader (a place from 0 to 1 that wheels, swipes, keys and the rail
-  move, with a swipe's carrying on). Its first stretch fades the slice in at the present; the rest of it carries the
-  slice back, a calendar year at a time, to 2014.
+  What the reader has brought into focus: the slice through time, the isolated world, the lit skill, the open event,
+  what a search found and where a ride stands. The travel through time is version 4's reader (a place from 0 to 1 that
+  wheels, swipes, keys, the rail and the ride move, with a swipe's carrying on). Its first stretch fades the slice in
+  at the present; the rest of it carries the slice back, a calendar year at a time, to 2014.
 */
 import { Follower } from "@/lib/about-cv/scene/follower";
 import type { WorldEvent } from "@/lib/about-cv/events";
@@ -21,14 +21,28 @@ export function yearAtTravel(progress: number, present: number): number | null {
   return Math.max(FIRST_YEAR, Math.floor(present - share * (present - FIRST_YEAR)));
 }
 
+/** The place of the travel that stands for a moment: evenly from now, just past the slice's fade, back to 2014. */
+export const travelAtTime = (time: number, present: number) =>
+  SLICE_ARRIVES_BY + ((present - Math.min(present, time)) / (present - FIRST_YEAR)) * (1 - SLICE_ARRIVES_BY);
+
+/** The moment a place of the travel stands for, the other way round. */
+export const timeAtTravel = (progress: number, present: number) =>
+  present - (Math.max(0, progress - SLICE_ARRIVES_BY) / (1 - SLICE_ARRIVES_BY)) * (present - FIRST_YEAR);
+
 /** The place of the travel that brings a year into focus: the middle of its stretch. */
-export function travelAtYear(year: number, present: number) {
-  const time = Math.min(present, year + 0.5);
-  return SLICE_ARRIVES_BY + ((present - time) / (present - FIRST_YEAR)) * (1 - SLICE_ARRIVES_BY);
-}
+export const travelAtYear = (year: number, present: number) => travelAtTime(Math.min(present, year + 0.5), present);
 
 /** The window of time a year lights: the calendar year, up to now for this one. */
 export const yearWindow = (year: number, present: number) => ({ from: year, to: Math.min(year + 1, present) });
+
+/** What a search found: the events it lights, the skills whose dust gathers, the cities named. */
+export type Found = { events: Set<string>; skills: Set<SkillWord>; cities: Set<string> };
+
+/** Where a ride stands: the event the point is at, the events it has met, and the city of its moment. */
+export type RideFocus = { current: WorldEvent | null; met: Set<string>; city: string | null };
+
+/** How far the rest of the object steps back while a ride lights its events: less than for a lit skill or a card. */
+const RIDE_STEPS_BACK = 0.45;
 
 export class Focus {
   /** The year in focus, or null when every year shows. */
@@ -36,6 +50,8 @@ export class Focus {
   isolated: WorldKey | null = null;
   litSkill: SkillWord | null = null;
   openEvent: WorldEvent | null = null;
+  found: Found | null = null;
+  ride: RideFocus | null = null;
   private readonly sliceShown = new Follower(0, 60);
   private readonly centreShown: Follower;
   private readonly selectingShown = new Follower(0, 60);
@@ -48,7 +64,6 @@ export class Focus {
     this.centreShown = new Follower(present, 60);
   }
 
-  /** Whether an event's bead lies in the year in focus. */
   /** Whether an event was happening in the year in focus: a span that ran through it counts, not only its end. */
   inSlice(event: WorldEvent) {
     if (this.year === null) return false;
@@ -56,25 +71,38 @@ export class Focus {
     return Math.min(event.start, beadTime(event, this.present)) < to && beadTime(event, this.present) >= from;
   }
 
-  /** Whether an event is lit by the reader: the lit skill names it, or its card is open. */
+  /** Whether an event is lit by the reader: the lit skill names it, its card is open, a search found it, a ride is at it. */
   isLit(event: WorldEvent) {
     if (this.openEvent?.id === event.id) return true;
+    if (this.found?.events.has(event.id)) return true;
+    if (this.ride?.current?.id === event.id) return true;
     return this.litSkill?.events.includes(event.id) ?? false;
   }
 
+  /** Whether a skill's dust is gathered to its events: the lit skill, or one a search found. */
+  isSkillLit(skill: SkillWord) {
+    return this.litSkill === skill || (this.found?.skills.has(skill) ?? false);
+  }
+
+  /** Whether a search found anything to light. */
+  isFinding() {
+    return this.found !== null && (this.found.events.size > 0 || this.found.skills.size > 0 || this.found.cities.size > 0);
+  }
+
   isSelecting() {
-    return this.openEvent !== null || this.litSkill !== null;
+    return this.openEvent !== null || this.litSkill !== null || this.isFinding();
   }
 
   /** Runs on by a frame's time. Says whether anything is still settling. */
   step(seconds: number) {
     const span = this.year === null ? null : yearWindow(this.year, this.present);
     const centre = span ? (span.from + span.to) / 2 : this.present;
+    const gathering = this.litSkill !== null || (this.found?.skills.size ?? 0) > 0;
     const targets: [Follower, number][] = [
       [this.sliceShown, this.year === null ? 0 : 1],
       [this.centreShown, centre],
-      [this.selectingShown, this.isSelecting() ? 1 : 0],
-      [this.gatherShown, this.litSkill ? 1 : 0],
+      [this.selectingShown, this.isSelecting() ? 1 : this.ride?.current ? RIDE_STEPS_BACK : 0],
+      [this.gatherShown, gathering ? 1 : 0],
     ];
     let moving = false;
     for (const [follower, target] of targets) {

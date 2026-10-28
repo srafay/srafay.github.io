@@ -15,12 +15,10 @@ import type { WorldEvent } from "@/lib/about-cv/events";
 import { glyphOfEvent, glyphOfSkill } from "@/lib/about-cv/glyphs";
 import { glyphElement, placeGlyph, type Glyph } from "@/lib/about-cv/icons";
 import { element } from "@/lib/about-cv/scene/dom";
-import { skillMarks } from "@/lib/about-cv/skill-marks";
 import type { SkillWord } from "@/lib/about-cv/skills";
 import { timeAtStartOf } from "@/lib/about-cv/time";
 import { cardHeading, closeButton, fillEventCard, neighboursOf } from "@/lib/about-cv/ui/event-card";
-import { readsOnNight, WORLD_HUES, WORDS } from "@/lib/hypercube/palette";
-import { beadTime, homeWorldOf } from "@/lib/hypercube/shape";
+import { beadTime, litColourOf } from "@/lib/hypercube/shape";
 import type { HypercubeScene } from "./hypercube-scene";
 import type { Sound } from "./sound";
 
@@ -35,14 +33,6 @@ const CARD_DELAY_MILLISECONDS = 140;
 const FLOWN_ZOOM = -0.6;
 
 const PREFIX = "cube";
-
-/** The colour a lit skill takes: its brand's, where it has a mark that reads on the night, else its world's hue. */
-export function litColourOf(skill: SkillWord, events: WorldEvent[]) {
-  const brand = skillMarks[skill.word]?.hex;
-  if (brand && readsOnNight(brand)) return `#${brand}`;
-  const world = homeWorldOf(skill, events);
-  return world ? WORLD_HUES[world] : WORDS;
-}
 
 export class Interaction {
   readonly answer = element("p", "cube-answer");
@@ -241,7 +231,6 @@ export class Interaction {
   /** Lights a skill: its dust flies to its events, and the answer line names them. */
   lightSkill(skill: SkillWord) {
     this.closeCard(false);
-    this.scene.setLitColour(litColourOf(skill, this.events));
     this.scene.lightSkill(skill);
     this.ringEvent = null;
     this.ring.hidden = true;

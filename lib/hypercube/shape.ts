@@ -10,8 +10,9 @@ import { cvSkillGroups, stays } from "@/content/about/profile";
 import type { WorldEvent } from "@/lib/about-cv/events";
 import type { SkillWord } from "@/lib/about-cv/skills";
 import { FIRST_YEAR, timeAtStartOf } from "@/lib/about-cv/time";
+import { skillMarks } from "@/lib/about-cv/skill-marks";
 import { worldIndex, worlds, type WorldKey } from "@/lib/about-cv/worlds";
-import { quieter, rgbOf, worldColour, QUIET_WORDS, WORDS, type Rgb } from "./palette";
+import { quieter, readsOnNight, rgbOf, worldColour, QUIET_WORDS, WORDS, WORLD_HUES, type Rgb } from "./palette";
 import {
   cityPoint,
   levelCirclePoint,
@@ -40,6 +41,8 @@ export type Detail = {
   lineGap: number;
   /** Dust specks for each skill. */
   specksPerSkill: number;
+  /** The gap between the dots of the ride's thread, in units of the object. */
+  threadGap: number;
 };
 
 export const COMPUTER_DETAIL: Detail = {
@@ -47,6 +50,7 @@ export const COMPUTER_DETAIL: Detail = {
   dotsPerRadius: 260,
   lineGap: 0.014,
   specksPerSkill: 7,
+  threadGap: 0.006,
 };
 
 export const PHONE_DETAIL: Detail = {
@@ -54,6 +58,7 @@ export const PHONE_DETAIL: Detail = {
   dotsPerRadius: 130,
   lineGap: 0.04,
   specksPerSkill: 4,
+  threadGap: 0.014,
 };
 
 /** What a dot is part of, for its strength and size. */
@@ -275,6 +280,14 @@ export function homeWorldOf(skill: SkillWord, events: WorldEvent[]): WorldKey | 
   return best;
 }
 
+/** The colour a lit skill takes: its brand's, where it has a mark that reads on the night, else its world's hue. */
+export function litColourOf(skill: SkillWord, events: WorldEvent[]) {
+  const brand = skillMarks[skill.word]?.hex;
+  if (brand && readsOnNight(brand)) return `#${brand}`;
+  const world = homeWorldOf(skill, events);
+  return world ? WORLD_HUES[world] : WORDS;
+}
+
 /** A skill named by many events gets more specks, so when it is lit each of its events gathers some. */
 const specksFor = (skill: SkillWord, detail: Detail) =>
   Math.max(detail.specksPerSkill, Math.min(24, skill.events.length * 3));
@@ -284,7 +297,8 @@ const GATHERED_SCATTER = 0.03;
 
 /**
   The skills' dust: a few specks for each skill, scattered round its home, in the quiet hue of its world. Each speck
-  also has a place to fly to when its skill is lit: beside one of the events that name it, taken in turn.
+  also has a place to fly to when its skill is lit, beside one of the events that name it, taken in turn, and the
+  colour it lights in: its skill's own, as litColourOf gives it, in sRGB shares.
 */
 export function dustDots(data: HypercubeData, detail: Detail) {
   const list = new DotList();
@@ -293,15 +307,18 @@ export function dustDots(data: HypercubeData, detail: Detail) {
   const beadOf = new Map(data.events.map((event) => [event.id, beadPoint(event, data.present)]));
   const skillOfSpeck: number[] = [];
   const targets: number[] = [];
+  const litTints: number[] = [];
   data.skills.forEach((skill, index) => {
     const world = homeWorldOf(skill, data.events);
     const colour = world ? worldColour(world, true) : rgbOf(QUIET_WORDS);
     const scatter = skill.events.length ? NAMED_SCATTER : GROUP_SCATTER;
+    const litTint = rgbOf(litColourOf(skill, data.events));
     for (let speck = 0; speck < specksFor(skill, detail); speck++) {
       const home = homes[index];
       const place = home.map((value) => value + (random() * 2 - 1) * scatter) as Point4;
       list.add(place, timeOfW(place[3], data.present), colour, "dust", world ? worldIndex(world) : -1);
       skillOfSpeck.push(index);
+      litTints.push(...litTint);
       const eventId = skill.events[speck % Math.max(1, skill.events.length)];
       const target = eventId ? (beadOf.get(eventId) as Point4) : place;
       targets.push(...target.map((value) => value + (random() * 2 - 1) * GATHERED_SCATTER));
@@ -311,6 +328,7 @@ export function dustDots(data: HypercubeData, detail: Detail) {
     dots: list.finish(),
     skillOfSpeck: new Float32Array(skillOfSpeck),
     targets: new Float32Array(targets),
+    litTints: new Float32Array(litTints),
   };
 }
 

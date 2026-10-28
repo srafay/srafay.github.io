@@ -1,14 +1,19 @@
 /*
   A held press. During the unfold a press speeds it on from the moment it lands, and letting go lets it settle back
-  to its slow pace. After the unfold, a press held still for a moment speeds the object's turn until it lifts. The
-  space bar does the same as a press. A hold is never needed: the unfold runs on its own.
+  to its slow pace. On a ride, a press held still for a moment hurries the ride until it lifts. Otherwise after the
+  unfold, a press held still for a moment speeds the object's turn. The space bar does the same as a press, except
+  while the ride is the top thing: then a tap of Space pauses or resumes it, and only a longer hold hurries it. A hold
+  is never needed: the unfold and the ride run on their own.
 */
 import type { HypercubeScene } from "./hypercube-scene";
 
-/** How long a press must stay still after the unfold before it speeds the turn. */
+/** How long a press must stay still after the unfold before it speeds the turn or hurries the ride. */
 const HOLD_STILL_MILLISECONDS = 450;
-/** A press shorter than this during the unfold is still a tap, though it sped the unfold while it lasted. */
+/** A press shorter than this is still a tap, though it sped the unfold while it lasted. A tap of Space too. */
 const SHORTEST_HOLD_MILLISECONDS = 350;
+
+/** What a hold does now. */
+type HoldsWhat = "unfold" | "ride" | "turn";
 
 export type Holds = {
   /** A finger or a button came down on the stage. */
@@ -22,18 +27,31 @@ export type Holds = {
   lastPointerWasMouse(): boolean;
 };
 
-export function listenForHolds(scene: HypercubeScene): Holds {
+/** What a hold needs of the ride: whether it is the top thing and playing, and how to hurry and toggle it. */
+export type RideForHolds = {
+  isTop(): boolean;
+  isPlaying(): boolean;
+  hurry(on: boolean): void;
+  toggle(): void;
+};
+
+export function listenForHolds(scene: HypercubeScene, ride: RideForHolds): Holds {
   let timer = 0;
   let pointerType = "mouse";
   let holding = false;
   let heldThisPress = false;
   let pressedAt = 0;
+  let spaceTimer = 0;
+
+  const holdsWhat = (): HoldsWhat => (!scene.unfold.isDone() ? "unfold" : ride.isPlaying() ? "ride" : "turn");
 
   const start = () => {
     holding = true;
     heldThisPress = true;
-    if (scene.unfold.isDone()) scene.turn.speeding = true;
-    else scene.unfold.holding = true;
+    const what = holdsWhat();
+    if (what === "unfold") scene.unfold.holding = true;
+    else if (what === "ride") ride.hurry(true);
+    else scene.turn.speeding = true;
     scene.requestFrame();
   };
 
@@ -42,6 +60,7 @@ export function listenForHolds(scene: HypercubeScene): Holds {
     holding = false;
     scene.unfold.holding = false;
     scene.turn.speeding = false;
+    ride.hurry(false);
     scene.requestFrame();
   };
 
@@ -52,10 +71,23 @@ export function listenForHolds(scene: HypercubeScene): Holds {
     if (event.key !== " " || event.repeat || isTyping(event.target)) return;
     event.preventDefault();
     heldThisPress = false;
-    start();
+    if (!ride.isTop()) return start();
+    // On a ride a tap of Space pauses or resumes it; held, it hurries the ride once the hold is long enough.
+    window.clearTimeout(spaceTimer);
+    spaceTimer = window.setTimeout(() => {
+      spaceTimer = 0;
+      start();
+    }, SHORTEST_HOLD_MILLISECONDS);
   });
   document.addEventListener("keyup", (event) => {
-    if (event.key === " " && holding) stop();
+    if (event.key !== " ") return;
+    if (spaceTimer) {
+      window.clearTimeout(spaceTimer);
+      spaceTimer = 0;
+      ride.toggle();
+      return;
+    }
+    if (holding) stop();
   });
 
   return {
@@ -64,14 +96,15 @@ export function listenForHolds(scene: HypercubeScene): Holds {
       heldThisPress = false;
       pressedAt = performance.now();
       window.clearTimeout(timer);
-      if (!scene.unfold.isDone()) start();
+      if (holdsWhat() === "unfold") start();
       else timer = window.setTimeout(start, HOLD_STILL_MILLISECONDS);
     },
     end: stop,
     cancel() {
       window.clearTimeout(timer);
-      if (scene.turn.speeding) {
+      if (scene.turn.speeding || holding) {
         scene.turn.speeding = false;
+        ride.hurry(false);
         holding = false;
       }
     },

@@ -177,6 +177,7 @@ void main() {
 
 const fragmentShader = /* glsl */ `
 uniform sampler2D atlas;
+uniform float awake;
 varying vec2 atlasPoint;
 varying vec3 colour;
 varying float shown;
@@ -186,7 +187,7 @@ void main() {
   float coverage = smoothstep(${EDGE_VALUE.toFixed(3)} - softness, ${EDGE_VALUE.toFixed(3)} + softness, field);
   // A soft dark halo just outside the letters, so a word over bright dots stays readable.
   float halo = smoothstep(${(EDGE_VALUE - 0.45).toFixed(3)}, ${(EDGE_VALUE - 0.05).toFixed(3)}, field) * 0.75;
-  float alpha = max(coverage, halo) * shown;
+  float alpha = max(coverage, halo) * shown * awake;
   if (alpha < 0.01) discard;
   gl_FragColor = vec4(colour * coverage / max(coverage, halo), alpha);
 }
@@ -211,6 +212,8 @@ export class WordQuads {
   private readonly boxAttribute: THREE.InstancedBufferAttribute;
   private readonly opacityAttribute: THREE.InstancedBufferAttribute;
   readonly viewport = { value: new THREE.Vector2(1, 1) };
+  /** How awake the words are, from 0 (asleep, while the object rests) to 1. */
+  readonly awake = { value: 1 };
 
   constructor(
     labels: Label[],
@@ -241,7 +244,7 @@ export class WordQuads {
     const material = new THREE.ShaderMaterial({
       vertexShader,
       fragmentShader,
-      uniforms: { atlas: { value: atlasTexture(atlas) }, viewport: this.viewport },
+      uniforms: { atlas: { value: atlasTexture(atlas) }, viewport: this.viewport, awake: this.awake },
       // Laid out with y growing down the screen, each quad winds the other way round: both sides are drawn.
       side: THREE.DoubleSide,
       transparent: true,

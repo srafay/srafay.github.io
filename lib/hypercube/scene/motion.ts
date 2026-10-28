@@ -74,6 +74,8 @@ export class ObjectTurn {
   private swayClock = 0;
   /** Whether a held press is speeding the turntable. */
   speeding = false;
+  /** The share of its pace the turntable keeps: all of it, less while the object rests quietly. */
+  spinShare = 1;
 
   constructor(private readonly still: boolean) {
     if (still) this.spinRate.jump(0);
@@ -114,12 +116,17 @@ export class ObjectTurn {
     return this.targetAcross;
   }
 
+  /** The reader's own turn up (yw), where it is heading. */
+  readerUp() {
+    return this.targetUp;
+  }
+
   reset() {
     this.turnTo(REST_TURN.xw, REST_TURN.yw);
     this.paused = false;
   }
 
-  /** While the camera is flown close to a bead, the turntable rests, so the bead stays in front. */
+  /** While the camera is flown close to a bead or rides with the moving point, the turntable rests. */
   paused = false;
 
   isChanged() {
@@ -135,7 +142,7 @@ export class ObjectTurn {
     moving = this.leanAcross.step(this.wantedLeanAcross, seconds) || moving;
     moving = this.leanUp.step(this.wantedLeanUp, seconds) || moving;
     if (!this.still) {
-      this.spinRate.step(this.paused ? 0 : this.speeding ? IDLE_SPIN * HELD_SPIN_SPEED : IDLE_SPIN, seconds);
+      this.spinRate.step(this.paused ? 0 : (this.speeding ? IDLE_SPIN * HELD_SPIN_SPEED : IDLE_SPIN) * this.spinShare, seconds);
       this.spin += this.spinRate.value * seconds;
       this.swayClock += seconds;
     }
