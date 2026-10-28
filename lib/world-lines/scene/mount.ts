@@ -4,10 +4,10 @@
   camera moved, a drift step is due, the pointer moved, or a tap lit something. Off screen nothing is drawn.
 */
 import * as THREE from "three";
-import type { WorldEvent } from "@/lib/world-lines/events";
-import type { SkillWord } from "@/lib/world-lines/skills";
-import { FIRST_YEAR } from "@/lib/world-lines/time";
-import { worldIndex, worlds, type WorldKey } from "@/lib/world-lines/worlds";
+import type { WorldEvent } from "@/lib/about-cv/events";
+import type { SkillWord } from "@/lib/about-cv/skills";
+import { FIRST_YEAR } from "@/lib/about-cv/time";
+import { worldIndex, worlds, type WorldKey } from "@/lib/about-cv/worlds";
 import {
   blendPoses,
   endPose,
@@ -37,8 +37,8 @@ import {
   type Vault,
 } from "./layout";
 import { FACES, placeCities, placeWords, wordRequests } from "./scene-words";
-import { createScrollReader, type ScrollReader } from "./scroll";
-import { Follower } from "./follower";
+import { createScrollReader, type ScrollReader } from "@/lib/about-cv/scene/scroll";
+import { Follower } from "@/lib/about-cv/scene/follower";
 import {
   distanceToFrame,
   fullTimeSquash,
@@ -50,7 +50,7 @@ import {
   wholeAngles,
   wholePose,
 } from "./view";
-import { buildAtlas, loadFaces } from "./word-atlas";
+import { buildAtlas, loadFaces } from "@/lib/about-cv/scene/word-atlas";
 import {
   COMPUTER_READABLE,
   COMPUTER_SKILL_CAP,

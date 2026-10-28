@@ -6,7 +6,7 @@
   The distance field is the exact Euclidean distance transform of Felzenszwalb and Huttenlocher, run once over each
   word's own pixels. The work is spread over frames with a time budget, so no frame waits on it.
 */
-import type { Glyph } from "@/lib/world-lines/icons";
+import type { Glyph } from "@/lib/about-cv/icons";
 
 export type WordRequest = {
   key: string;

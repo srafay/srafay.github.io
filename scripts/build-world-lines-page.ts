@@ -12,11 +12,11 @@ import path from "node:path";
 import { bio } from "@/content/about/profile";
 import { fontFaceCss, preloadedFonts } from "@/lib/fonts";
 import { site } from "@/lib/site";
-import { allEvents } from "@/lib/world-lines/events";
-import { checkGlyphTables } from "@/lib/world-lines/icons";
-import { checkSkillMarks } from "@/lib/world-lines/skill-marks";
-import { checkThreads, skillWords } from "@/lib/world-lines/skills";
-import { presentTime } from "@/lib/world-lines/time";
+import { allEvents } from "@/lib/about-cv/events";
+import { checkGlyphTables } from "@/lib/about-cv/icons";
+import { checkSkillMarks } from "@/lib/about-cv/skill-marks";
+import { checkThreads, skillWords } from "@/lib/about-cv/skills";
+import { presentTime } from "@/lib/about-cv/time";
 import {
   copyArt,
   hazeMarkup,

@@ -7,9 +7,9 @@
   There is no floor grid and no ribs: the structure is the lines and their light, and the years are numerals only.
 */
 import * as THREE from "three";
-import { FIRST_YEAR } from "@/lib/world-lines/time";
-import type { WorldEvent } from "@/lib/world-lines/events";
-import type { WorldKey } from "@/lib/world-lines/worlds";
+import { FIRST_YEAR } from "@/lib/about-cv/time";
+import type { WorldEvent } from "@/lib/about-cv/events";
+import type { WorldKey } from "@/lib/about-cv/worlds";
 import { glowPoints, ribbon, type GlowUniforms, type RibbonLook } from "./glow";
 import {
   LINES_BEFORE_FIRST_YEAR,

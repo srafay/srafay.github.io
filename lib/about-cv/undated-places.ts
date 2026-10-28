@@ -3,7 +3,7 @@
   "Undated in the CV" and gives that clue, so the place is never mistaken for a date. One function per clue, so a
   better clue changes one line.
 */
-import { middleOfYear } from "@/lib/world-lines/time";
+import { middleOfYear } from "@/lib/about-cv/time";
 
 export type UndatedPlace = { time: number; evidence: string };
 

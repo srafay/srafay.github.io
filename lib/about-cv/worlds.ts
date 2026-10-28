@@ -1,6 +1,6 @@
 /*
   The five world lines, each a thread of the life. Each has a form of its own, so a reader can tell them apart
-  without reading their names (scene/forms.ts draws them).
+  without reading their names. Version 4 draws each its own form (lib/world-lines/scene/forms.ts).
 */
 export type WorldKey =
   "work" | "study" | "projects" | "courses" | "offTheClock";

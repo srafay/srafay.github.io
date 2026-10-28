@@ -4,8 +4,8 @@
   with their threads to it. Nothing lit, everything is as it was.
 */
 import * as THREE from "three";
-import type { WorldEvent } from "@/lib/world-lines/events";
-import type { SkillWord } from "@/lib/world-lines/skills";
+import type { WorldEvent } from "@/lib/about-cv/events";
+import type { SkillWord } from "@/lib/about-cv/skills";
 import type { Palette } from "./forms";
 import type { Point } from "./layout";
 import type { WorldLinesScene } from "./mount";

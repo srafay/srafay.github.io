@@ -2,8 +2,8 @@
   The words the page says back: where a lit skill was used, and what an event's card holds. Plain sentences built from
   the data, so the scene, the keyboard layer and the lists all say the same thing.
 */
-import { UNDATED, type WorldEvent } from "@/lib/world-lines/events";
-import type { SkillWord } from "@/lib/world-lines/skills";
+import { UNDATED, type WorldEvent } from "@/lib/about-cv/events";
+import type { SkillWord } from "@/lib/about-cv/skills";
 
 const COUNT_WORDS = [
   "No",

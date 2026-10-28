@@ -7,8 +7,8 @@
   whatever else the page was busy with, and draws only when the scene draws.
 */
 import gsap from "gsap";
-import { FIRST_YEAR } from "@/lib/world-lines/time";
-import { worlds } from "@/lib/world-lines/worlds";
+import { FIRST_YEAR } from "@/lib/about-cv/time";
+import { worlds } from "@/lib/about-cv/worlds";
 import { LINES_BEFORE_FIRST_YEAR, LINES_PAST_NOW, zOfTime } from "./layout";
 import type { WorldLinesScene } from "./mount";
 

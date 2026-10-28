@@ -6,11 +6,11 @@
 */
 import * as THREE from "three";
 import { stays } from "@/content/about/profile";
-import type { WorldEvent } from "@/lib/world-lines/events";
-import { glyphOfEvent, glyphOfSkill } from "@/lib/world-lines/glyphs";
-import { placeGlyph } from "@/lib/world-lines/icons";
-import type { SkillWord } from "@/lib/world-lines/skills";
-import { timeAtStartOf } from "@/lib/world-lines/time";
+import type { WorldEvent } from "@/lib/about-cv/events";
+import { glyphOfEvent, glyphOfSkill } from "@/lib/about-cv/glyphs";
+import { placeGlyph } from "@/lib/about-cv/icons";
+import type { SkillWord } from "@/lib/about-cv/skills";
+import { timeAtStartOf } from "@/lib/about-cv/time";
 import { travelToTime, type Interaction } from "./interaction";
 import { zOfTime } from "./layout";
 import type { WorldLinesScene } from "./mount";

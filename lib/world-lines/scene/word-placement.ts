@@ -8,8 +8,8 @@
   All of it is worked out again only when the camera has moved.
 */
 import * as THREE from "three";
-import type { AtlasEntry } from "./word-atlas";
-import { worldIndex, type WorldKey } from "@/lib/world-lines/worlds";
+import type { AtlasEntry } from "@/lib/about-cv/scene/word-atlas";
+import { worldIndex, type WorldKey } from "@/lib/about-cv/worlds";
 import type { PlacedWord, WordLayer, WordUniforms } from "./words";
 
 export const PHONE_SKILL_CAP = 44;

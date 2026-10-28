@@ -8,11 +8,11 @@ import {
   typeGlyphs,
   worldGlyphs,
   type Glyph,
-} from "@/lib/world-lines/icons";
-import type { WorldEvent } from "@/lib/world-lines/events";
-import type { WorldKey } from "@/lib/world-lines/worlds";
+} from "@/lib/about-cv/icons";
+import type { WorldEvent } from "@/lib/about-cv/events";
+import type { WorldKey } from "@/lib/about-cv/worlds";
 
-export { glyphOfSkill } from "@/lib/world-lines/skill-marks";
+export { glyphOfSkill } from "@/lib/about-cv/skill-marks";
 
 export const glyphOfWorld = (world: WorldKey): Glyph => worldGlyphs[world];
 

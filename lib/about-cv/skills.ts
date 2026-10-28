@@ -7,7 +7,7 @@ import {
   cvSkillGroups,
   type CvSkill,
 } from "@/content/about/profile";
-import type { WorldEvent } from "@/lib/world-lines/events";
+import type { WorldEvent } from "@/lib/about-cv/events";
 
 export type SkillWord = {
   word: string;

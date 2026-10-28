@@ -14,7 +14,7 @@
 
   Keys: up and down travel, left and right turn, plus and minus zoom.
 */
-import type { ScrollReader } from "./scroll";
+import type { ScrollReader } from "@/lib/about-cv/scene/scroll";
 
 export type GestureHandlers = {
   travel: ScrollReader;

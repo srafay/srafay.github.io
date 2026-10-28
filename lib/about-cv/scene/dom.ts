@@ -1,4 +1,4 @@
-import { glyphElement, type Glyph } from "@/lib/world-lines/icons";
+import { glyphElement, type Glyph } from "@/lib/about-cv/icons";
 
 /** An element with a class and its text, the one way this page's script makes its HTML (never from markup strings). */
 export function element<Tag extends keyof HTMLElementTagNameMap>(

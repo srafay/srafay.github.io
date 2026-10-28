@@ -6,20 +6,20 @@
   to the scene, so no word in the scene is drawn under it.
 */
 import { currentRoleSkills, cvSkillGroups } from "@/content/about/profile";
-import type { EventKind, WorldEvent } from "@/lib/world-lines/events";
-import { glyphOfSkill, glyphOfWorld } from "@/lib/world-lines/glyphs";
+import type { EventKind, WorldEvent } from "@/lib/about-cv/events";
+import { glyphOfSkill, glyphOfWorld } from "@/lib/about-cv/glyphs";
 import { site } from "@/lib/site";
 import {
   controlGlyphs,
   glyphElement,
   linkGlyphs,
   type Glyph,
-} from "@/lib/world-lines/icons";
-import { CURRENT_ROLE_GROUP, wordsOf, type SkillWord } from "@/lib/world-lines/skills";
-import { FIRST_YEAR } from "@/lib/world-lines/time";
-import { worlds, type WorldKey } from "@/lib/world-lines/worlds";
+} from "@/lib/about-cv/icons";
+import { CURRENT_ROLE_GROUP, wordsOf, type SkillWord } from "@/lib/about-cv/skills";
+import { FIRST_YEAR } from "@/lib/about-cv/time";
+import { worlds, type WorldKey } from "@/lib/about-cv/worlds";
 import { progressAtTime, STRETCHES, travelTime } from "./camera";
-import { element } from "./dom";
+import { element } from "@/lib/about-cv/scene/dom";
 import { ZOOM_STEP } from "./gestures";
 import type { Interaction } from "./interaction";
 import type { WorldLinesScene } from "./mount";

@@ -5,7 +5,7 @@
   Each stretch is a share of the scroll. Each pose depends on the screen's shape, so a narrow screen frames it tall.
 */
 import * as THREE from "three";
-import { FIRST_YEAR } from "@/lib/world-lines/time";
+import { FIRST_YEAR } from "@/lib/about-cv/time";
 import { cameraLineHeight, zOfTime, type Vault } from "./layout";
 
 /**

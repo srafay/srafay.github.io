@@ -6,7 +6,7 @@
 */
 import * as THREE from "three";
 import type { Pose } from "./camera";
-import { Follower } from "./follower";
+import { Follower } from "@/lib/about-cv/scene/follower";
 
 /** The zoom: -1 is as near the moment as the camera goes, 0 the travel's own view, 1 the whole spacetime. */
 const ZOOM_NEAREST = -1;

@@ -5,12 +5,12 @@
 */
 import * as THREE from "three";
 import { stays } from "@/content/about/profile";
-import type { WorldEvent } from "@/lib/world-lines/events";
-import type { SkillWord } from "@/lib/world-lines/skills";
-import { FIRST_YEAR, timeAtStartOf } from "@/lib/world-lines/time";
-import { glyphOfEvent, glyphOfSkill } from "@/lib/world-lines/glyphs";
-import { placeGlyph, type Glyph } from "@/lib/world-lines/icons";
-import { worldIndex, type WorldKey } from "@/lib/world-lines/worlds";
+import type { WorldEvent } from "@/lib/about-cv/events";
+import type { SkillWord } from "@/lib/about-cv/skills";
+import { FIRST_YEAR, timeAtStartOf } from "@/lib/about-cv/time";
+import { glyphOfEvent, glyphOfSkill } from "@/lib/about-cv/glyphs";
+import { placeGlyph, type Glyph } from "@/lib/about-cv/icons";
+import { worldIndex, type WorldKey } from "@/lib/about-cv/worlds";
 import {
   anchorOf,
   onArch,
@@ -18,7 +18,7 @@ import {
   type Point,
   type Vault,
 } from "./layout";
-import type { Atlas, WordRequest } from "./word-atlas";
+import type { Atlas, WordRequest } from "@/lib/about-cv/scene/word-atlas";
 import type { PlacedWord } from "./words";
 
 const TEXT_SIZE = 28;

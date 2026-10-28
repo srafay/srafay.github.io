@@ -3,9 +3,9 @@
   (negative z). The five world lines stand on an arch over a floor, like a vault seen end on. The skills hang in the
   space inside it. Each rule is its own function, so moving one line or one word moves only that.
 */
-import type { SkillWord } from "@/lib/world-lines/skills";
-import type { WorldEvent } from "@/lib/world-lines/events";
-import type { WorldKey } from "@/lib/world-lines/worlds";
+import type { SkillWord } from "@/lib/about-cv/skills";
+import type { WorldEvent } from "@/lib/about-cv/events";
+import type { WorldKey } from "@/lib/about-cv/worlds";
 
 /** How far one year is along the depth axis, in scene units. */
 export const YEAR_LENGTH = 2.2;

@@ -7,9 +7,9 @@
   window.worldLines is for the checks that drive the page in a test browser. It says where the camera is and how the
   view is turned and zoomed, and it can go to a point of the travel.
 */
-import { allEvents } from "@/lib/world-lines/events";
-import { skillWords } from "@/lib/world-lines/skills";
-import { presentTime } from "@/lib/world-lines/time";
+import { allEvents } from "@/lib/about-cv/events";
+import { skillWords } from "@/lib/about-cv/skills";
+import { presentTime } from "@/lib/about-cv/time";
 import { addArt } from "./art";
 import { Controls } from "./controls";
 import { listenForGestures, listenForKeys, type GestureHandlers } from "./gestures";

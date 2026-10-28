@@ -104,8 +104,8 @@ import {
   markGlyph,
   type Glyph,
   type SimpleIcon,
-} from "@/lib/world-lines/icons";
-import type { SkillWord } from "@/lib/world-lines/skills";
+} from "@/lib/about-cv/icons";
+import type { SkillWord } from "@/lib/about-cv/skills";
 
 /** Skill word, as the scene floats it, to its exact Simple Icons mark. */
 export const skillMarks: Record<string, SimpleIcon> = {

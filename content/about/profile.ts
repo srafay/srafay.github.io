@@ -320,8 +320,8 @@ export const cities: City[] = [
 ];
 
 /*
-  Everything below is the rest of the CV, for version 4 of the About page ("World lines", lib/world-lines/), which
-  draws the whole of it. Source: the owner's CV, read on 28 October 2026, its words rewritten into the site's voice.
+  Everything below is the rest of the CV, for the About page versions that draw the whole of it (from version 4 on,
+  read through lib/about-cv/). Source: the owner's CV, read on 28 October 2026, its words rewritten into the site's voice.
   The CV's phone number, email and summary paragraph are left out on purpose.
 */
 

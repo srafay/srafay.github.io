@@ -23,7 +23,7 @@ import {
   timeAtStartOf,
   middleOfYear,
   yearsInWords,
-} from "@/lib/world-lines/time";
+} from "@/lib/about-cv/time";
 import {
   aiClubPlace,
   greenSocietyPlace,
@@ -35,8 +35,8 @@ import {
   serverAdministrationPlace,
   universitySystemPlace,
   type UndatedPlace,
-} from "@/lib/world-lines/undated-places";
-import type { WorldKey } from "@/lib/world-lines/worlds";
+} from "@/lib/about-cv/undated-places";
+import type { WorldKey } from "@/lib/about-cv/worlds";
 
 /** What kind of thing an event is. */
 export type EventKind =

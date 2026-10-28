@@ -5,7 +5,7 @@
   writes a word's presence, lit state and placement when they change.
 */
 import * as THREE from "three";
-import { EDGE_VALUE, type Atlas, type AtlasEntry } from "./word-atlas";
+import { EDGE_VALUE, type Atlas, type AtlasEntry } from "@/lib/about-cv/scene/word-atlas";
 import type { Point } from "./layout";
 
 export type WordKind =
