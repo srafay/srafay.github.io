@@ -33,6 +33,8 @@ export class Interaction {
   readonly card: Card;
   readonly answer = element("div", "letters-answer letters-panel");
   readonly tag = element("p", "letters-tag");
+  /** A ring where a finger or a click lands, at once, while the tap waits to see whether a second one follows. */
+  readonly tapRing = element("div", "letters-ring letters-tap-ring");
   readonly flight: Flight;
   litSkill: SkillWord | null = null;
   isolated: WorldKey | null = null;
@@ -61,7 +63,9 @@ export class Interaction {
     this.answer.setAttribute("aria-live", "polite");
     this.answer.dataset.lettersControl = "";
     this.tag.hidden = true;
-    scene.elements.stage.append(this.card.panel, this.answer, this.tag);
+    this.tapRing.hidden = true;
+    this.tapRing.setAttribute("aria-hidden", "true");
+    scene.elements.stage.append(this.card.panel, this.answer, this.tag, this.tapRing);
     scene.onFrame(() => this.stepDescent());
   }
 
@@ -73,7 +77,11 @@ export class Interaction {
   tap(x: number, y: number) {
     const picked = this.scene.pick(x, y);
     window.clearTimeout(this.pendingTap);
+    // The tap answers at once with a ring where it landed; what it opens follows when no second tap comes.
+    this.tapRing.style.transform = `translate(${Math.round(x)}px, ${Math.round(y)}px)`;
+    this.tapRing.hidden = !picked;
     this.pendingTap = window.setTimeout(() => {
+      window.setTimeout(() => (this.tapRing.hidden = true), 220);
       if (!picked) return void this.closeCard();
       if (picked.kind === "skill") return this.lightSkill(this.scene.data.skills[picked.index]);
       if (picked.kind === "city") return this.openCity(picked.index);
@@ -84,6 +92,7 @@ export class Interaction {
   /** Flies to what lies under a double tap and zooms in to reading distance. */
   doubleTap(x: number, y: number) {
     window.clearTimeout(this.pendingTap);
+    this.tapRing.hidden = true;
     const picked = this.scene.pick(x, y);
     if (!picked || picked.kind === "skill") return;
     const { land } = this.scene.data;

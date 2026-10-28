@@ -927,6 +927,18 @@ body.about-v7 {
   will-change: transform;
 }
 
+/* The ring a tap draws at once, a little smaller than the one the keyboard draws. */
+.about-v7 .letters-tap-ring {
+  width: 30px;
+  height: 30px;
+  margin: -15px 0 0 -15px;
+}
+
+/* A panel takes the focus so the keys go into it; the panel needs no ring of its own, its controls have theirs. */
+.about-v7 .letters-panel:focus {
+  outline: none;
+}
+
 .about-v7 .letters-tag {
   position: absolute;
   top: 0;
