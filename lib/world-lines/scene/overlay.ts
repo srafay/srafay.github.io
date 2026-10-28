@@ -10,7 +10,8 @@ export function followTitle(scene: WorldLinesScene, title: HTMLElement) {
   scene.onFrame(() => {
     const progress = scene.shownProgress();
     const shouldHide =
-      progress > STRETCHES.overview + 0.008 && progress < 0.995;
+      scene.wholeShare() > 0.3 ||
+      (progress > STRETCHES.overview + 0.008 && progress < 0.995);
     if (shouldHide === hidden) return;
     hidden = shouldHide;
     title.toggleAttribute("data-lines-hidden", hidden);
@@ -27,7 +28,7 @@ export function addYear(scene: WorldLinesScene, stage: HTMLElement) {
   stage.append(holder);
   let shownYear: number | null = null;
   scene.onFrame(() => {
-    const year = scene.yearNow();
+    const year = scene.wholeShare() > 0.5 ? null : scene.yearNow();
     if (year === shownYear) return;
     const previous = shownYear;
     shownYear = year;

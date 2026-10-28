@@ -13,7 +13,9 @@ import { bio } from "@/content/about/profile";
 import { fontFaceCss, preloadedFonts } from "@/lib/fonts";
 import { site } from "@/lib/site";
 import { allEvents } from "@/lib/world-lines/events";
-import { checkThreads } from "@/lib/world-lines/skills";
+import { checkGlyphTables } from "@/lib/world-lines/icons";
+import { checkSkillMarks } from "@/lib/world-lines/skill-marks";
+import { checkThreads, skillWords } from "@/lib/world-lines/skills";
 import { presentTime } from "@/lib/world-lines/time";
 
 type Bundler = {
@@ -30,16 +32,6 @@ const SOURCE = path.join("lib", "world-lines");
 const OUTPUT = path.join("public", "about", "v4");
 const DESCRIPTION =
   "Syed Rafay, senior software engineer at Twin Technology: every role, degree, project, course and skill, drawn as lines through the years.";
-
-/*
-  The theme the lists below the scene start in: the visitor's stored choice, as lib/home.ts reads it, or the system's.
-  On a phone or tablet the page scrolls inside a box and the document never does. So the browser's bars never slide
-  and resize the scene mid-swipe, as with the homepage's box in lib/home.ts. Both are decided before any paint.
-*/
-const HEAD_SCRIPT = [
-  `try{const t=localStorage.getItem("theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch{}`,
-  `if(matchMedia("(hover: none) and (pointer: coarse)").matches)document.documentElement.classList.add("lines-in-a-box")`,
-].join(";");
 
 const hashOf = (contents: string) =>
   createHash("sha256").update(contents).digest("hex").slice(0, 10);
@@ -79,7 +71,14 @@ function fillTemplate(template: string, values: Record<string, string>) {
 
 export async function buildWorldLinesPage() {
   // A thread to a skill that floats nowhere would lead nowhere: fail the build instead.
-  checkThreads(allEvents(presentTime()));
+  const events = allEvents(presentTime());
+  checkThreads(events);
+  // A renamed or missing icon fails here too, and the coverage printed is the one the build computed.
+  checkGlyphTables();
+  const coverage = checkSkillMarks(skillWords(events));
+  console.log(
+    `World lines skills: ${coverage.skills} words, ${coverage.marks} with a technology mark, ${coverage.groupGlyphs} with their group's glyph, ${coverage.none} with none`,
+  );
   const script = await bundleScene();
   const style = fs.readFileSync(path.join(SOURCE, "styles.css"), "utf8");
   const standIn = fs.existsSync(path.join(SOURCE, "stand-in.html"))
@@ -89,7 +88,6 @@ export async function buildWorldLinesPage() {
     fs.readFileSync(path.join(SOURCE, "page.html"), "utf8"),
     {
       description: escapeHtml(DESCRIPTION),
-      headScript: HEAD_SCRIPT,
       fontPreloads: fontPreloads(),
       fontFaces: fontFaceCss,
       styleHash: hashOf(style),

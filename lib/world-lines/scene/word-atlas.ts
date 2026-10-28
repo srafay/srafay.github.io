@@ -6,6 +6,7 @@
   The distance field is the exact Euclidean distance transform of Felzenszwalb and Huttenlocher, run once over each
   word's own pixels. The work is spread over frames with a time budget, so no frame waits on it.
 */
+import type { Glyph } from "@/lib/world-lines/icons";
 
 export type WordRequest = {
   key: string;
@@ -14,7 +15,46 @@ export type WordRequest = {
   font: string;
   /** The font size in that shorthand, in pixels. */
   sizePixels: number;
+  /** A glyph drawn before the word, at its cap height, in its colour. */
+  glyph?: Glyph;
+  /** The glyph's size against the font size, when not the usual: a display face's capitals stand taller than a pin should. */
+  glyphShare?: number;
 };
+
+/** A glyph's size against the font size, and the room after it, so it sits at the letters' cap height. */
+const GLYPH_SHARE = 0.84;
+const GLYPH_GAP_SHARE = 0.34;
+/** How far a glyph's top stands above the baseline, as a share of its size: its foot sits just under the letters'. */
+const GLYPH_RISE = 0.905;
+/**
+ * Lucide's line weight in the atlas, on its 24 grid. A step heavier than the HTML's 1.875, because the distance field
+ * softens a hairline at the small sizes the scene shows a word.
+ */
+const ATLAS_LINE_WEIGHT = 2.15;
+
+/** Draws a glyph with its top left corner at (left, top), size pixels square, in white. */
+function drawGlyph(
+  context: CanvasRenderingContext2D,
+  glyph: Glyph,
+  left: number,
+  top: number,
+  size: number,
+) {
+  context.save();
+  context.translate(left, top);
+  context.scale(size / 24, size / 24);
+  context.fillStyle = "#fff";
+  context.strokeStyle = "#fff";
+  context.lineWidth = ATLAS_LINE_WEIGHT;
+  context.lineCap = "round";
+  context.lineJoin = "round";
+  for (const data of glyph.paths) {
+    const path = new Path2D(data);
+    if (glyph.drawing === "stroke") context.stroke(path);
+    else context.fill(path);
+  }
+  context.restore();
+}
 
 /** Where a word sits in the texture, and its shape. */
 export type AtlasEntry = {
@@ -56,7 +96,13 @@ export function wordBitmap(request: WordRequest): Bitmap {
   const measured = context.measureText(request.text);
   const ascent = Math.ceil(request.sizePixels * 0.98);
   const descent = Math.ceil(request.sizePixels * 0.3);
-  const width = Math.ceil(measured.width) + PADDING * 2;
+  const glyphSize = request.glyph
+    ? Math.round(request.sizePixels * (request.glyphShare ?? GLYPH_SHARE))
+    : 0;
+  const glyphRoom = request.glyph
+    ? glyphSize + Math.round((glyphSize * GLYPH_GAP_SHARE) / GLYPH_SHARE)
+    : 0;
+  const width = Math.ceil(measured.width) + glyphRoom + PADDING * 2;
   const height = ascent + descent + PADDING * 2;
   const canvas = drawingCanvas as HTMLCanvasElement;
   canvas.width = width;
@@ -65,7 +111,18 @@ export function wordBitmap(request: WordRequest): Bitmap {
   context.textBaseline = "alphabetic";
   context.fillStyle = "#fff";
   context.clearRect(0, 0, width, height);
-  context.fillText(request.text, PADDING, PADDING + ascent);
+  const baseline = PADDING + ascent;
+  if (request.glyph)
+    drawGlyph(
+      context,
+      request.glyph,
+      PADDING,
+      baseline - glyphSize * GLYPH_RISE,
+      glyphSize,
+    );
+  context.font = request.font;
+  context.fillStyle = "#fff";
+  context.fillText(request.text, PADDING + glyphRoom, baseline);
   const pixels = context.getImageData(0, 0, width, height).data;
   const alpha = new Uint8ClampedArray(width * height);
   for (let index = 0; index < alpha.length; index++)

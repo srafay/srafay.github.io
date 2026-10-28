@@ -1,44 +1,18 @@
 /*
   Version 4 of the About page, "World lines". A page of its own, so nothing of the site's stylesheet reaches it. The
-  tokens below copy the site's own (app/globals.css). The stage is night in both themes. Its present has to be the
-  brightest thing on the screen, and depth is light fading into the dark. The lists below the stage and the versions
-  line follow the visitor's theme.
+  page is the stage alone, full screen, night in both themes. Its present has to be the brightest thing on the screen,
+  and depth is light fading into the dark. Nothing scrolls. Every gesture on the stage moves the spacetime instead.
 */
 :root {
-  --lines-paper: #e5e5df;
-  --lines-ink: #1b1d22;
-  --lines-muted: #63655f;
-  --lines-border: #cfd0c8;
-  --lines-link: #1f6e5e;
   --lines-face-display: "Fraunces", Georgia, "Times New Roman", serif;
   --lines-face-text: "Figtree", system-ui, sans-serif;
-  /* The stage: space is black, the light is the site's warm white, and the site's mint marks what the reader lit. */
+  /* Space is black, the light is the site's warm white, and the site's mint marks what the reader lit. */
   --lines-night: #000000;
   --lines-light: #ece6dc;
   --lines-light-muted: #948b80;
   --lines-signal: #9de6c4;
   --lines-gutter: 16px;
-  color-scheme: light;
-}
-
-:root[data-theme="dark"] {
-  --lines-paper: #07060b;
-  --lines-ink: #ece6dc;
-  --lines-muted: #948b80;
-  --lines-border: #24202a;
-  --lines-link: #9de6c4;
   color-scheme: dark;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --lines-paper: #07060b;
-    --lines-ink: #ece6dc;
-    --lines-muted: #948b80;
-    --lines-border: #24202a;
-    --lines-link: #9de6c4;
-    color-scheme: dark;
-  }
 }
 
 @media (min-width: 900px) {
@@ -65,23 +39,12 @@ body.about-v4 {
   text-size-adjust: 100%;
 }
 
-/* On touch screens the page scrolls inside this box and the document never moves (see the head script). */
-html.lines-in-a-box,
-html.lines-in-a-box body.about-v4 {
+/* The page never scrolls, bounces or pulls to refresh: the stage is the whole page. */
+html:has(body.about-v4),
+body.about-v4 {
   height: 100%;
   overflow: hidden;
-}
-
-html.lines-in-a-box .about-v4 .lines-scroller {
-  position: fixed;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  overflow-x: hidden;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: none;
 }
 
 .about-v4 a {
@@ -96,7 +59,7 @@ html.lines-in-a-box .about-v4 .lines-scroller {
   border-radius: 2px;
 }
 
-/* In the stage, so it stays on the night and leaves with it when the lists below come up. */
+/* Back to the homepage, always at the top left. */
 .about-v4 .lines-home {
   position: absolute;
   top: max(12px, env(safe-area-inset-top));
@@ -115,19 +78,15 @@ html.lines-in-a-box .about-v4 .lines-scroller {
   text-decoration: underline;
 }
 
-.about-v4 .lines-track {
-  position: relative;
-  /* The script sets the length to the years it travels. This is the length without it. */
-  height: var(--lines-track-height, 100svh);
-}
-
+/* The stage takes every gesture itself: no page scroll, no pull to refresh, no page zoom. */
 .about-v4 .lines-stage {
-  position: sticky;
-  top: 0;
-  height: 100svh;
+  position: fixed;
+  inset: 0;
+  display: block;
   overflow: hidden;
   background: var(--lines-night);
-  touch-action: pan-y;
+  touch-action: none;
+  overscroll-behavior: none;
   -webkit-tap-highlight-color: transparent;
   user-select: none;
   -webkit-user-select: none;
@@ -223,7 +182,8 @@ html.lines-in-a-box .about-v4 .lines-scroller {
 .about-v4 .lines-year {
   position: absolute;
   left: var(--lines-gutter);
-  bottom: max(18px, env(safe-area-inset-bottom));
+  /* Over the worlds' switches, never on them. */
+  bottom: calc(max(6px, env(safe-area-inset-bottom)) + 72px);
   z-index: 2;
   margin: 0;
   font-family: var(--lines-face-display);
@@ -254,11 +214,11 @@ html.lines-in-a-box .about-v4 .lines-scroller {
 @media (min-width: 900px) {
   .about-v4 .lines-year {
     font-size: 200px;
-    bottom: 32px;
+    bottom: 84px;
   }
 }
 
-/* Where a lit skill was used, and the end's links. */
+/* Where a lit skill was used. */
 .about-v4 .lines-answer {
   position: absolute;
   left: var(--lines-gutter);
@@ -301,7 +261,7 @@ html.lines-in-a-box .about-v4 .lines-scroller {
 /* One event's card, opened by a tap. A solid panel with one border, no shadow. */
 .about-v4 .lines-card {
   position: absolute;
-  z-index: 4;
+  z-index: 6;
   left: 12px;
   right: 12px;
   bottom: max(12px, env(safe-area-inset-bottom));
@@ -402,48 +362,6 @@ html.lines-in-a-box .about-v4 .lines-scroller {
   cursor: pointer;
 }
 
-/* The end of the travel, under the name: where to find him. */
-.about-v4 .lines-end {
-  display: none;
-  margin-top: 26px;
-  pointer-events: auto;
-}
-
-.about-v4 .lines-end[data-lines-shown] {
-  display: block;
-  animation: lines-end-arrives 400ms ease both;
-}
-
-@keyframes lines-end-arrives {
-  from {
-    opacity: 0;
-  }
-}
-
-.about-v4 .lines-end h2 {
-  margin: 0;
-  font-family: var(--lines-face-display);
-  font-weight: 500;
-  font-variation-settings: "opsz" 48;
-  font-size: 26px;
-  line-height: 1.1;
-}
-
-.about-v4 .lines-end ul {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px 20px;
-  margin: 14px 0 0;
-  padding: 0;
-  list-style: none;
-  font-size: 17px;
-}
-
-.about-v4 .lines-end a {
-  display: inline-block;
-  padding: 6px 0;
-}
-
 /* The keyboard's way in: one button per event and skill, unseen until focused, then a ring is drawn at its point. */
 .about-v4 .lines-keys {
   position: absolute;
@@ -496,110 +414,533 @@ html.lines-in-a-box .about-v4 .lines-scroller {
   display: none;
 }
 
-/* The whole CV in words, under the stage, in the visitor's theme. */
-.about-v4 .lines-record {
-  display: block;
-  padding: 72px var(--lines-gutter) 24px;
-  background: var(--lines-paper);
-  color: var(--lines-ink);
-}
-
-.about-v4 .lines-record-inner {
-  max-width: 44rem;
-  margin: 0 auto;
-}
-
-.about-v4 .lines-record h2 {
-  margin: 56px 0 8px;
-  font-family: var(--lines-face-display);
-  font-weight: 500;
-  font-variation-settings: "opsz" 48;
-  font-size: 32px;
-  line-height: 1.15;
-}
-
-.about-v4 .lines-record h2:first-child {
-  margin-top: 0;
-}
-
-.about-v4 .lines-record .lines-world-note {
-  margin: 0 0 20px;
-  color: var(--lines-muted);
-}
-
-.about-v4 .lines-record ol,
-.about-v4 .lines-record ul {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.about-v4 .lines-record li.lines-item {
-  padding: 16px 0;
-  border-top: 1px solid var(--lines-border);
-}
-
-.about-v4 .lines-record h3 {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 600;
-  line-height: 1.35;
-}
-
-.about-v4 .lines-record p {
-  margin: 4px 0 0;
-  max-width: 68ch;
-  line-height: 1.55;
-}
-
-.about-v4 .lines-record .lines-item-meta {
-  color: var(--lines-muted);
-}
-
-.about-v4 .lines-record a {
-  display: inline-block;
-  padding: 3px 0;
-  color: var(--lines-link);
-}
-
-.about-v4 .lines-record .lines-group {
-  padding: 14px 0;
-  border-top: 1px solid var(--lines-border);
-}
-
-.about-v4 .lines-record .lines-group h3 {
-  margin-bottom: 4px;
-}
-
+/* Without a script or graphics: one line, over the night, pointing to the page that needs neither. */
 .about-v4 .lines-plain {
+  position: absolute;
+  left: var(--lines-gutter);
+  right: var(--lines-gutter);
+  bottom: 15%;
+  z-index: 3;
   margin: 0;
-  padding: 24px var(--lines-gutter);
   font-size: 17px;
 }
 
+/* The other versions of this page, for the owner: one small muted line under Home, over no part of the scene. */
 .about-v4 .lines-versions {
-  padding: 24px var(--lines-gutter) max(28px, env(safe-area-inset-bottom));
-  background: var(--lines-paper);
-  color: var(--lines-muted);
+  position: absolute;
+  top: calc(max(12px, env(safe-area-inset-top)) + 32px);
+  left: var(--lines-gutter);
+  z-index: 5;
 }
 
 .about-v4 .lines-versions p {
-  max-width: 44rem;
-  margin: 0 auto;
-  font-size: 16px;
+  margin: 0;
+  font-size: 13px;
+  line-height: 24px;
+  color: var(--lines-light-muted);
 }
 
 .about-v4 .lines-versions a {
-  display: inline-block;
-  padding: 3px 0;
+  display: inline-flex;
+  justify-content: center;
+  min-width: 24px;
+  min-height: 24px;
+  text-decoration-color: rgba(148, 139, 128, 0.55);
 }
 
 @media (prefers-reduced-motion: reduce) {
   .about-v4 .lines-canvas,
   .about-v4 .lines-stand-in,
   .about-v4 .lines-title,
-  .about-v4 .lines-year,
-  .about-v4 .lines-end {
+  .about-v4 .lines-year {
     transition: none;
   }
 }
+
+/* Glyphs in the HTML: the text's own colour, at about its cap height. */
+.about-v4 .lines-icon {
+  width: 1.05em;
+  height: 1.05em;
+  flex: none;
+  vertical-align: -0.17em;
+}
+
+.about-v4 .lines-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* The controls: muted at rest, full strength when pressed, open or under the pointer. No boxes. */
+.about-v4 .lines-top {
+  position: absolute;
+  top: max(12px, env(safe-area-inset-top));
+  right: 52px;
+  z-index: 5;
+  display: flex;
+  gap: 16px;
+}
+
+.about-v4 .lines-control,
+.about-v4 .lines-world {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 4px 2px;
+  font: inherit;
+  font-size: 16px;
+  line-height: 1.15;
+  color: var(--lines-light-muted);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.about-v4 .lines-control[aria-pressed="true"],
+.about-v4 .lines-control[aria-expanded="true"],
+.about-v4 .lines-world[aria-pressed="true"] {
+  color: var(--lines-light);
+}
+
+@media (hover: hover) {
+  .about-v4 .lines-control:hover,
+  .about-v4 .lines-world:hover {
+    color: var(--lines-light);
+  }
+}
+
+/* The five worlds: a bar under the lines' near ends on a phone, a row at the bottom left on a computer. */
+.about-v4 .lines-worlds {
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  bottom: max(6px, env(safe-area-inset-bottom));
+  z-index: 5;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 2px;
+}
+
+.about-v4 .lines-world {
+  flex-direction: column;
+  justify-content: flex-start;
+  min-height: 52px;
+  font-size: 16px;
+  text-align: center;
+}
+
+.about-v4 .lines-world .lines-icon {
+  width: 20px;
+  height: 20px;
+}
+
+@media (min-width: 900px) {
+  .about-v4 .lines-worlds {
+    left: var(--lines-gutter);
+    right: auto;
+    bottom: 26px;
+    display: flex;
+    gap: 22px;
+  }
+  .about-v4 .lines-world {
+    flex-direction: row;
+    min-height: 36px;
+  }
+}
+
+.about-v4 .lines-count {
+  position: absolute;
+  bottom: 70px;
+  z-index: 6;
+  margin: 0;
+  padding: 4px 10px;
+  font-size: 16px;
+  color: var(--lines-light);
+  background: #0d0c10;
+  border: 1px solid #2c2822;
+  border-radius: 6px;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+
+.about-v4 .lines-count[hidden] {
+  display: none;
+}
+
+/* The year rail: a thin line, 2026 at the top and 2014 at the bottom, a tick where each event sits. */
+.about-v4 .lines-rail {
+  position: absolute;
+  top: calc(max(12px, env(safe-area-inset-top)) + 58px);
+  bottom: 96px;
+  right: 0;
+  z-index: 4;
+  width: 44px;
+  touch-action: none;
+  cursor: ns-resize;
+}
+
+.about-v4 .lines-rail[hidden] {
+  display: none;
+}
+
+@media (min-width: 900px) {
+  .about-v4 .lines-rail {
+    top: 84px;
+    bottom: 96px;
+    right: 8px;
+  }
+}
+
+.about-v4 .lines-rail-line {
+  position: absolute;
+  top: 10px;
+  bottom: 10px;
+  right: 16px;
+  width: 1px;
+  background: rgba(236, 230, 220, 0.24);
+}
+
+.about-v4 .lines-rail-tick {
+  position: absolute;
+  right: 1px;
+  width: 5px;
+  height: 1px;
+  background: rgba(236, 230, 220, 0.5);
+}
+
+.about-v4 .lines-rail-year {
+  position: absolute;
+  right: 8px;
+  font-size: 13px;
+  line-height: 1;
+  color: var(--lines-light-muted);
+  transform: translateY(-50%);
+}
+
+.about-v4 .lines-rail-marker {
+  position: absolute;
+  right: -4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  line-height: 1;
+  color: var(--lines-light);
+  transform: translateY(-50%);
+  white-space: nowrap;
+}
+
+.about-v4 .lines-rail-marker::after {
+  content: "";
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  background: var(--lines-light);
+}
+
+.about-v4 .lines-rail-marker:not([data-lines-travelling]) {
+  font-size: 0;
+}
+
+/* The skills sheet: a sheet from the bottom on a phone, a panel beside the scene on a computer. */
+.about-v4 .lines-sheet {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: max(8px, env(safe-area-inset-bottom));
+  z-index: 7;
+  max-height: 72svh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 16px 16px 20px;
+  color: var(--lines-light);
+  background: #0d0c10;
+  border: 1px solid #2c2822;
+  border-radius: 12px;
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+.about-v4 .lines-sheet[hidden] {
+  display: none;
+}
+
+@media (min-width: 900px) {
+  .about-v4 .lines-sheet {
+    left: auto;
+    right: 60px;
+    top: 64px;
+    bottom: 24px;
+    width: 380px;
+    max-height: none;
+  }
+}
+
+.about-v4 .lines-sheet h2 {
+  margin: 0 40px 12px 0;
+  font-family: var(--lines-face-display);
+  font-weight: 500;
+  font-variation-settings: "opsz" 24;
+  font-size: 24px;
+  line-height: 1.15;
+}
+
+.about-v4 .lines-filter-label {
+  position: relative;
+  display: block;
+}
+
+.about-v4 .lines-filter-label .lines-icon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--lines-light-muted);
+}
+
+.about-v4 .lines-filter {
+  width: 100%;
+  padding: 9px 10px 9px 36px;
+  font: inherit;
+  font-size: 16px;
+  color: var(--lines-light);
+  background: transparent;
+  border: 1px solid #3a352f;
+  border-radius: 8px;
+}
+
+.about-v4 .lines-sheet-group[hidden],
+.about-v4 .lines-sheet-group li[hidden] {
+  display: none;
+}
+
+.about-v4 .lines-sheet-group h3 {
+  margin: 18px 0 8px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--lines-light-muted);
+}
+
+.about-v4 .lines-sheet-group ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.about-v4 .lines-skill-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* A card's heading carries its glyph. Its steps go along its own line. */
+.about-v4 .lines-card h2 {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.about-v4 .lines-heading-icon {
+  width: 0.85em;
+  height: 0.85em;
+  color: var(--lines-light-muted);
+  transform: translateY(0.06em);
+}
+
+.about-v4 .lines-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.about-v4 .lines-close .lines-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.about-v4 .lines-steps {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 16px;
+  padding-top: 10px;
+  border-top: 1px solid #2c2822;
+}
+
+.about-v4 .lines-step {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 4px 2px;
+  font: inherit;
+  font-size: 16px;
+  color: var(--lines-light);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+.about-v4 .lines-step:disabled {
+  color: var(--lines-light-muted);
+  opacity: 0.45;
+  cursor: default;
+}
+
+/* The tag beside a hovered or focused point carries its glyph. */
+.about-v4 .lines-focus-label span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.about-v4 .lines-answer strong {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* The one hint, once, above the worlds. */
+/* The gestures in plain words, once, under the name and its line, in the line's own light. */
+.about-v4 .lines-hint {
+  margin: 14px 0 0;
+  max-width: 24em;
+  font-size: 16px;
+  line-height: 1.45;
+  color: var(--lines-light);
+  transition: opacity 400ms ease;
+}
+
+.about-v4 .lines-hint[hidden] {
+  display: none;
+}
+
+.about-v4 .lines-hint[data-lines-leaving] {
+  opacity: 0;
+}
+
+/* A card at the top opens under the top controls, and its steps stay in view at its foot however long it is. */
+.about-v4 .lines-card[data-lines-at="top"] {
+  top: calc(max(12px, env(safe-area-inset-top)) + 48px);
+}
+
+.about-v4 .lines-card .lines-steps {
+  position: sticky;
+  bottom: -16px;
+  margin: 16px -18px -16px;
+  padding: 10px 18px 12px;
+  background: #0d0c10;
+}
+
+/* On a phone the answer line sits above the worlds, near the thumb, and leaves the name in view. */
+@media (max-width: 899px) {
+  .about-v4 .lines-answer {
+    top: auto;
+    bottom: calc(max(6px, env(safe-area-inset-bottom)) + 62px);
+    left: 12px;
+    right: 12px;
+  }
+}
+
+/* Find me: a small panel of the profiles under its button, each by name and mark. */
+.about-v4 .lines-find {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 220px;
+  padding: 6px;
+  background: #0d0c10;
+  border: 1px solid #2c2822;
+  border-radius: 10px;
+}
+
+.about-v4 .lines-find[hidden] {
+  display: none;
+}
+
+.about-v4 .lines-find ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.about-v4 .lines-find-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 42px;
+  padding: 6px 10px;
+  font-size: 16px;
+  color: var(--lines-light);
+  text-decoration: none;
+  border-radius: 6px;
+}
+
+@media (hover: hover) {
+  .about-v4 .lines-find-link:hover {
+    background: #1a1820;
+  }
+}
+
+/* Zoom out, zoom in and Reset view: a row at the foot of the rail, above the worlds on a phone. */
+.about-v4 .lines-view {
+  position: absolute;
+  right: 4px;
+  bottom: calc(max(6px, env(safe-area-inset-bottom)) + 62px);
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+@media (min-width: 900px) {
+  .about-v4 .lines-view {
+    right: 24px;
+    bottom: 26px;
+    gap: 8px;
+  }
+}
+
+.about-v4 .lines-view .lines-control[hidden] {
+  display: none;
+}
+
+.about-v4 .lines-zoom {
+  justify-content: center;
+  min-width: 40px;
+  min-height: 40px;
+}
+
+.about-v4 .lines-zoom .lines-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.about-v4 .lines-zoom span {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* On a phone the rail ends above the zoom buttons. */
+@media (max-width: 899px) {
+  .about-v4 .lines-rail {
+    bottom: calc(max(6px, env(safe-area-inset-bottom)) + 112px);
+  }
+  .about-v4 .lines-top {
+    right: 8px;
+    gap: 8px;
+  }
+}
+

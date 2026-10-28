@@ -1,14 +1,18 @@
 /*
-  The keyboard's way through the scene. There is one button for every event, newest first as the travel meets them,
-  then one for every skill in the CV's order. The buttons are out of sight. The focused one is shown in the scene with
-  a ring on its point and its name beside it. The travel moves to its time. Enter opens an event's card or lights
-  a skill. Escape closes the card, then clears the skill (interaction.ts).
+  The keyboard's way through the scene. There is one button for every event, newest first as the travel meets them.
+  Then come one for each city and one for every skill, in the CV's order. The buttons are out of sight. The focused one is
+  shown in the scene with a ring on its point and its name and glyph beside it. The travel moves to its time. Enter
+  opens an event's or a city's card, or lights a skill. Escape closes the top thing (main.ts).
 */
 import * as THREE from "three";
+import { stays } from "@/content/about/profile";
 import type { WorldEvent } from "@/lib/world-lines/events";
+import { glyphOfEvent, glyphOfSkill } from "@/lib/world-lines/glyphs";
+import { placeGlyph } from "@/lib/world-lines/icons";
 import type { SkillWord } from "@/lib/world-lines/skills";
-import { progressAtTime, YEARS_BEHIND_A_MOMENT } from "./camera";
-import type { Interaction } from "./interaction";
+import { timeAtStartOf } from "@/lib/world-lines/time";
+import { travelToTime, type Interaction } from "./interaction";
+import { zOfTime } from "./layout";
 import type { WorldLinesScene } from "./mount";
 
 const describeEvent = (event: WorldEvent) =>
@@ -32,20 +36,8 @@ export function addKeys(
   layer.setAttribute("role", "group");
   layer.setAttribute(
     "aria-label",
-    "Every point in time, newest first, then every skill",
+    "Every point in time, newest first, then every city and every skill",
   );
-
-  /** Travels to just after a moment, so it stands ahead of the camera. */
-  const travelTo = (time: number) => {
-    if (scene.reducedMotion) return;
-    const cameraTime = Math.min(
-      scene.data.present,
-      time + YEARS_BEHIND_A_MOMENT,
-    );
-    scene.scroll.scrollToProgress(
-      progressAtTime(cameraTime, scene.data.present),
-    );
-  };
 
   const button = (name: string, onFocus: () => void, onPress: () => void) => {
     const made = document.createElement("button");
@@ -66,10 +58,23 @@ export function addKeys(
     button(
       describeEvent(event),
       () => {
-        travelTo(event.end ?? event.start);
-        interaction.showFocus(point, event.label);
+        travelToTime(scene, event.end ?? event.start);
+        interaction.showFocus(point, event.label, glyphOfEvent(event));
       },
       () => interaction.openEvent(event),
+    );
+  }
+  for (const stay of stays) {
+    const from = timeAtStartOf(stay.from);
+    const to = stay.to ? timeAtStartOf(stay.to) : scene.data.present;
+    const point = new THREE.Vector3(0, 0, zOfTime((from + to) / 2, scene.data.present));
+    button(
+      `${stay.city}, a place`,
+      () => {
+        travelToTime(scene, (from + to) / 2);
+        interaction.showFocus(point, stay.city, placeGlyph);
+      },
+      () => interaction.openPlace(stay.city),
     );
   }
   for (const skill of skills) {
@@ -77,8 +82,8 @@ export function addKeys(
     button(
       `${skill.word}, a skill`,
       () => {
-        travelTo(scene.timeAtDepth(point.z));
-        interaction.showFocus(point, skill.word);
+        travelToTime(scene, scene.timeAtDepth(point.z));
+        interaction.showFocus(point, skill.word, glyphOfSkill(skill));
       },
       () => interaction.lightSkill(skill),
     );

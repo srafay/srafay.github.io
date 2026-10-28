@@ -79,9 +79,8 @@ export function travelPose(
   };
 }
 
-/** The pull back at the end: the first screen's view. A phone tilts a little less, so the links have room. */
+/** The pull back at the end: the first screen's view again, with now at the foot of the screen above the worlds. */
 export function endPose(aspect: number, vault: Vault): Pose {
-  if (isNarrow(aspect)) return lookingBack(vault.height + 3.55, 5.5, 15, 54, 0);
   return overviewPose(aspect, vault);
 }
 

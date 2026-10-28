@@ -1,6 +1,6 @@
 /*
   Which words the scene writes, in which face, and where. There is every skill and every event's short label. There
-  are the years at the arch's left foot, the lines' names past their near ends, and the three cities on the floor.
+  are the years at the arch's left foot and the three cities on the floor. Skills, events and cities carry glyphs.
   Sizes are the letters' height in scene units. The word layer keeps readable ones at 13 pixels or more.
 */
 import * as THREE from "three";
@@ -8,12 +8,12 @@ import { stays } from "@/content/about/profile";
 import type { WorldEvent } from "@/lib/world-lines/events";
 import type { SkillWord } from "@/lib/world-lines/skills";
 import { FIRST_YEAR, timeAtStartOf } from "@/lib/world-lines/time";
-import { worlds, type WorldKey } from "@/lib/world-lines/worlds";
+import { glyphOfEvent, glyphOfSkill } from "@/lib/world-lines/glyphs";
+import { placeGlyph, type Glyph } from "@/lib/world-lines/icons";
+import { worldIndex, type WorldKey } from "@/lib/world-lines/worlds";
 import {
-  LINES_PAST_NOW,
   anchorOf,
   onArch,
-  worldPoint,
   zOfTime,
   type Point,
   type Vault,
@@ -37,7 +37,6 @@ const textFace = (weight = 500) => `${weight} ${TEXT_SIZE}px Figtree`;
 export const skillKey = (skill: SkillWord) => `skill:${skill.word}`;
 export const eventKey = (event: WorldEvent) => `event:${event.id}`;
 const yearKey = (year: number) => `year:${year}`;
-const lineKey = (world: WorldKey) => `line:${world}`;
 const cityKey = (city: string) => `city:${city}`;
 /** The present names itself with its date too ("Twin Technology, since August 2026"); its city is on the floor beside it. */
 export const presentLabel = (present: WorldEvent) =>
@@ -51,11 +50,17 @@ export function wordRequests(
   events: WorldEvent[],
   present: number,
 ): WordRequest[] {
-  const text = (key: string, words: string, weight = 500): WordRequest => ({
+  const text = (
+    key: string,
+    words: string,
+    glyph: Glyph,
+    weight = 500,
+  ): WordRequest => ({
     key,
     text: words,
     font: textFace(weight),
     sizePixels: TEXT_SIZE,
+    glyph,
   });
   const years: WordRequest[] = [];
   for (let year = FIRST_YEAR; year <= Math.floor(present); year++)
@@ -72,12 +77,20 @@ export function wordRequests(
       text: stay.city,
       font: `500 ${DISPLAY_SIZE}px Fraunces`,
       sizePixels: DISPLAY_SIZE,
+      glyph: placeGlyph,
+      glyphShare: CITY_GLYPH_SHARE,
     })),
-    ...worlds.map((world) => text(lineKey(world.key), world.name, 600)),
     ...events.map((event) =>
-      text(eventKey(event), labelOf(event), event.isPresent ? 600 : 500),
+      text(
+        eventKey(event),
+        labelOf(event),
+        glyphOfEvent(event),
+        event.isPresent ? 600 : 500,
+      ),
     ),
-    ...skills.map((skill) => text(skillKey(skill), skill.word)),
+    ...skills.map((skill) =>
+      text(skillKey(skill), skill.word, glyphOfSkill(skill)),
+    ),
   ];
 }
 
@@ -107,29 +120,12 @@ function stackPlaces(events: WorldEvent[]) {
   return places;
 }
 
-/**
- * How far into the future each line's name stands. The lines high on the arch stand nearer the camera. So seen from
- * above, all five names fall in rows under the present instead of on top of its label.
- */
-function lineNameDepth(world: WorldKey) {
-  if (world === "work" || world === "courses") return LINES_PAST_NOW * 0.32;
-  if (world === "offTheClock") return LINES_PAST_NOW * 0.62;
-  return LINES_PAST_NOW * 0.47;
-}
-
-/** A line's name reads toward the middle of the vault from its line, so the names at the edges stay on screen. */
-function lineNameAnchor(world: WorldKey): [number, number] {
-  if (world === "work") return [-0.08, 0.5];
-  if (world === "courses") return [1.08, 0.5];
-  // The two lines either side of the middle read outward, leaving the middle to Off the clock.
-  if (world === "study") return [1.08, 0.5];
-  if (world === "projects") return [-0.08, 0.5];
-  return [0.5, -0.3];
-}
-
 const SKILL_LETTERS = 0.1;
 const EVENT_LETTERS = 0.092;
-const LINE_NAME_LETTERS = 0.075;
+/** The present names itself a little smaller than its light deserves, so its one line clears the year rail. */
+const PRESENT_LETTERS = 0.074;
+/** A city's pin against its name's size: about the height of its lower-case letters. */
+const CITY_GLYPH_SHARE = 0.5;
 const YEAR_LETTERS = 0.26;
 
 export function placeWords(
@@ -154,20 +150,6 @@ export function placeWords(
       minimumPixels: 13,
     });
   }
-  // Each line's name stands just past now, in the unwritten future, where nothing else is drawn.
-  for (const world of worlds) {
-    const point = worldPoint(world.key, vault, lineNameDepth(world.key));
-    words.push({
-      key: lineKey(world.key),
-      kind: "lineName",
-      at: point,
-      letterHeight: LINE_NAME_LETTERS,
-      anchor: lineNameAnchor(world.key),
-      colour: colours.light,
-      strength: 0.78,
-      minimumPixels: 13,
-    });
-  }
   const stacked = stackPlaces(events);
   for (const event of events) {
     const at = anchorOf(event, vault, present);
@@ -175,15 +157,16 @@ export function placeWords(
     words.push({
       key: eventKey(event),
       kind: event.isPresent ? "present" : "event",
+      world: worldIndex(event.world),
       at,
-      letterHeight: EVENT_LETTERS,
+      letterHeight: event.isPresent ? PRESENT_LETTERS : EVENT_LETTERS,
       anchor: event.isPresent
         ? [-0.1, -0.55]
         : [across, down - (stacked.get(event.id) ?? 0) * 0.95],
       colour: colours.light,
       strength: event.isPresent ? 1 : 0.95,
       // The present always names itself. Other labels show once they are big enough to read.
-      minimumPixels: event.isPresent ? 16 : 0,
+      minimumPixels: event.isPresent ? 15 : 0,
     });
   }
   skills.forEach((skill, index) =>

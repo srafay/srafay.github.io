@@ -206,6 +206,7 @@ export type Beads = {
   points: THREE.Vector3[];
   setBrightness(index: number, amount: number, colour: THREE.Color): void;
   setPixelsPerUnitAtOne(value: number): void;
+  setTime(seconds: number, breathing: boolean): void;
   /** Each bead's resting colour, the present's warm light included. */
   restingColour(index: number): THREE.Color;
 };
@@ -237,6 +238,7 @@ export function buildBeads(
       lights.setColour(index, scratch.copy(colour).multiplyScalar(amount));
     },
     setPixelsPerUnitAtOne: lights.setPixelsPerUnitAtOne,
+    setTime: lights.setTime,
     restingColour: (index) => resting[index],
   };
 }

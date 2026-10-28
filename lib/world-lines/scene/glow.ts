@@ -175,13 +175,19 @@ const pointVertex = /* glsl */ `
 attribute float size;
 attribute vec3 glowColour;
 uniform float pixelsPerUnitAtOne;
+uniform float time;
+uniform float pulse;
 varying vec3 colour;
 varying float depth;
+varying float gain;
 void main() {
   vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
   depth = -mvPosition.z;
   colour = glowColour;
   gl_PointSize = max(2.0, size * pixelsPerUnitAtOne / max(depth, 0.05));
+  // The beads near the camera breathe a little, each on its own beat, so they look like things to touch.
+  float nearness = 1.0 - smoothstep(3.0, 10.0, depth);
+  gain = 1.0 + pulse * nearness * 0.5 * (0.5 + 0.5 * sin(time * 2.2 + float(gl_VertexID) * 1.7));
   gl_Position = projectionMatrix * mvPosition;
   #include <clipping_planes_vertex>
 }
@@ -193,12 +199,13 @@ uniform float fogNear;
 uniform float fogFar;
 varying vec3 colour;
 varying float depth;
+varying float gain;
 void main() {
   #include <clipping_planes_fragment>
   vec2 fromCentre = gl_PointCoord * 2.0 - 1.0;
   float distanceSquared = dot(fromCentre, fromCentre);
   if (distanceSquared > 1.0) discard;
-  float light = exp(-distanceSquared * 28.0) * 1.2 + exp(-distanceSquared * 5.0) * 0.35;
+  float light = (exp(-distanceSquared * 28.0) * 1.2 + exp(-distanceSquared * 5.0) * 0.35) * gain;
   float fog = 1.0 - smoothstep(fogNear, fogFar, depth);
   float notTooClose = smoothstep(0.3, 1.4, depth);
   gl_FragColor = vec4(colour * light * fog * notTooClose, 1.0);
@@ -211,6 +218,8 @@ export type GlowPoints = {
   setColour(index: number, colour: THREE.Color): void;
   /** The scale from a point's size in scene units to pixels at depth 1; set on every resize. */
   setPixelsPerUnitAtOne(value: number): void;
+  /** The time in seconds, and whether the near beads breathe (never under reduced motion). */
+  setTime(seconds: number, breathing: boolean): void;
 };
 
 /** Soft round lights, each `size` scene units across its glow (halo included). */
@@ -236,6 +245,8 @@ export function glowPoints(
   geometry.setAttribute("glowColour", colourAttribute);
   const uniforms = {
     pixelsPerUnitAtOne: { value: 800 },
+    time: { value: 0 },
+    pulse: { value: 0 },
     fogNear: shared.fogNear,
     fogFar: shared.fogFar,
   };
@@ -256,6 +267,10 @@ export function glowPoints(
     setColour(index, colour) {
       colourAttribute.setXYZ(index, colour.r, colour.g, colour.b);
       colourAttribute.needsUpdate = true;
+    },
+    setTime(seconds, breathing) {
+      uniforms.time.value = seconds;
+      uniforms.pulse.value = breathing ? 1 : 0;
     },
     setPixelsPerUnitAtOne(value) {
       uniforms.pixelsPerUnitAtOne.value = value;

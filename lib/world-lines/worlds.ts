@@ -43,3 +43,7 @@ export const worlds: World[] = [
       "A game server, clubs, graphics, and what fills the evenings now.",
   },
 ];
+
+/** A world's place in the list, which the scene's shaders use to tell the worlds apart. */
+export const worldIndex = (key: WorldKey) =>
+  worlds.findIndex((world) => world.key === key);

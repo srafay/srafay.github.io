@@ -7,31 +7,24 @@
 <meta name="theme-color" content="#000000">
 <meta name="description" content="{{description}}">
 <title>About me · Syed Rafay</title>
-<script>{{headScript}}</script>
 {{fontPreloads}}
 <style>{{fontFaces}}</style>
 <link rel="stylesheet" href="/about/v4/world-lines.css?v={{styleHash}}">
 <script src="/about/v4/world-lines.js?v={{scriptHash}}" defer></script>
 </head>
 <body class="about-v4">
-<div class="lines-scroller" data-lines-scroller>
-  <div class="lines-track" data-lines-track>
-    <div class="lines-stage" data-lines-stage>
-      <a class="lines-home" href="/">Home</a>
-      {{standIn}}
-      <canvas class="lines-canvas" data-lines-canvas aria-hidden="true"></canvas>
-      <div class="lines-title" data-lines-title>
-        <h1 class="lines-name">{{name}}</h1>
-        <p class="lines-bio">{{bio}}</p>
-      </div>
-    </div>
-  </div>
-  <main class="lines-record" data-lines-record>
-    <noscript><p class="lines-plain">This version needs its script. <a href="/about/">The About page</a> reads without one.</p></noscript>
-  </main>
+<main class="lines-stage" data-lines-stage>
+  <a class="lines-home" href="/?from=post">Home</a>
   <nav class="lines-versions" aria-label="Versions of this page">
-    <p>Version 4. See <a href="/about/">the first draft</a>, <a href="/about/v1/">version 1</a>, <a href="/about/v2/">version 2</a> or <a href="/about/v3/">version 3</a>.</p>
+    <p>Version 4. Also: <a href="/about/">first draft</a>, <a href="/about/v1/" aria-label="version 1">1</a>, <a href="/about/v2/" aria-label="version 2">2</a>, <a href="/about/v3/" aria-label="version 3">3</a></p>
   </nav>
-</div>
+  {{standIn}}
+  <canvas class="lines-canvas" data-lines-canvas aria-hidden="true"></canvas>
+  <div class="lines-title" data-lines-title>
+    <h1 class="lines-name">{{name}}</h1>
+    <p class="lines-bio">{{bio}}</p>
+  </div>
+  <noscript><p class="lines-plain">This version needs its script. <a href="/about/">The About page</a> reads without one.</p></noscript>
+</main>
 </body>
 </html>

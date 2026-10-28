@@ -38,10 +38,23 @@ import {
 } from "@/lib/world-lines/undated-places";
 import type { WorldKey } from "@/lib/world-lines/worlds";
 
+/** What kind of thing an event is. */
+export type EventKind =
+  | "role"
+  | "internship"
+  | "degree"
+  | "thesis"
+  | "project"
+  | "course"
+  | "activity"
+  | "pastime";
+
 export type WorldEvent = {
   /** Unique, stable, safe in an address. */
   id: string;
   world: WorldKey;
+  /** What kind of thing it is, for its glyph. */
+  kind: EventKind;
   /** The short label beside its mark in the scene. */
   label: string;
   /** The card's heading. */
@@ -84,6 +97,7 @@ function roleEvent(role: Role, present: number): WorldEvent {
   return {
     id: `work-${slug(role.shortName)}`,
     world: "work",
+    kind: "role",
     label: role.shortName,
     title: role.title,
     subtitle: role.organisation,
@@ -108,6 +122,7 @@ function internshipEvents(): WorldEvent[] {
     return {
       id: `work-${slug(internship.shortName)}`,
       world: "work",
+      kind: "internship",
       label: internship.shortName,
       title: internship.title,
       subtitle: internship.organisation,
@@ -135,6 +150,7 @@ function degreeEvent(degree: Degree): WorldEvent {
   return {
     id: `study-${slug(degree.school)}`,
     world: "study",
+    kind: "degree",
     label: schoolLabel(degree),
     title: degree.title,
     subtitle: degree.school,
@@ -163,6 +179,7 @@ function projectEvent(project: Project): WorldEvent {
     id: `${isThesis(project) ? "study" : "projects"}-${slug(project.shortName)}`,
     // The thesis is one of the CV's projects, drawn on the Study line with the Masters it was written for.
     world: isThesis(project) ? "study" : "projects",
+    kind: isThesis(project) ? "thesis" : "project",
     label: project.shortName,
     title: project.name,
     subtitle: project.context,
@@ -179,6 +196,7 @@ function courseEvent(course: Course): WorldEvent {
   return {
     id: `courses-${slug(course.shortName)}`,
     world: "courses",
+    kind: "course",
     label: course.shortName,
     title: course.name,
     subtitle: course.provider,
@@ -203,6 +221,7 @@ function activityEvents(): WorldEvent[] {
     return {
       id: `off-${slug(activity.shortName)}`,
       world: "offTheClock",
+      kind: "activity",
       label: activity.shortName,
       title: activity.role,
       subtitle: activity.organisation,
@@ -220,6 +239,7 @@ function pastimeEvents(present: number): WorldEvent[] {
   return pastimes.map((pastime, index) => ({
     id: `off-${slug(pastime.name)}`,
     world: "offTheClock",
+    kind: "pastime",
     label: pastime.name,
     title: pastime.name,
     subtitle: "From the GitHub profile",

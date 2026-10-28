@@ -23,6 +23,8 @@ export type PlacedWord = {
   strength: number;
   /** Never shown smaller than this many pixels: it grows instead. Zero lets it fade out when small. */
   minimumPixels: number;
+  /** The index of the world it belongs to (worlds.ts), or -1 for a word that belongs to none. */
+  world?: number;
 };
 
 const KIND_NUMBER: Record<WordKind, number> = {
@@ -54,8 +56,12 @@ attribute vec3 style;
 // How present it is (the phone's cap, the intro), whether the reader lit it, and how readable it is (a skill that is
 // not one of the few chosen to read is haze).
 attribute vec3 state;
+// The world the word belongs to, or -1.
+attribute float wordWorld;
 
 uniform float viewportHeight;
+uniform float isolatedWorld;
+uniform float hoveredWord;
 uniform float time;
 uniform float drift;
 uniform float fogNear;
@@ -93,8 +99,15 @@ void main() {
   float letterPixels = quadHeight * sizeShare * pixelsPerUnit;
   // From afar (the first screen and the end) a word that must stay readable grows to its smallest size. Inside the
   // vault words are near enough to be read as they are, and a far one simply fades.
-  float holdsSize = minimumPixels > 0.0 ? holdSmall : 0.0;
-  float grow = max(1.0, mix(1.0, minimumPixels / letterPixels, holdsSize));
+  // With a world isolated, every event of it holds a readable size and shows however far away it is.
+  bool isolating = isolatedWorld > -0.5;
+  bool inIsolated = isolating && abs(wordWorld - isolatedWorld) < 0.5;
+  // A lit word holds a readable size too, wherever it is.
+  bool litNow = lit > 0.5 && selecting > 0.5;
+  bool heldReadable = litNow || (inIsolated && wordKind > 0.5 && wordKind < 1.5);
+  float minimum = heldReadable ? max(13.0, minimumPixels) : minimumPixels;
+  float holdsSize = minimum > 0.0 ? (heldReadable || inIsolated ? 1.0 : holdSmall) : 0.0;
+  float grow = max(1.0, mix(1.0, minimum / letterPixels, holdsSize));
   // A word coming close stops growing at the largest size a label needs, so it never swells into a grey ghost.
   // A city is meant to be large and keeps growing.
   if (wordKind < 4.5) grow = min(grow, maximumPixels / max(letterPixels, 0.001));
@@ -112,18 +125,26 @@ void main() {
   float shownPixels = letterPixels * grow;
   float legible = mix(smoothstep(11.5, 13.5, letterPixels), 1.0, holdsSize);
   // Inside the vault an event's label shows only within reading distance, so far labels never pile up at the horizon.
-  float withinReach = wordKind > 0.5 && wordKind < 1.5 ? 1.0 - smoothstep(labelReach, labelReach * 1.4, depth) : 1.0;
+  float withinReach = wordKind > 0.5 && wordKind < 1.5 && !inIsolated && !litNow ? 1.0 - smoothstep(labelReach, labelReach * 1.4, depth) : 1.0;
+  // The other worlds step back while one is isolated. Words of no world (skills, years, cities) step back less.
+  float isolation = !isolating || inIsolated ? 1.0 : (wordWorld > -0.5 ? 0.16 : 0.45);
+  // The word under the pointer or a finger is drawn a little brighter.
+  float hovered = abs(float(gl_InstanceID) - hoveredWord) < 0.5 ? 1.0 : 0.0;
+#ifdef FLAT
+  hovered = 0.0;
+#endif
   float notTooClose = smoothstep(0.45, 1.3, depth);
   float notTooBig = 1.0;
-  // Only words the placement chose are drawn as words. An unchosen skill is a speck of light instead.
+  // Only words the placement chose are drawn as words, lit ones too, so no two ever overlap. An unchosen skill is a speck
+  // of light instead.
   float placed = readable;
   float fog = 1.0 - smoothstep(fogNear, fogFar, depth);
   float isLit = step(0.5, lit) * selecting;
   float dimmed = mix(1.0, mix(0.2, 1.0, step(0.5, lit)), selecting);
-  colour = mix(wordColour, signal, isLit);
-  opacity = wordStrength * presence * legible * withinReach * notTooClose * notTooBig * mix(placed, 1.0, isLit) * fog * dimmed;
+  colour = mix(mix(wordColour, vec3(1.0), hovered * 0.45), signal, isLit);
+  opacity = min(1.0, wordStrength * (1.0 + hovered * 0.3)) * presence * legible * withinReach * notTooClose * notTooBig * placed * fog * dimmed * isolation;
   // A dimmed word loses its halo too, or the halo would stand out as a dark shape.
-  haloShare = dimmed * dimmed;
+  haloShare = dimmed * dimmed * isolation * (1.0 + 0.3 * isLit);
   if (opacity < 0.004) gl_Position = vec4(2.0, 2.0, 2.0, 1.0);
 }
 `;
@@ -159,6 +180,10 @@ export type WordUniforms = {
   holdSmall: { value: number };
   /** How far an event's label reaches inside the vault, in scene units. */
   labelReach: { value: number };
+  /** The index of the isolated world (worlds.ts), or -1 when every world shows. */
+  isolatedWorld: { value: number };
+  /** The word under the pointer or a finger, by its index in the layer, or -1. */
+  hoveredWord: { value: number };
   selecting: { value: number };
   signal: { value: THREE.Color };
   atlas: { value: THREE.Texture | null };
@@ -175,6 +200,8 @@ export function wordUniforms(signal: THREE.Color): WordUniforms {
     maximumPixels: { value: 26 },
     holdSmall: { value: 1 },
     labelReach: { value: 1000 },
+    isolatedWorld: { value: -1 },
+    hoveredWord: { value: -1 },
     selecting: { value: 0 },
     signal: { value: signal },
     atlas: { value: null },
@@ -188,6 +215,9 @@ export type WordLayer = {
   presenceOf(index: number): number;
   setPresence(index: number, amount: number): void;
   setLit(index: number, lit: boolean): void;
+  isLit(index: number): boolean;
+  /** Moves a label to another side of its point, as the placement chose. */
+  setAnchor(index: number, anchor: [number, number]): void;
   readableOf(index: number): number;
   setReadable(index: number, amount: number): void;
   /** Sends the changed presences and lit states to the graphics chip, once per frame at most. */
@@ -238,6 +268,7 @@ export function buildWordLayer(
   const colours = new Float32Array(count * 3);
   const styles = new Float32Array(count * 3);
   const states = new Float32Array(count * 3);
+  const wordWorlds = new Float32Array(count);
   words.forEach((word, index) => {
     const entry = atlas.entries.get(word.key) as AtlasEntry;
     centres.set([word.at.x, word.at.y, word.at.z], index * 3);
@@ -258,13 +289,15 @@ export function buildWordLayer(
       index * 3,
     );
     states.set([1, 0, 0], index * 3);
+    wordWorlds[index] = word.world ?? -1;
   });
   perWord(geometry, "wordCentre", centres, 3);
   perWord(geometry, "shape", shapes, 4);
   perWord(geometry, "atlasRect", rects, 4);
-  perWord(geometry, "wordAnchor", anchors, 2);
+  const anchorAttribute = perWord(geometry, "wordAnchor", anchors, 2);
   perWord(geometry, "wordColour", colours, 3);
   perWord(geometry, "style", styles, 3);
+  perWord(geometry, "wordWorld", wordWorlds, 1);
   const stateAttribute = perWord(geometry, "state", states, 3);
   stateAttribute.setUsage(THREE.DynamicDrawUsage);
 
@@ -290,6 +323,11 @@ export function buildWordLayer(
     },
     setLit(index, lit) {
       states[index * 3 + 1] = lit ? 1 : 0;
+    },
+    isLit: (index) => states[index * 3 + 1] > 0.5,
+    setAnchor(index, anchor) {
+      anchors.set(anchor, index * 2);
+      anchorAttribute.needsUpdate = true;
     },
     readableOf: (index) => states[index * 3 + 2],
     setReadable(index, amount) {

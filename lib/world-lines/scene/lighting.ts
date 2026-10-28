@@ -15,6 +15,9 @@ const toVector = (point: Point) => new THREE.Vector3(point.x, point.y, point.z);
 
 /** How bright a lit thread is. */
 const LIT_THREAD_STRENGTH = 0.85;
+/** Where along a thread, from its event, it begins to fade out, and how bright it still is there. */
+const THREAD_FADES_FROM = 0.7;
+const THREAD_SHARE_WHERE_FADING = 0.3;
 /** How much a bead keeps of its light while something else is lit. */
 const DIMMED_BEAD = 0.25;
 
@@ -64,18 +67,17 @@ export class Lighting {
       const index = this.eventIndex.get(id);
       if (!from || index === undefined) continue;
       const to = this.scene.beads.points[index];
-      positions.push(from.x, from.y, from.z, to.x, to.y, to.z);
-      // The thread is brightest at its event and fades toward the skill, so the skill end never looks like a bead.
-      colours.push(
-        colour.r * strength * 0.35,
-        colour.g * strength * 0.35,
-        colour.b * strength * 0.35,
-      );
-      colours.push(
-        colour.r * strength,
-        colour.g * strength,
-        colour.b * strength,
-      );
+      // The thread is brightest at its event and fades out before the skill, so it never runs through the word's letters.
+      const fading = to.clone().lerp(from, THREAD_FADES_FROM);
+      const shade = (share: number) => [
+        colour.r * strength * share,
+        colour.g * strength * share,
+        colour.b * strength * share,
+      ];
+      positions.push(to.x, to.y, to.z, fading.x, fading.y, fading.z);
+      colours.push(...shade(1), ...shade(THREAD_SHARE_WHERE_FADING));
+      positions.push(fading.x, fading.y, fading.z, from.x, from.y, from.z);
+      colours.push(...shade(THREAD_SHARE_WHERE_FADING), ...shade(0));
     }
     const geometry = new THREE.BufferGeometry();
     geometry.setAttribute(
@@ -86,7 +88,10 @@ export class Lighting {
       "color",
       new THREE.Float32BufferAttribute(colours, 3),
     );
-    return new THREE.LineSegments(geometry, threadMaterial());
+    const threads = new THREE.LineSegments(geometry, threadMaterial());
+    // Drawn before the words, so a word's dark halo lies over any thread that passes under it.
+    threads.renderOrder = -1;
+    return threads;
   }
 
   /** Lights a skill and every event that names it. */
@@ -126,6 +131,7 @@ export class Lighting {
     }
     layer.markChanged();
     this.scene.uniforms.selecting.value = 1;
+    this.scene.wordsRelit();
     const lit = new Set(eventIds);
     this.events.forEach((event, index) =>
       lit.has(event.id)
@@ -161,13 +167,8 @@ export class Lighting {
       layer.markChanged();
     }
     this.scene.uniforms.selecting.value = 0;
-    this.events.forEach((_, index) =>
-      this.scene.beads.setBrightness(
-        index,
-        1,
-        this.scene.beads.restingColour(index),
-      ),
-    );
+    this.scene.wordsRelit();
+    this.scene.restBeads();
     this.scene.requestFrame();
   }
 }
