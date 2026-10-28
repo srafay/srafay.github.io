@@ -40,7 +40,7 @@ body.about-v4 {
 }
 
 /* The page never scrolls, bounces or pulls to refresh: the stage is the whole page. */
-html:has(body.about-v4),
+html,
 body.about-v4 {
   height: 100%;
   overflow: hidden;
