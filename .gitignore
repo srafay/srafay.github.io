@@ -62,3 +62,5 @@ CLAUDE.md
 /public/about*.js
 # version 4 of the About page, a page of its own, built whole by scripts/build-world-lines-page.ts
 /public/about/v4/
+# version 5 of the About page, built whole by scripts/build-hypercube-page.ts
+/public/about/v5/

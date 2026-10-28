@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#000000">
+<meta name="description" content="{{description}}">
+<title>{{title}}</title>
+{{fontPreloads}}
+<style>{{fontFaces}}</style>
+<link rel="stylesheet" href="/about/v5/hypercube.css?v={{styleHash}}">
+<script src="/about/v5/hypercube.js?v={{scriptHash}}" defer></script>
+</head>
+<body class="about-v5">
+<main class="cube-stage" data-cube-stage>
+  <canvas class="cube-canvas" data-cube-canvas aria-hidden="true"></canvas>
+  <div class="cube-point" aria-hidden="true"></div>
+  <a class="cube-home" href="/?from=post">Home</a>
+  <nav class="cube-versions" aria-label="Versions of this page">
+    <p>Version 5. Also: <a href="/about/">first draft</a>, <a href="/about/v1/" aria-label="version 1">1</a>, <a href="/about/v2/" aria-label="version 2">2</a>, <a href="/about/v3/" aria-label="version 3">3</a>, <a href="/about/v4/" aria-label="version 4">4</a></p>
+  </nav>
+  <div class="cube-title" data-cube-title>
+    <h1 class="cube-name">{{name}}</h1>
+    <p class="cube-bio">{{bio}}</p>
+    <p class="cube-hold" data-cube-hold><strong>Press and hold</strong><span>The years unfold faster while you hold.<span class="cube-keys-only"> Space does the same.</span></span></p>
+  </div>
+  <noscript><p class="cube-plain">This version needs its script. <a href="/about/">The About page</a> reads without one.</p></noscript>
+</main>
+</body>
+</html>

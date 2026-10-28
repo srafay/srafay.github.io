@@ -8,6 +8,7 @@
 */
 import fs from "node:fs";
 import path from "node:path";
+import { buildHypercubePage } from "./build-hypercube-page";
 import { buildWorldLinesPage } from "./build-world-lines-page";
 
 type Bundler = {
@@ -57,3 +58,6 @@ for (const scene of SCENES) await buildScene(scene);
 
 // Version 4, "World lines": a page of its own, not a Next page, so it is built whole (scripts/build-world-lines-page.ts).
 await buildWorldLinesPage();
+
+// Version 5, "Hypercube": the life as one object in four dimensions, also a page of its own (scripts/build-hypercube-page.ts).
+await buildHypercubePage();

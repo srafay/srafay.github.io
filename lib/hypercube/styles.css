@@ -1,0 +1,1012 @@
+/*
+  Version 5 of the About page, "Hypercube". A page of its own, so nothing of the site's stylesheet reaches it. The
+  page is the stage alone, full screen, night in both themes: the object is light, and light needs the dark. Nothing
+  scrolls. Every gesture on the stage handles the object instead, and a long press is the object's, never the text's.
+*/
+:root {
+  --cube-face-display: "Fraunces", Georgia, "Times New Roman", serif;
+  --cube-face-text: "Figtree", system-ui, sans-serif;
+  --cube-night: #000000;
+  --cube-light: #ece6dc;
+  --cube-light-muted: #948b80;
+  --cube-present: #ffd2a1;
+  --cube-panel: #0d0c10;
+  --cube-panel-line: #2c2822;
+  --cube-gutter: 16px;
+  --cube-top: max(12px, env(safe-area-inset-top));
+  --cube-bottom: max(6px, env(safe-area-inset-bottom));
+  color-scheme: dark;
+}
+
+@media (min-width: 900px) {
+  :root {
+    --cube-gutter: 64px;
+  }
+}
+
+.about-v5,
+.about-v5 * {
+  box-sizing: border-box;
+}
+
+body.about-v5 {
+  margin: 0;
+  background: var(--cube-night);
+  color: var(--cube-light);
+  font-family: var(--cube-face-text);
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* The page never scrolls, bounces or pulls to refresh: the stage is the whole page. */
+html,
+body.about-v5 {
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+.about-v5 a {
+  color: inherit;
+  text-underline-offset: 0.18em;
+  text-decoration-thickness: 1px;
+}
+
+.about-v5 :focus-visible {
+  outline: 2px solid var(--cube-light);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/*
+  The stage takes every gesture itself: no page scroll, no pull to refresh, no page zoom. A long press must not
+  select text, show the loupe or the callout, so the press stays the object's.
+*/
+.about-v5 .cube-stage {
+  position: fixed;
+  inset: 0;
+  display: block;
+  overflow: hidden;
+  background: var(--cube-night);
+  touch-action: none;
+  overscroll-behavior: none;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.about-v5 .cube-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  opacity: 0;
+  transition: opacity 200ms ease;
+}
+
+.about-v5 .cube-stage[data-cube-state="drawing"] .cube-canvas {
+  opacity: 1;
+}
+
+/*
+  The present before the script arrives: a warm point where the object will unfold from, so the first paint is
+  already the page's first frame. It goes once the scene draws its own.
+*/
+.about-v5 .cube-point {
+  position: absolute;
+  left: 50%;
+  top: 58%;
+  width: 120px;
+  height: 120px;
+  margin: -60px 0 0 -60px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    #fff8ee 0,
+    #ffe6c8 4%,
+    rgba(255, 210, 161, 0.55) 11%,
+    rgba(255, 210, 161, 0.16) 30%,
+    rgba(255, 210, 161, 0) 62%
+  );
+  pointer-events: none;
+  transition: opacity 300ms ease;
+}
+
+@media (min-aspect-ratio: 1/1) {
+  .about-v5 .cube-point {
+    left: 66.5%;
+    top: 52%;
+    width: 170px;
+    height: 170px;
+    margin: -85px 0 0 -85px;
+  }
+}
+
+.about-v5 .cube-stage[data-cube-state="drawing"] .cube-point {
+  opacity: 0;
+}
+
+/* Back to the homepage, always at the top left. */
+.about-v5 .cube-home {
+  position: absolute;
+  top: var(--cube-top);
+  left: var(--cube-gutter);
+  z-index: 5;
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 4px 2px;
+  font-size: 16px;
+  color: var(--cube-light);
+  text-decoration: none;
+}
+
+.about-v5 .cube-home:hover {
+  text-decoration: underline;
+}
+
+/* The other versions of this page, for the owner: one small muted line under Home. */
+.about-v5 .cube-versions {
+  position: absolute;
+  top: calc(var(--cube-top) + 32px);
+  left: var(--cube-gutter);
+  z-index: 5;
+}
+
+.about-v5 .cube-versions p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 24px;
+  color: var(--cube-light-muted);
+}
+
+.about-v5 .cube-versions a {
+  display: inline-flex;
+  justify-content: center;
+  min-width: 24px;
+  min-height: 24px;
+  text-decoration-color: rgba(148, 139, 128, 0.55);
+}
+
+/* The name and the line under it, over the object, at the top on a phone and in the left third on a computer. */
+.about-v5 .cube-title {
+  position: absolute;
+  left: var(--cube-gutter);
+  right: var(--cube-gutter);
+  top: calc(var(--cube-top) + 68px);
+  z-index: 2;
+  max-width: 34rem;
+  pointer-events: none;
+  text-shadow:
+    0 0 18px #000,
+    0 0 4px #000;
+}
+
+@media (min-width: 900px) {
+  .about-v5 .cube-title {
+    top: 15%;
+    right: auto;
+    max-width: 31rem;
+  }
+}
+
+.about-v5 .cube-name {
+  margin: 0;
+  font-family: var(--cube-face-display);
+  font-weight: 500;
+  font-variation-settings: "opsz" 72;
+  font-size: 56px;
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+  color: var(--cube-light);
+}
+
+.about-v5 .cube-bio {
+  margin: 14px 0 0;
+  max-width: 21em;
+  font-size: 17px;
+  line-height: 1.4;
+  color: var(--cube-light);
+}
+
+@media (min-width: 900px) {
+  .about-v5 .cube-name {
+    font-size: 104px;
+  }
+  .about-v5 .cube-bio {
+    font-size: 20px;
+    margin-top: 20px;
+  }
+}
+
+/* "Press and hold", until the unfold has reached 2014. */
+.about-v5 .cube-hold {
+  margin: 16px 0 0;
+  max-width: 22em;
+  font-size: 15px;
+  line-height: 1.4;
+  color: var(--cube-light-muted);
+  transition: opacity 500ms ease;
+}
+
+.about-v5 .cube-hold strong {
+  display: block;
+  font-size: 17px;
+  font-weight: 500;
+  color: var(--cube-present);
+}
+
+.about-v5 .cube-keys-only {
+  display: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .about-v5 .cube-keys-only {
+    display: inline;
+  }
+}
+
+/* Without a script or graphics: one line, over the night, pointing to the page that needs neither. */
+.about-v5 .cube-plain {
+  position: absolute;
+  left: var(--cube-gutter);
+  right: var(--cube-gutter);
+  bottom: 15%;
+  z-index: 3;
+  margin: 0;
+  font-size: 17px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .about-v5 .cube-canvas,
+  .about-v5 .cube-point,
+  .about-v5 .cube-hold {
+    transition: none;
+  }
+}
+
+/* The five worlds' hues (palette.ts), for the switches when pressed and the rail's ticks. */
+:root {
+  --cube-work: #86a4ea;
+  --cube-study: #b186ea;
+  --cube-projects: #86dcea;
+  --cube-courses: #86eaa7;
+  --cube-offTheClock: #ea86cc;
+}
+
+/* Glyphs in the HTML: the text's own colour, at about its cap height. */
+.about-v5 .cube-icon {
+  width: 1.05em;
+  height: 1.05em;
+  flex: none;
+  vertical-align: -0.17em;
+}
+
+.about-v5 .cube-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* The controls: muted at rest, full strength when pressed, open or under the pointer. No boxes. */
+.about-v5 .cube-top {
+  position: absolute;
+  top: var(--cube-top);
+  right: 52px;
+  z-index: 5;
+  display: flex;
+  gap: 16px;
+}
+
+.about-v5 .cube-control,
+.about-v5 .cube-world {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 4px 2px;
+  font: inherit;
+  font-size: 16px;
+  line-height: 1.15;
+  color: var(--cube-light-muted);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.about-v5 .cube-control[hidden],
+.about-v5 .cube-world[hidden] {
+  display: none;
+}
+
+.about-v5 .cube-control[aria-pressed="true"],
+.about-v5 .cube-control[aria-expanded="true"] {
+  color: var(--cube-light);
+}
+
+.about-v5 .cube-world[aria-pressed="true"] {
+  color: var(--cube-world-hue, var(--cube-light));
+}
+
+@media (hover: hover) {
+  .about-v5 .cube-control:hover,
+  .about-v5 .cube-world:hover {
+    color: var(--cube-light);
+  }
+}
+
+/* Find me: a small panel of the profiles under its button. */
+.about-v5 .cube-find {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 220px;
+  padding: 6px;
+  background: var(--cube-panel);
+  border: 1px solid var(--cube-panel-line);
+  border-radius: 10px;
+}
+
+.about-v5 .cube-find[hidden] {
+  display: none;
+}
+
+.about-v5 .cube-find ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.about-v5 .cube-find-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 42px;
+  padding: 6px 10px;
+  font-size: 16px;
+  color: var(--cube-light);
+  text-decoration: none;
+  border-radius: 6px;
+}
+
+@media (hover: hover) {
+  .about-v5 .cube-find-link:hover {
+    background: #1a1820;
+  }
+}
+
+/* The five worlds: a bar along the foot on a phone, a row at the bottom left on a computer. */
+.about-v5 .cube-worlds {
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  bottom: var(--cube-bottom);
+  z-index: 5;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 2px;
+}
+
+.about-v5 .cube-world {
+  flex-direction: column;
+  justify-content: flex-start;
+  min-height: 52px;
+  text-align: center;
+}
+
+.about-v5 .cube-world .cube-icon {
+  width: 20px;
+  height: 20px;
+}
+
+@media (min-width: 900px) {
+  .about-v5 .cube-worlds {
+    left: var(--cube-gutter);
+    right: auto;
+    bottom: 26px;
+    display: flex;
+    gap: 22px;
+  }
+  .about-v5 .cube-world {
+    flex-direction: row;
+    min-height: 36px;
+  }
+}
+
+.about-v5 .cube-count {
+  position: fixed;
+  bottom: 70px;
+  z-index: 6;
+  margin: 0;
+  padding: 4px 10px;
+  font-size: 16px;
+  color: var(--cube-light);
+  background: var(--cube-panel);
+  border: 1px solid var(--cube-panel-line);
+  border-radius: 6px;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+
+.about-v5 .cube-count[hidden] {
+  display: none;
+}
+
+/* The year rail: a thin line, All years at the top, 2014 at the foot, a tick in its world's hue for each event. */
+.about-v5 .cube-rail {
+  position: absolute;
+  top: calc(var(--cube-top) + 58px);
+  bottom: calc(var(--cube-bottom) + 170px);
+  right: 0;
+  z-index: 4;
+  width: 44px;
+  touch-action: none;
+  cursor: ns-resize;
+}
+
+@media (min-width: 900px) {
+  .about-v5 .cube-rail {
+    top: 84px;
+    bottom: 140px;
+    right: 8px;
+  }
+}
+
+.about-v5 .cube-rail-line {
+  position: absolute;
+  top: 10px;
+  bottom: 10px;
+  right: 16px;
+  width: 1px;
+  background: rgba(236, 230, 220, 0.24);
+}
+
+.about-v5 .cube-rail-tick {
+  position: absolute;
+  right: 1px;
+  width: 5px;
+  height: 1px;
+  background: var(--cube-tick-hue, rgba(236, 230, 220, 0.5));
+  opacity: 0.75;
+}
+
+.about-v5 .cube-rail-year {
+  position: absolute;
+  right: 8px;
+  font-size: 13px;
+  line-height: 1;
+  color: var(--cube-light-muted);
+  transform: translateY(-50%);
+  white-space: nowrap;
+}
+
+.about-v5 .cube-rail-marker {
+  position: absolute;
+  right: -4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  line-height: 1;
+  color: var(--cube-light);
+  transform: translateY(-50%);
+  white-space: nowrap;
+}
+
+.about-v5 .cube-rail-marker::after {
+  content: "";
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  background: var(--cube-light);
+}
+
+/* Lay out time, Tilt, Reset view and the zoom: two rows at the rail's foot, above the worlds on a phone. */
+.about-v5 .cube-view {
+  position: absolute;
+  right: 4px;
+  bottom: calc(var(--cube-bottom) + 80px);
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0;
+}
+
+.about-v5 .cube-view-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+@media (min-width: 900px) {
+  .about-v5 .cube-view {
+    right: 24px;
+    bottom: 26px;
+    flex-direction: row;
+    align-items: center;
+    gap: 14px;
+  }
+}
+
+.about-v5 .cube-zoom {
+  justify-content: center;
+  min-width: 40px;
+  min-height: 40px;
+}
+
+.about-v5 .cube-zoom .cube-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.about-v5 .cube-zoom span {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* The year in focus, set large, over the object's lower left. */
+.about-v5 .cube-year {
+  position: absolute;
+  left: var(--cube-gutter);
+  bottom: calc(var(--cube-bottom) + 126px);
+  z-index: 2;
+  margin: 0;
+  font-family: var(--cube-face-display);
+  font-weight: 400;
+  font-variation-settings: "opsz" 96;
+  font-size: 96px;
+  line-height: 0.9;
+  letter-spacing: -0.02em;
+  color: var(--cube-light);
+  pointer-events: none;
+  text-shadow: 0 0 24px #000;
+}
+
+.about-v5 .cube-year[hidden] {
+  display: none;
+}
+
+@media (min-width: 900px) {
+  .about-v5 .cube-year {
+    font-size: 200px;
+    bottom: 120px;
+  }
+}
+
+/* The readouts: real values of the object now, small and muted in the bottom left corner. */
+.about-v5 .cube-readouts {
+  position: absolute;
+  left: var(--cube-gutter);
+  bottom: calc(var(--cube-bottom) + 84px);
+  z-index: 4;
+  display: grid;
+  grid-template-columns: auto auto;
+  column-gap: 18px;
+  row-gap: 2px;
+  margin: 0;
+  font-size: 13px;
+  line-height: 18px;
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+
+.about-v5 .cube-readouts div {
+  display: flex;
+  gap: 8px;
+}
+
+.about-v5 .cube-readouts dt {
+  color: var(--cube-light-muted);
+}
+
+.about-v5 .cube-readouts dd {
+  margin: 0;
+  color: var(--cube-light);
+  min-width: 4.5em;
+}
+
+@media (min-width: 900px) {
+  .about-v5 .cube-readouts {
+    bottom: 76px;
+  }
+}
+
+/* Where a lit skill was used: above the worlds on a phone, at the bottom left on a computer. */
+.about-v5 .cube-answer {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: calc(var(--cube-bottom) + 84px);
+  z-index: 6;
+  margin: 0;
+  max-width: 40rem;
+  padding: 12px 14px;
+  font-size: 16px;
+  line-height: 1.45;
+  color: var(--cube-light);
+  background: var(--cube-panel);
+  border: 1px solid var(--cube-panel-line);
+  border-radius: 10px;
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+@media (min-width: 900px) {
+  .about-v5 .cube-answer {
+    left: var(--cube-gutter);
+    right: auto;
+    bottom: 76px;
+    width: 30rem;
+  }
+}
+
+.about-v5 .cube-answer[hidden] {
+  display: none;
+}
+
+.about-v5 .cube-answer strong {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+}
+
+.about-v5 .cube-clear {
+  margin-left: 8px;
+  min-height: 28px;
+  padding: 2px 10px;
+  font: inherit;
+  font-size: 16px;
+  color: var(--cube-light);
+  background: transparent;
+  border: 1px solid #3a352f;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+/* One event's card, opened by a tap: a solid panel with one border, no shadow. */
+.about-v5 .cube-card {
+  position: absolute;
+  z-index: 7;
+  left: 12px;
+  right: 12px;
+  bottom: var(--cube-bottom);
+  max-height: 62svh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 18px 18px 16px;
+  background: var(--cube-panel);
+  color: var(--cube-light);
+  border: 1px solid var(--cube-panel-line);
+  border-radius: 10px;
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+@media (min-width: 900px) {
+  .about-v5 .cube-card {
+    left: auto;
+    right: 64px;
+    bottom: 32px;
+    width: 26rem;
+  }
+}
+
+.about-v5 .cube-card[hidden] {
+  display: none;
+}
+
+.about-v5 .cube-card[data-cube-at="top"] {
+  top: calc(var(--cube-top) + 48px);
+  bottom: auto;
+}
+
+.about-v5 .cube-card h2 {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin: 0 40px 4px 0;
+  font-family: var(--cube-face-display);
+  font-weight: 500;
+  font-variation-settings: "opsz" 24;
+  font-size: 24px;
+  line-height: 1.15;
+}
+
+.about-v5 .cube-heading-icon {
+  width: 0.85em;
+  height: 0.85em;
+  color: var(--cube-light-muted);
+  transform: translateY(0.06em);
+}
+
+.about-v5 .cube-card p {
+  margin: 8px 0 0;
+  max-width: 60ch;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.about-v5 .cube-card .cube-card-meta {
+  color: var(--cube-light-muted);
+}
+
+.about-v5 .cube-card-skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.about-v5 .cube-skill-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 30px;
+  padding: 3px 10px;
+  font: inherit;
+  font-size: 16px;
+  color: var(--cube-light);
+  background: transparent;
+  border: 1px solid #3a352f;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+@media (hover: hover) {
+  .about-v5 .cube-skill-button:hover {
+    border-color: var(--cube-light-muted);
+  }
+}
+
+.about-v5 .cube-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  font: inherit;
+  color: var(--cube-light);
+  background: transparent;
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.about-v5 .cube-close .cube-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.about-v5 .cube-steps {
+  position: sticky;
+  bottom: -16px;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 16px -18px -16px;
+  padding: 10px 18px 12px;
+  background: var(--cube-panel);
+  border-top: 1px solid var(--cube-panel-line);
+}
+
+.about-v5 .cube-step {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 4px 2px;
+  font: inherit;
+  font-size: 16px;
+  color: var(--cube-light);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+.about-v5 .cube-step:disabled {
+  color: var(--cube-light-muted);
+  opacity: 0.45;
+  cursor: default;
+}
+
+/* The skills sheet: a sheet from the bottom on a phone, a panel beside the object on a computer. */
+.about-v5 .cube-sheet {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: var(--cube-bottom);
+  z-index: 8;
+  max-height: 72svh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 16px 16px 20px;
+  color: var(--cube-light);
+  background: var(--cube-panel);
+  border: 1px solid var(--cube-panel-line);
+  border-radius: 12px;
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+.about-v5 .cube-sheet[hidden] {
+  display: none;
+}
+
+@media (min-width: 900px) {
+  .about-v5 .cube-sheet {
+    left: auto;
+    right: 60px;
+    top: 64px;
+    bottom: 24px;
+    width: 380px;
+    max-height: none;
+  }
+}
+
+.about-v5 .cube-sheet h2 {
+  margin: 0 40px 12px 0;
+  font-family: var(--cube-face-display);
+  font-weight: 500;
+  font-variation-settings: "opsz" 24;
+  font-size: 24px;
+  line-height: 1.15;
+}
+
+.about-v5 .cube-filter-label {
+  position: relative;
+  display: block;
+}
+
+.about-v5 .cube-filter-label .cube-icon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--cube-light-muted);
+}
+
+.about-v5 .cube-filter {
+  width: 100%;
+  padding: 9px 10px 9px 36px;
+  font: inherit;
+  font-size: 16px;
+  color: var(--cube-light);
+  background: transparent;
+  border: 1px solid #3a352f;
+  border-radius: 8px;
+}
+
+.about-v5 .cube-sheet-group[hidden],
+.about-v5 .cube-sheet-group li[hidden] {
+  display: none;
+}
+
+.about-v5 .cube-sheet-group h3 {
+  margin: 18px 0 8px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--cube-light-muted);
+}
+
+.about-v5 .cube-sheet-group ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* The keyboard's way in: a button per event, city and skill, out of sight; the focused one is ringed in the scene. */
+.about-v5 .cube-keys {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+.about-v5 .cube-ring {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 3;
+  width: 34px;
+  height: 34px;
+  margin: -17px 0 0 -17px;
+  border: 2px solid var(--cube-light);
+  border-radius: 999px;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.about-v5 .cube-ring[hidden],
+.about-v5 .cube-focus-label[hidden] {
+  display: none;
+}
+
+.about-v5 .cube-focus-label {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 3;
+  margin: 0;
+  padding: 2px 8px;
+  font-size: 16px;
+  color: var(--cube-night);
+  background: var(--cube-light);
+  border-radius: 4px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.about-v5 .cube-focus-label span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* The gestures in plain words, once, in the place "Press and hold" had. */
+.about-v5 .cube-hint {
+  margin: 0;
+  max-width: 24em;
+  font-size: 15px;
+  line-height: 1.4;
+  color: var(--cube-light);
+  transition: opacity 400ms ease;
+}
+
+.about-v5 .cube-hint[hidden] {
+  display: none;
+}
+
+.about-v5 .cube-hint[data-cube-leaving] {
+  opacity: 0;
+}
+
+/* Once unfolded, "Press and hold" goes, and the hint (if it shows) takes its place under the line. */
+.about-v5 .cube-stage[data-cube-unfolded] .cube-hold {
+  display: none;
+}
+
+.about-v5 .cube-stage[data-cube-unfolded] .cube-hint {
+  margin-top: 16px;
+}
+
+/* On a phone the top controls sit closer together, so Find me, Skills and Sound fit beside Home. */
+@media (max-width: 899px) {
+  .about-v5 .cube-top {
+    right: 8px;
+    gap: 6px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .about-v5 .cube-hint {
+    transition: none;
+  }
+}
