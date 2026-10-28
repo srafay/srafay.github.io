@@ -28,8 +28,13 @@ export function listenForKeys(handlers: GestureHandlers, scene: HypercubeScene) 
     const target = event.target as Element | null;
     if (target?.closest(KEYS_STAY_INSIDE)) return;
     const travelStep = scene.stageSize().height * TRAVEL_STEP_SHARE;
-    const up = event.shiftKey ? () => handlers.turnBy(0, -TURN_STEP) : () => handlers.travel.moveBy(-travelStep);
-    const down = event.shiftKey ? () => handlers.turnBy(0, TURN_STEP) : () => handlers.travel.moveBy(travelStep);
+    // Shift with Up and Down turns in the yw plane whatever pointer was used last: a key is not a finger.
+    const turnUp = (amount: number) => () => {
+      scene.turn.turnBy(0, amount);
+      scene.requestFrame();
+    };
+    const up = event.shiftKey ? turnUp(-TURN_STEP) : () => handlers.travel.moveBy(-travelStep);
+    const down = event.shiftKey ? turnUp(TURN_STEP) : () => handlers.travel.moveBy(travelStep);
     const actions: Record<string, () => void> = {
       ArrowUp: up,
       ArrowDown: down,

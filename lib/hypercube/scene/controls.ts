@@ -335,12 +335,14 @@ export class Controls {
     labelAt(String(FIRST_YEAR), 1);
     line.append(this.marker);
     let dragging = false;
-    const goToPointer = (clientY: number) => {
-      const box = line.getBoundingClientRect();
+    // The rail's place is read once as a press lands, never while it drags.
+    let box = { top: 0, height: 1 };
+    const goToPointer = (clientY: number) =>
       this.travel.scrollToProgress(Math.min(1, Math.max(0, (clientY - box.top) / box.height)));
-    };
     rail.addEventListener("pointerdown", (event) => {
       dragging = true;
+      const measured = line.getBoundingClientRect();
+      box = { top: measured.top, height: Math.max(1, measured.height) };
       rail.setPointerCapture(event.pointerId);
       goToPointer(event.clientY);
     });
@@ -384,7 +386,8 @@ export class Controls {
     const progress = this.travel.progress();
     const year = yearAtTravel(progress, this.scene.data.present);
     this.scene.setYear(year);
-    this.marker.style.top = `${(progress * 100).toFixed(2)}%`;
+    const markerTop = `${(progress * 100).toFixed(2)}%`;
+    if (this.marker.style.top !== markerTop) this.marker.style.top = markerTop;
     if (year !== this.shownYear) {
       this.shownYear = year;
       this.marker.textContent = year === null ? "" : String(year);
@@ -393,8 +396,11 @@ export class Controls {
       this.year.textContent = year === null ? "" : String(year);
       this.year.hidden = year === null;
     }
-    this.resetButton.hidden = !this.viewIsChanged();
-    this.timelineButton.setAttribute("aria-pressed", String(this.isTimeline()));
+    // Written only when they change, so a frame touches nothing the page must restyle.
+    const resetHidden = !this.viewIsChanged();
+    if (this.resetButton.hidden !== resetHidden) this.resetButton.hidden = resetHidden;
+    const laidOut = String(this.isTimeline());
+    if (this.timelineButton.getAttribute("aria-pressed") !== laidOut) this.timelineButton.setAttribute("aria-pressed", laidOut);
     const now = performance.now();
     if (now - this.lastReadouts >= READOUTS_EVERY || !moving) {
       this.lastReadouts = now;
