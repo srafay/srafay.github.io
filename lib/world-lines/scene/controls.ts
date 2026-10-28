@@ -5,22 +5,17 @@
   is a real button (or a slider, for the rail) and works by touch, mouse and keyboard. Each control's place is given
   to the scene, so no word in the scene is drawn under it.
 */
-import { currentRoleSkills, cvSkillGroups } from "@/content/about/profile";
-import type { EventKind, WorldEvent } from "@/lib/about-cv/events";
-import { glyphOfSkill, glyphOfWorld } from "@/lib/about-cv/glyphs";
-import { site } from "@/lib/site";
-import {
-  controlGlyphs,
-  glyphElement,
-  linkGlyphs,
-  type Glyph,
-} from "@/lib/about-cv/icons";
-import { CURRENT_ROLE_GROUP, wordsOf, type SkillWord } from "@/lib/about-cv/skills";
+import { kindsInWords } from "@/lib/about-cv/answers";
+import type { WorldEvent } from "@/lib/about-cv/events";
+import { glyphOfWorld } from "@/lib/about-cv/glyphs";
+import { controlGlyphs, glyphElement, type Glyph } from "@/lib/about-cv/icons";
+import type { SkillWord } from "@/lib/about-cv/skills";
 import { FIRST_YEAR } from "@/lib/about-cv/time";
 import { worlds, type WorldKey } from "@/lib/about-cv/worlds";
 import { progressAtTime, STRETCHES, travelTime } from "./camera";
 import { element } from "@/lib/about-cv/scene/dom";
-import { ZOOM_STEP } from "./gestures";
+import { ZOOM_STEP } from "@/lib/about-cv/scene/gestures";
+import { buildSkillsSheet, findMeList } from "@/lib/about-cv/ui/skills-sheet";
 import type { Interaction } from "./interaction";
 import type { WorldLinesScene } from "./mount";
 import type { Rectangle } from "./word-placement";
@@ -41,25 +36,6 @@ function controlButton(glyph: Glyph, text: string, className: string) {
   button.dataset.linesControl = "";
   button.append(glyphElement(glyph), element("span", undefined, text));
   return button;
-}
-
-const KIND_NOUNS: Record<EventKind, [string, string]> = {
-  role: ["role", "roles"],
-  internship: ["internship", "internships"],
-  degree: ["degree", "degrees"],
-  thesis: ["thesis", "theses"],
-  project: ["project", "projects"],
-  course: ["course", "courses"],
-  activity: ["activity", "activities"],
-  pastime: ["pastime", "pastimes"],
-};
-
-/** "7 roles and 2 internships": what a world holds, counted by kind, in the order its events first appear. */
-export function countInWords(events: WorldEvent[]) {
-  const counts = new Map<EventKind, number>();
-  for (const event of events) counts.set(event.kind, (counts.get(event.kind) ?? 0) + 1);
-  const parts = [...counts].map(([kind, count]) => `${count} ${KIND_NOUNS[kind][count === 1 ? 0 : 1]}`);
-  return parts.length > 1 ? `${parts.slice(0, -1).join(", ")} and ${parts.at(-1)}` : (parts[0] ?? "");
 }
 
 export class Controls {
@@ -141,18 +117,7 @@ export class Controls {
     this.findMeButton.addEventListener("click", () =>
       this.findMePanel.hidden ? this.openFindMe() : this.closeFindMe(),
     );
-    const list = element("ul");
-    for (const link of site.links) {
-      const item = element("li");
-      const anchor = element("a", "lines-find-link");
-      anchor.href = link.href;
-      anchor.rel = "me";
-      const glyph = linkGlyphs[link.label] as Glyph | undefined;
-      anchor.append(glyph ? glyphElement(glyph) : element("span", "lines-icon"), element("span", undefined, link.label));
-      item.append(anchor);
-      list.append(item);
-    }
-    this.findMePanel.append(list);
+    this.findMePanel.append(findMeList("lines"));
     // A press anywhere else closes it, as a menu does.
     document.addEventListener("pointerdown", (event) => {
       const target = event.target as Node;
@@ -207,7 +172,7 @@ export class Controls {
     this.countTip.setAttribute("aria-live", "polite");
     for (const world of worlds) {
       const own = this.events.filter((event) => event.world === world.key);
-      const count = countInWords(own);
+      const count = kindsInWords(own);
       const button = controlButton(glyphOfWorld(world.key), world.name, "lines-world");
       button.setAttribute("aria-pressed", "false");
       button.title = count;
@@ -358,69 +323,15 @@ export class Controls {
   }
 
   private buildSheet() {
-    const sheet = this.sheet;
-    sheet.hidden = true;
-    sheet.dataset.linesControl = "";
-    sheet.setAttribute("role", "dialog");
-    sheet.setAttribute("aria-label", "Skills");
-    sheet.tabIndex = -1;
-    const heading = element("h2", undefined, "Skills");
-    const close = element("button", "lines-close");
-    close.type = "button";
-    close.setAttribute("aria-label", "Close the skills");
-    close.append(glyphElement(controlGlyphs.close));
-    close.addEventListener("click", () => this.closeSheet());
-    const filterLabel = element("label", "lines-filter-label");
-    filterLabel.append(glyphElement(controlGlyphs.search), element("span", "lines-hidden", "Filter the skills"));
-    this.filter.type = "search";
-    this.filter.placeholder = "Filter, for example Py";
-    this.filter.autocomplete = "off";
-    this.filter.spellcheck = false;
-    filterLabel.append(this.filter);
-    const groups = element("div", "lines-sheet-groups");
-    const groupNames = [...cvSkillGroups.map((group) => group.name), CURRENT_ROLE_GROUP];
-    for (const name of groupNames) {
-      const words =
-        name === CURRENT_ROLE_GROUP
-          ? currentRoleSkills
-          : cvSkillGroups.find((group) => group.name === name)?.skills.flatMap(wordsOf) ?? [];
-      const own = this.skills.filter((skill) => skill.group === name && words.includes(skill.word));
-      if (!own.length) continue;
-      const block = element("section", "lines-sheet-group");
-      block.append(element("h3", undefined, name));
-      const list = element("ul");
-      for (const skill of own) {
-        const item = element("li");
-        const button = element("button", "lines-skill-button");
-        button.type = "button";
-        button.dataset.linesSkill = skill.word;
-        button.append(glyphElement(glyphOfSkill(skill)), element("span", undefined, skill.word));
-        button.addEventListener("click", () => {
-          this.interaction.lightSkill(skill, true);
-          if (this.scene.stageSize().width < SHEET_BESIDE_FROM) this.closeSheet();
-        });
-        item.append(button);
-        list.append(item);
-      }
-      block.append(list);
-      groups.append(block);
-    }
-    this.filter.addEventListener("input", () => this.applyFilter(groups));
-    sheet.append(close, heading, filterLabel, groups);
-  }
-
-  /** "Py" leaves Python, PyCharm, Pytest and the rest. A group with nothing left hides. */
-  private applyFilter(groups: HTMLElement) {
-    const wanted = this.filter.value.trim().toLowerCase();
-    for (const block of groups.querySelectorAll<HTMLElement>(".lines-sheet-group")) {
-      let any = false;
-      for (const button of block.querySelectorAll<HTMLElement>("[data-lines-skill]")) {
-        const shows = !wanted || (button.dataset.linesSkill ?? "").toLowerCase().includes(wanted);
-        (button.parentElement as HTMLElement).hidden = !shows;
-        any ||= shows;
-      }
-      block.hidden = !any;
-    }
+    buildSkillsSheet(this.sheet, this.filter, {
+      prefix: "lines",
+      skills: this.skills,
+      onPick: (skill) => {
+        this.interaction.lightSkill(skill, true);
+        if (this.scene.stageSize().width < SHEET_BESIDE_FROM) this.closeSheet();
+      },
+      onClose: () => this.closeSheet(),
+    });
   }
 
   openSheet() {

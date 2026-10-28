@@ -10,11 +10,10 @@
 */
 import * as THREE from "three";
 import { stays } from "@/content/about/profile";
-import { cardMeta, skillAnswer } from "@/lib/about-cv/answers";
+import { skillAnswer } from "@/lib/about-cv/answers";
 import type { WorldEvent } from "@/lib/about-cv/events";
 import { glyphOfEvent, glyphOfSkill } from "@/lib/about-cv/glyphs";
 import {
-  controlGlyphs,
   glyphElement,
   placeGlyph,
   type Glyph,
@@ -23,6 +22,13 @@ import type { SkillWord } from "@/lib/about-cv/skills";
 import { timeAtStartOf } from "@/lib/about-cv/time";
 import { progressAtTime, YEARS_BEHIND_A_MOMENT } from "./camera";
 import { element } from "@/lib/about-cv/scene/dom";
+import {
+  cardHeading,
+  closeButton,
+  fillEventCard,
+  neighboursOf,
+  type EventCardOptions,
+} from "@/lib/about-cv/ui/event-card";
 import type { Lighting } from "./lighting";
 import type { WorldLinesScene } from "./mount";
 
@@ -347,8 +353,8 @@ export class Interaction {
       list.append(item);
     }
     this.card.replaceChildren(
-      this.closeButton(),
-      this.heading(placeGlyph, city),
+      closeButton("lines", () => this.closeCard()),
+      cardHeading("lines", placeGlyph, city),
       element("p", "lines-card-meta", years),
       element("p", "lines-card-meta", "What happened here"),
       list,
@@ -375,106 +381,34 @@ export class Interaction {
     if (alsoClear && wasOpen && this.chosen && this.chosen.kind !== "skill") this.clear();
   }
 
-  private closeButton() {
-    const close = element("button", "lines-close");
-    close.type = "button";
-    close.setAttribute("aria-label", "Close");
-    close.append(glyphElement(controlGlyphs.close));
-    close.addEventListener("click", () => this.closeCard());
-    return close;
-  }
-
-  private heading(glyph: Glyph, text: string) {
-    const heading = element("h2");
-    heading.append(glyphElement(glyph, "lines-icon lines-heading-icon"), element("span", undefined, text));
-    return heading;
-  }
-
-  /** The events on the same line as this one, earliest first. */
-  private lineOf(event: WorldEvent) {
-    return this.events
-      .filter((candidate) => candidate.world === event.world)
-      .sort((first, second) => (first.end ?? first.start) - (second.end ?? second.start));
-  }
-
-  /** Previous is the earlier event on the same line, Next the later one. */
-  private neighbours(event: WorldEvent) {
-    const line = this.lineOf(event);
-    const place = line.indexOf(event);
-    return { previous: line[place - 1] ?? null, next: line[place + 1] ?? null };
-  }
-
-  private stepButton(label: string, glyph: Glyph, target: WorldEvent | null, glyphFirst: boolean) {
-    const button = element("button", "lines-step");
-    button.type = "button";
-    button.dataset.linesStep = label.toLowerCase();
-    const words = element("span", undefined, label);
-    if (glyphFirst) button.append(glyphElement(glyph), words);
-    else button.append(words, glyphElement(glyph));
-    if (target) {
-      button.setAttribute("aria-label", `${label}: ${target.label}`);
-      button.addEventListener("click", () => this.openEvent(target, true));
-    } else button.disabled = true;
-    return button;
-  }
-
   /** Left and Right step the open card along its line, as its Previous and Next do. */
   private stepWithArrows(event: KeyboardEvent) {
     if (this.chosen?.kind !== "event") return;
-    const { previous, next } = this.neighbours(this.chosen.event);
+    const { previous, next } = neighboursOf(this.chosen.event, this.events);
     const target = event.key === "ArrowLeft" ? previous : event.key === "ArrowRight" ? next : null;
     if (!target) return;
     event.preventDefault();
     this.openEvent(target, true);
   }
 
+  /** What the shared card body needs: this version's class prefix and what its buttons do. */
+  private cardOptions(): EventCardOptions {
+    return {
+      prefix: "lines",
+      events: this.events,
+      skills: this.skills,
+      onClose: () => this.closeCard(),
+      onSkill: (skill) => this.lightSkill(skill),
+      onStep: (target) => this.openEvent(target, true),
+    };
+  }
+
   private fillCard(event: WorldEvent, keepFocus: boolean) {
-    const heading = this.heading(glyphOfEvent(event), event.subtitle && event.world === "work" ? event.subtitle : event.title);
-    const parts: HTMLElement[] = [this.closeButton(), heading];
-    const second = event.world === "work" ? event.title : event.subtitle;
-    if (second && second !== heading.textContent) parts.push(element("p", "lines-card-meta", second));
-    parts.push(element("p", "lines-card-meta", cardMeta(event)));
-    for (const line of event.lines) parts.push(element("p", undefined, line));
-    if (event.evidence) parts.push(element("p", "lines-card-meta", event.evidence));
-    if (event.address) {
-      const paragraph = element("p");
-      const link = element("a", undefined, "The code on GitHub");
-      link.href = event.address;
-      link.rel = "noopener";
-      paragraph.append(link);
-      parts.push(paragraph);
-    }
-    if (event.skills.length) {
-      parts.push(element("p", "lines-card-meta", "Skills it names"));
-      const list = element("ul", "lines-card-skills");
-      for (const word of event.skills) {
-        const skill = this.skills.find((candidate) => candidate.word === word);
-        if (!skill) continue;
-        const item = element("li");
-        const button = element("button", "lines-skill-button");
-        button.type = "button";
-        button.append(glyphElement(glyphOfSkill(skill)), word);
-        button.addEventListener("click", () => this.lightSkill(skill));
-        item.append(button);
-        list.append(item);
-      }
-      parts.push(list);
-    }
-    const { previous, next } = this.neighbours(event);
-    const steps = element("nav", "lines-steps");
-    steps.setAttribute("aria-label", "Along this line");
-    steps.append(
-      this.stepButton("Previous", controlGlyphs.previous, previous, true),
-      this.stepButton("Next", controlGlyphs.next, next, false),
-    );
-    parts.push(steps);
-    const hadFocus = keepFocus && this.card.contains(document.activeElement);
-    const focusedStep = hadFocus ? (document.activeElement as HTMLElement).dataset.linesStep : undefined;
-    this.card.replaceChildren(...parts);
+    // Stepping keeps the keyboard on the same step button, so Next can be pressed again and again.
+    const refocus = fillEventCard(this.card, event, this.cardOptions(), keepFocus);
     this.card.dataset.linesAt = this.cardSideFor(event);
     this.card.hidden = false;
-    // Stepping keeps the keyboard on the same step button, so Next can be pressed again and again.
-    if (focusedStep) this.card.querySelector<HTMLElement>(`[data-lines-step="${focusedStep}"]`)?.focus();
+    refocus();
   }
 
   /** The card opens on the half of the stage away from its point, so the ring and its light stay in view. */

@@ -57,16 +57,22 @@ const SPEED_WINDOW_MILLISECONDS = 100;
 /** A line or a page of wheel, in pixels, for wheels that count in lines or pages. */
 const WHEEL_LINE_PIXELS = 40;
 
-/** Elements on the stage that take their own pointers: a press on them is never a gesture on the scene. */
-const OWN_POINTERS =
-  ".lines-card, .lines-answer, .lines-sheet, a, button, input, [data-lines-control]";
+/**
+  What each version tells the recogniser about its own page. ownPointers: elements on the stage that take their own
+  pointers, so a press on them is never a gesture on the scene. scrollsItself: the panels among them that the wheel
+  scrolls (a card, a sheet). keysStayInside: where the keys belong to the element, not the scene.
+*/
+export type GestureOptions = {
+  ownPointers: string;
+  scrollsItself: string;
+  keysStayInside: string;
+};
 
 type Way = "undecided" | "travel" | "turn" | "pinch";
 
-const ownsItsPointer = (target: EventTarget | null) =>
-  target instanceof Element && target.closest(OWN_POINTERS) !== null;
-
-export function listenForGestures(stage: HTMLElement, handlers: GestureHandlers) {
+export function listenForGestures(stage: HTMLElement, handlers: GestureHandlers, options: GestureOptions) {
+  const ownsItsPointer = (target: EventTarget | null) =>
+    target instanceof Element && target.closest(options.ownPointers) !== null;
   const pointers = new Map<number, { x: number; y: number; type: string }>();
   let way: Way = "undecided";
   let start = { x: 0, y: 0, time: 0 };
@@ -174,7 +180,7 @@ export function listenForGestures(stage: HTMLElement, handlers: GestureHandlers)
   stage.addEventListener(
     "wheel",
     (event) => {
-      if (ownsItsPointer(event.target) && (event.target as Element).closest(".lines-sheet, .lines-card")) return;
+      if (ownsItsPointer(event.target) && (event.target as Element).closest(options.scrollsItself)) return;
       event.preventDefault();
       handlers.began();
       const unit = event.deltaMode === 1 ? WHEEL_LINE_PIXELS : event.deltaMode === 2 ? stage.clientHeight : 1;
@@ -207,11 +213,11 @@ export function listenForGestures(stage: HTMLElement, handlers: GestureHandlers)
 }
 
 /** Keys anywhere on the page, unless typing, on the year rail (it has its own arrows) or in a card or the sheet. */
-export function listenForKeys(handlers: GestureHandlers, stageHeight: () => number) {
+export function listenForKeys(handlers: GestureHandlers, stageHeight: () => number, options: GestureOptions) {
   document.addEventListener("keydown", (event) => {
     if (event.ctrlKey || event.metaKey || event.altKey) return;
     const target = event.target as Element | null;
-    if (target?.closest("input, textarea, [role=slider], .lines-card, .lines-sheet")) return;
+    if (target?.closest(`input, textarea, [role=slider], ${options.keysStayInside}`)) return;
     const travelStep = stageHeight() * TRAVEL_STEP_SHARE_OF_SCREEN;
     const actions: Record<string, () => void> = {
       ArrowDown: () => handlers.travel.moveBy(travelStep),

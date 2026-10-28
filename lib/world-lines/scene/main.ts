@@ -12,7 +12,12 @@ import { skillWords } from "@/lib/about-cv/skills";
 import { presentTime } from "@/lib/about-cv/time";
 import { addArt } from "./art";
 import { Controls } from "./controls";
-import { listenForGestures, listenForKeys, type GestureHandlers } from "./gestures";
+import {
+  listenForGestures,
+  listenForKeys,
+  type GestureHandlers,
+  type GestureOptions,
+} from "@/lib/about-cv/scene/gestures";
 import { Interaction } from "./interaction";
 import { LIGHT_RUN_ENDS_SECONDS, playIntro } from "./intro";
 import { addKeys } from "./keys";
@@ -89,6 +94,13 @@ function listenForEscape(controls: Controls, interaction: Interaction) {
   });
 }
 
+/** What the gestures leave alone: the panels and controls take their own pointers, the card and sheet their wheel and keys. */
+const GESTURE_OPTIONS: GestureOptions = {
+  ownPointers: ".lines-card, .lines-answer, .lines-sheet, a, button, input, [data-lines-control]",
+  scrollsItself: ".lines-sheet, .lines-card",
+  keysStayInside: ".lines-card, .lines-sheet",
+};
+
 /** Every hand on the spacetime: the gestures, the keys, and what each one moves. */
 function handleTheSpacetime(
   scene: WorldLinesScene,
@@ -109,8 +121,8 @@ function handleTheSpacetime(
       scene.touched();
     },
   };
-  listenForGestures(scene.elements.stage, handlers);
-  listenForKeys(handlers, () => scene.stageSize().height);
+  listenForGestures(scene.elements.stage, handlers, GESTURE_OPTIONS);
+  listenForKeys(handlers, () => scene.stageSize().height, GESTURE_OPTIONS);
 }
 
 /** Without graphics there is no scene to handle: one plain line points to the page that reads without them. */

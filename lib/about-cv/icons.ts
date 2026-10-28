@@ -55,7 +55,7 @@ export type Glyph = {
 };
 
 /** A Simple Icons entry, as far as this page reads it. */
-export type SimpleIcon = { title: string; slug: string; path: string };
+export type SimpleIcon = { title: string; slug: string; path: string; hex?: string };
 
 /** How wide a lucide line is drawn on its 24 grid: the site's own line icons are 1.25 on a 16 grid. */
 export const LINE_WEIGHT = 1.875;

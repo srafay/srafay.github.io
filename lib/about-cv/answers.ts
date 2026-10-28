@@ -2,7 +2,7 @@
   The words the page says back: where a lit skill was used, and what an event's card holds. Plain sentences built from
   the data, so the scene, the keyboard layer and the lists all say the same thing.
 */
-import { UNDATED, type WorldEvent } from "@/lib/about-cv/events";
+import { UNDATED, type EventKind, type WorldEvent } from "@/lib/about-cv/events";
 import type { SkillWord } from "@/lib/about-cv/skills";
 
 const COUNT_WORDS = [
@@ -81,4 +81,23 @@ export function cardMeta(event: WorldEvent) {
   return event.place && event.dates !== UNDATED
     ? `${when}, ${event.place}`
     : when;
+}
+
+const KIND_NOUNS: Record<EventKind, [string, string]> = {
+  role: ["role", "roles"],
+  internship: ["internship", "internships"],
+  degree: ["degree", "degrees"],
+  thesis: ["thesis", "theses"],
+  project: ["project", "projects"],
+  course: ["course", "courses"],
+  activity: ["activity", "activities"],
+  pastime: ["pastime", "pastimes"],
+};
+
+/** "7 roles and 2 internships": what a world holds, counted by kind, in the order its events first appear. */
+export function kindsInWords(events: WorldEvent[]) {
+  const counts = new Map<EventKind, number>();
+  for (const event of events) counts.set(event.kind, (counts.get(event.kind) ?? 0) + 1);
+  const parts = [...counts].map(([kind, count]) => `${count} ${KIND_NOUNS[kind][count === 1 ? 0 : 1]}`);
+  return parts.length > 1 ? `${parts.slice(0, -1).join(", ")} and ${parts.at(-1)}` : (parts[0] ?? "");
 }
