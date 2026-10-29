@@ -177,6 +177,11 @@ export class LabelLayer {
       const located = this.view.locate(label);
       if (!located) return this.quads.setOpacity(index, 0);
       const { quad, letters } = this.boxAt(label, located.x, located.y, this.sides[index]);
+      // A word carried past a screen edge between placings (a ride's camera moves fast) leaves at once, never cut.
+      if (!this.onStage(letters)) {
+        this.targets[index] = 0;
+        return this.quads.setOpacity(index, 0);
+      }
       this.lettersNow[index] = letters;
       this.quads.setBox(index, quad.left, quad.top, quad.width, quad.height);
     });

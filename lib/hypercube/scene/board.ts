@@ -28,8 +28,13 @@ const FLYING_SIZE = 24;
 const LOCK_PULSE = [{ transform: "scale(1.35)" }, { transform: "scale(1)" }];
 const AGAIN_PULSE = [{ transform: "scale(1.25)" }, { transform: "scale(1)" }];
 const PULSE_MILLISECONDS = 160;
-/** The finale: the slots fill one after another this far apart, in milliseconds. */
+/**
+  The finale: the slots fill one after another this far apart, in milliseconds, written to the page in steps of about
+  a dozen. Every frame that changes the page pays for a paint of it, so twelve steps cost a slow phone far less than
+  a change in each of the cascade's 48 frames, or all 115 in one.
+*/
 const FINALE_STAGGER_MILLISECONDS = 7;
+const FINALE_STEP_MILLISECONDS = 70;
 /** How long the board folds into the Skills control. */
 const FOLD_MILLISECONDS = 600;
 
@@ -87,7 +92,10 @@ export class SkillBoard {
     this.element.append(head, this.cells);
     this.element.addEventListener("click", (event) => this.pick(event));
     this.writeCount();
-    scene.onFrame(() => this.launch());
+    scene.onFrame(() => {
+      this.launch();
+      this.cascade(performance.now());
+    });
     window.addEventListener("resize", () => this.measure());
   }
 
@@ -105,6 +113,8 @@ export class SkillBoard {
     this.waiting.length = 0;
     this.inFlight = 0;
     this.finaleWaiting = false;
+    this.cascadeSlots = [];
+    this.cascadeFilled = 0;
     this.filledCount = 0;
     this.reached = -1;
     this.caption.textContent = "";
@@ -145,6 +155,11 @@ export class SkillBoard {
 
   /** Asked for while marks still fly, the finale waits for the last of them to land. */
   private finaleWaiting = false;
+  /** The finale's slots in the order they fill, how many have filled, and when the cascade began. */
+  private cascadeSlots: Slot[] = [];
+  private cascadeFilled = 0;
+  private cascadeStarted = 0;
+  private cascadeStepped = 0;
 
   /** The finale: the skills no event names fill their slots in one cascade, and the count reaches the whole. */
   finale() {
@@ -156,24 +171,32 @@ export class SkillBoard {
     const left = this.plan.finale.filter((skill) => !this.slotOf.get(skill)?.filled);
     if (!left.length) return;
     this.caption.textContent = `And ${left.length} more that the CV lists.`;
-    left.forEach((skill, order) => {
-      const slot = this.slotOf.get(skill) as Slot;
+    this.cascadeSlots = left.map((skill) => this.slotOf.get(skill) as Slot);
+    this.cascadeFilled = 0;
+    this.cascadeStarted = performance.now();
+    this.cascadeStepped = -Infinity;
+    if (this.scene.reducedMotion) this.cascade(Infinity);
+    this.scene.requestFrame();
+  }
+
+  /** Fills the finale's slots whose turn has come by now, a step at a time. */
+  private cascade(now: number) {
+    if (this.cascadeFilled >= this.cascadeSlots.length) return;
+    if (now - this.cascadeStepped < FINALE_STEP_MILLISECONDS) return this.scene.requestFrame();
+    this.cascadeStepped = now;
+    const due = Math.min(this.cascadeSlots.length, Math.floor((now - this.cascadeStarted) / FINALE_STAGGER_MILLISECONDS) + 1);
+    for (; this.cascadeFilled < due; this.cascadeFilled++) {
+      const slot = this.cascadeSlots[this.cascadeFilled];
       this.fill(slot, false, false);
-      if (!this.scene.reducedMotion)
-        slot.cell.animate([{ opacity: 0, transform: "scale(1.35)" }, { opacity: 1, transform: "scale(1)" }], {
-          duration: 220,
-          delay: order * FINALE_STAGGER_MILLISECONDS,
-          easing: "ease-out",
-          fill: "backwards",
-        });
-    });
-    this.writeCount();
+    }
+    if (this.cascadeFilled < this.cascadeSlots.length) this.scene.requestFrame();
   }
 
   /** The ride is over: marks still waiting take their slots at once, and marks in the air land now. */
   landEverything() {
     for (const { slot } of this.waiting.splice(0)) this.fill(slot, false);
     for (const flight of this.flights) flight.finish();
+    this.cascade(Infinity);
   }
 
   /** Straight to the end: every slot filled, nothing flying. */
