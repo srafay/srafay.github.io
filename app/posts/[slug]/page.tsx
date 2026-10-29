@@ -4,6 +4,7 @@ import { PostTheme } from "@/components/post-theme";
 import { backdropScriptAddress } from "@/lib/home";
 import { formatDate, getPost, getPosts, type Post } from "@/lib/posts";
 import { site } from "@/lib/site";
+import { authorOfPosts, blogId, jsonLdText } from "@/lib/structured-data";
 
 export const dynamicParams = false;
 
@@ -46,12 +47,8 @@ function structuredData(post: Post) {
     datePublished: post.date,
     url,
     mainEntityOfPage: url,
-    author: {
-      "@id": `${site.url}/#person`,
-      name: site.name,
-      url: `${site.url}/`,
-    },
-    isPartOf: { "@id": `${site.url}/#blog` },
+    author: authorOfPosts,
+    isPartOf: { "@id": blogId },
   };
 }
 
@@ -66,7 +63,7 @@ export default async function PostPage({ params }: PageProps<"/posts/[slug]">) {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(structuredData(post)).replace(/</g, "\\u003c"),
+          __html: jsonLdText(structuredData(post)),
         }}
       />
       <CosmosBackdrop

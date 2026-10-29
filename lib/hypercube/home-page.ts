@@ -3,10 +3,11 @@ import path from "node:path";
 
 /*
   The homepage: version 5 of the About page, "Hypercube", at /. It is the page of /about/v5/ with the head of a
-  homepage (scripts/hypercube-home-head.ts). The build (scripts/build-hypercube-page.ts) makes it whole, beside the
-  scene's one build in public/hypercube/ that both pages ask for, and app/route.ts serves it from here. It is plain
-  HTML, not a React page: the scene's script adds its controls and cards to the document, and React would discard
-  them as the page hydrates.
+  homepage (scripts/hypercube-home-head.ts) and without the prototype's own few lines of body (its Home link and its
+  line of versions). The build (scripts/build-hypercube-page.ts) makes it whole, beside the scene's one build in
+  public/hypercube/ that both pages ask for, and app/route.ts serves it from here. It is plain HTML, not a React
+  page: the scene's script adds its controls and cards to the document, and React would discard them as the page
+  hydrates.
 */
 export const BUILT_HOME_PAGE = path.join("lib", "hypercube", "built", "home.html");
 

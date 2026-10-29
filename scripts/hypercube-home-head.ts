@@ -1,13 +1,15 @@
 /*
-  The head of the homepage, which is version 5 of the About page at /. Below the head the page is the same as
-  /about/v5/. The head is what differs: the homepage may be indexed, it is the site's own address, it carries the site's
-  icons and feed, it tells search engines who the site is about, and it counts the visit (lib/visit-counter.ts).
+  The head of the homepage, which is version 5 of the About page at /. The scene and the body are the same as
+  /about/v5/'s, but for the few lines the template marks for one page (scripts/build-hypercube-page.ts). The head is
+  what differs: the homepage may be indexed, it is the site's own address, it carries the site's icons and feed, it
+  tells search engines who the site is about, and it counts the visit (lib/visit-counter.ts).
 
   Everything here says only what the page shows: the name, the bio, the life drawn as one object, and the profiles
-  under Find me. The notes are not on the page, so their structured data is not either. The page is black in both
-  themes, so its one theme colour is the template's (lib/hypercube/page.html), not the pair the sky had.
+  under Find me. The notes are not on the page, so their structured data is not either. It is on /posts/. The page is
+  black in both themes, so its one theme colour is the template's (lib/hypercube/page.html), not the pair the sky had.
 */
 import { site } from "@/lib/site";
+import { jsonLdText, personId } from "@/lib/structured-data";
 import { visitCounterScript } from "@/lib/visit-counter";
 import { escapeHtml } from "./standalone-page";
 
@@ -45,9 +47,9 @@ const iconLinks = () =>
 const feedLink = () =>
   `<link rel="alternate" type="application/rss+xml" title="${escapeHtml(site.name)}" href="${site.rss}">`;
 
-/** The person and the website, by the ids the posts' own structured data points at. */
+/** The person, by the id the posts' own structured data points at, and the website. The blog is on /posts/. */
 function structuredData() {
-  const person = { "@id": `${site.url}/#person` };
+  const person = { "@id": personId };
   return {
     "@context": "https://schema.org",
     "@graph": [
@@ -70,7 +72,7 @@ function structuredData() {
 }
 
 const structuredDataScript = () =>
-  `<script type="application/ld+json">${JSON.stringify(structuredData()).replace(/</g, "\\u003c")}</script>`;
+  `<script type="application/ld+json">${jsonLdText(structuredData())}</script>`;
 
 const visitCounter = () => `<script>${visitCounterScript}</script>`;
 
