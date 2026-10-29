@@ -277,6 +277,8 @@ function wireTheRide(
     const on = state === "playing" || state === "paused";
     if (on) immersive.setPlaying(state === "playing");
     else immersive.hidePlayer();
+    // Called off before it began (Escape during the unfold): Skip goes and the top bar's right group comes back.
+    if (!on && !immersive.isImmersive()) immersive.setAutoplay(false);
     // Words in the scene take back the places of the chrome once it has faded (0.4 s).
     if (on) {
       window.clearTimeout(endTimer);
@@ -287,10 +289,12 @@ function wireTheRide(
     // The ride gives the page back: after the pull back at its end (at once when the reader left it), the chrome
     // returns, the hint shows once, and the board folds into Skills.
     window.clearTimeout(endTimer);
-    endTimer = window.setTimeout(() => giveThePageBack(), state === "ended" && !scene.reducedMotion ? PULL_BACK_MILLISECONDS : 0);
+    const pullBack = state === "ended" && !ride.wasSkipped() && !scene.reducedMotion;
+    endTimer = window.setTimeout(() => giveThePageBack(), pullBack ? PULL_BACK_MILLISECONDS : 0);
   };
   let endTimer = 0;
   const giveThePageBack = () => {
+    board.landEverything();
     immersive.setImmersive(false);
     immersive.setAutoplay(false);
     window.setTimeout(() => controls.measure(), 600);
@@ -393,7 +397,7 @@ export function mountHypercube(root: HTMLElement, data: HypercubeData) {
   elements.stage.addEventListener("pointerdown", () => (pressed = true));
   document.addEventListener("pointerup", () => (pressed = false));
   document.addEventListener("pointercancel", () => (pressed = false));
-  idle.mayRest = () => !pressed && !panelOrSearchOpen() && !ride.isOn();
+  idle.mayRest = () => !pressed && !panelOrSearchOpen() && !ride.isAutoplaying();
   idle.onRest = (resting) => {
     if (resting) ride.handled();
   };

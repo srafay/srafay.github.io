@@ -68,6 +68,8 @@ export class RidePlayer {
   /** Set on load: the ride starts by itself on the frame the unfold reaches 2014. */
   private autoplayArmed = false;
   private finaleDone = false;
+  /** Set when the reader skipped to the end, so the page is given back at once, with no pull back to watch. */
+  private skipped = false;
   private reached = -1;
   private along = 0;
   private time: number;
@@ -120,6 +122,7 @@ export class RidePlayer {
     this.reached = -1;
     this.jumped = true;
     this.finaleDone = false;
+    this.skipped = false;
     this.startAcross = scene.turn.readerAcross();
     this.offset.across = 0;
     this.offset.up = 0;
@@ -206,10 +209,17 @@ export class RidePlayer {
     if (index !== this.reached) this.goToStop(index);
   }
 
-  /** Ends the ride now: the camera lets the point go and its thread fades. Says whether there was one. */
+  /**
+    Ends the ride now: the camera lets the point go and its thread fades. Before it has started by itself, it no longer
+    will (Escape during the unfold says no thanks). Says whether there was a ride to end or to call off.
+  */
   end() {
+    const wasArmed = this.autoplayArmed;
     this.autoplayArmed = false;
-    if (this.state === "off") return false;
+    if (this.state === "off") {
+      if (wasArmed) this.onState("off");
+      return wasArmed;
+    }
     const wasOn = this.isOn();
     this.setState("off");
     if (wasOn) this.letGo();
@@ -224,7 +234,13 @@ export class RidePlayer {
     this.place();
     this.onSkip();
     this.finaleDone = true;
+    this.skipped = true;
     this.finish();
+  }
+
+  /** Whether the ride just ended by Skip. */
+  wasSkipped() {
+    return this.skipped;
   }
 
   private goToStop(index: number) {
@@ -297,7 +313,8 @@ export class RidePlayer {
     this.crossed(this.time, time);
     this.time = time;
     if (at.reached !== this.reached) this.reach(at.reached);
-    this.travel.scrollToProgress(travelAtTime(time, scene.data.present));
+    // On the way in to the first stop every year still shows, as the unfold left it; the slice comes in at 2014.
+    this.travel.scrollToProgress(at.reached < 0 ? 0 : travelAtTime(time, scene.data.present));
     this.jumped = false;
   }
 

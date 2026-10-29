@@ -83,6 +83,8 @@ const HEAD_GLOW_PHONE = 30;
 const HEAD_GLOW_COMPUTER = 38;
 /** Narrower than this, in CSS pixels, the present names itself by its short label. */
 const NARROW_STAGE = 400;
+/** How much light the dots outside the year in focus keep: at rest, and on a ride, where the whole stays in view. */
+const SLICE_FLOOR = { resting: 0.13, riding: 0.3 };
 /** How far round the present's point no other word may sit, in CSS pixels: its bright core and near glow. */
 const PRESENT_KEEPS_CLEAR = 22;
 /**
@@ -682,6 +684,7 @@ export class HypercubeScene {
   /** A ride frames the object for the whole screen, every bar, name and control stepped away. */
   setRiding(riding: boolean) {
     this.riding = riding;
+    this.uniforms.sliceFloor.value = riding ? SLICE_FLOOR.riding : SLICE_FLOOR.resting;
     this.requestFrame();
   }
 

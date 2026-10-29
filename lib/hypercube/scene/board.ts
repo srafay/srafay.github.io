@@ -13,7 +13,7 @@ import { glyphOfSkill } from "@/lib/about-cv/glyphs";
 import { glyphElement, groupGlyphs } from "@/lib/about-cv/icons";
 import { element } from "@/lib/about-cv/scene/dom";
 import type { SkillWord } from "@/lib/about-cv/skills";
-import { boardGroups, type CollectionPlan } from "@/lib/hypercube/collection";
+import { boardGroups, type CollectionPlan, collectedAfter } from "@/lib/hypercube/collection";
 import { litColourOf } from "@/lib/hypercube/shape";
 import type { HypercubeScene } from "./hypercube-scene";
 
@@ -45,6 +45,10 @@ export class SkillBoard {
   private readonly slotOf = new Map<SkillWord, Slot>();
   private readonly waiting: Waiting[] = [];
   private inFlight = 0;
+  /** The marks in the air now, so the end of a ride can land them at once. */
+  private readonly flights = new Set<Animation>();
+  /** Counts the rides: a mark from a ride before this one lands nowhere. */
+  private ride = 0;
   private lastLaunch = 0;
   private filledCount = 0;
   /** The stops whose skills are on the board already, by their place in the ride. */
@@ -89,6 +93,9 @@ export class SkillBoard {
 
   /** Empties every slot for a new ride and shows the board on the stage again, out of the sheet. */
   reset() {
+    this.ride++;
+    for (const flight of this.flights) flight.cancel();
+    this.flights.clear();
     const home = this.element.closest<HTMLElement>(".cube-board-home");
     if (home) {
       home.hidden = true;
@@ -96,6 +103,7 @@ export class SkillBoard {
     }
     for (const slot of this.slots) this.empty(slot);
     this.waiting.length = 0;
+    this.inFlight = 0;
     this.finaleWaiting = false;
     this.filledCount = 0;
     this.reached = -1;
@@ -162,9 +170,15 @@ export class SkillBoard {
     this.writeCount();
   }
 
+  /** The ride is over: marks still waiting take their slots at once, and marks in the air land now. */
+  landEverything() {
+    for (const { slot } of this.waiting.splice(0)) this.fill(slot, false);
+    for (const flight of this.flights) flight.finish();
+  }
+
   /** Straight to the end: every slot filled, nothing flying. */
   fillEverything() {
-    this.waiting.length = 0;
+    this.landEverything();
     this.finaleWaiting = false;
     for (const slot of this.slots) if (!slot.filled) this.fill(slot, false, false);
     this.reached = this.plan.stops.length - 1;
@@ -204,9 +218,17 @@ export class SkillBoard {
       .finished.then(settle, settle);
   }
 
-  /** For the checks: how many slots are filled, how many marks fly, and the caption. */
+  /** For the checks: the slots filled, the count the plan gives by the stop reached, the marks in the air, the caption. */
   report() {
-    return { filled: this.filledCount, of: this.slots.length, inFlight: this.inFlight, waiting: this.waiting.length, caption: this.caption.textContent, folded: this.element.hasAttribute("data-cube-folded") };
+    return {
+      filled: this.filledCount,
+      planned: collectedAfter(this.plan, this.reached),
+      of: this.slots.length,
+      inFlight: this.inFlight,
+      waiting: this.waiting.length,
+      caption: this.caption.textContent,
+      folded: this.element.hasAttribute("data-cube-folded"),
+    };
   }
 
   /** Sends the next waiting mark on its way, one every STAGGER_MILLISECONDS and never more than MOST_IN_FLIGHT. */
@@ -231,23 +253,26 @@ export class SkillBoard {
     const middle = `translate(${(from.x + slot.x) / 2 - FLYING_SIZE / 2}px, ${Math.min(from.y, slot.y) - FLIGHT_BOW - FLYING_SIZE / 2}px) scale(0.8)`;
     const end = `translate(${slot.x - FLYING_SIZE / 2}px, ${slot.y - FLYING_SIZE / 2}px) scale(${(size * 0.8) / FLYING_SIZE})`;
     this.inFlight++;
+    const ride = this.ride;
+    const flight = mark.animate(
+      [
+        { transform: start, opacity: 0 },
+        { transform: start, opacity: 1, offset: 0.08 },
+        { transform: middle, opacity: 1, offset: 0.5 },
+        { transform: end, opacity: 1 },
+      ],
+      { duration: FLIGHT_MILLISECONDS, easing: "cubic-bezier(0.45, 0, 0.25, 1)" },
+    );
     const land = () => {
-      this.inFlight--;
       mark.remove();
+      this.flights.delete(flight);
+      if (ride !== this.ride) return;
+      this.inFlight--;
       this.fill(slot, true);
       if (this.finaleWaiting && !this.inFlight && !this.waiting.length) this.finale();
     };
-    mark
-      .animate(
-        [
-          { transform: start, opacity: 0 },
-          { transform: start, opacity: 1, offset: 0.08 },
-          { transform: middle, opacity: 1, offset: 0.5 },
-          { transform: end, opacity: 1 },
-        ],
-        { duration: FLIGHT_MILLISECONDS, easing: "cubic-bezier(0.45, 0, 0.25, 1)" },
-      )
-      .finished.then(land, land);
+    this.flights.add(flight);
+    flight.finished.then(land, land);
   }
 
   /** A slot takes its skill's mark, in the skill's own colour, and the count follows. */

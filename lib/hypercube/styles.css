@@ -1312,11 +1312,14 @@ body.about-v5 {
   display: inline-flex;
 }
 
+/* On a phone its 44 px reach up into the gutter, so it never meets the versions line, and its words sit level with Home. */
 @media (hover: none) and (pointer: coarse) {
   .about-v5 .cube-skip {
     min-width: 72px;
     min-height: 44px;
-    margin-top: -6px;
+    margin-top: -12px;
+    padding-top: 12px;
+    padding-bottom: 0;
   }
 }
 
@@ -1440,11 +1443,11 @@ body.about-v5 {
 
 /*
   The board of skills: every slot a faint dot from the start, filled with its skill's mark in the skill's own colour.
-  The groups run one after another, each opened by its glyph. 28 cells a row; the cell gives on a narrow phone, never
-  the count. At most a sixth of a phone's height, at the foot; on a computer at the bottom left.
+  The groups run one after another, each opened by its glyph. 28 cells a row; the cell gives on a narrow or a short
+  phone, never the count, so the board stays within a sixth of the height, at the foot. On a computer, the bottom left.
 */
 .about-v5 {
-  --cube-cell: clamp(11px, calc((100vw - 24px) / 28), 14px);
+  --cube-cell: clamp(11px, min(calc((100vw - 24px) / 28), calc((100dvh / 6 - 24px) / 9)), 14px);
   --cube-board-height: calc(var(--cube-cell) * 9 + 30px);
 }
 

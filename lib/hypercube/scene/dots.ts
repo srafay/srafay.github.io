@@ -24,6 +24,8 @@ export type DotUniforms = {
   focus: { value: number };
   sliceOn: { value: number };
   sliceHalfWidth: { value: number };
+  /** How much light a dot outside the slice keeps: little at rest, more on a ride, so the whole stays in view. */
+  sliceFloor: { value: number };
   /** The isolated world's index, or -1 when every world shows. */
   isolated: { value: number };
   /** How much the reader has lit something (a skill, an event), from 0 to 1: the rest steps back. */
@@ -62,6 +64,7 @@ export function dotUniforms(): DotUniforms {
     focus: { value: 0 },
     sliceOn: { value: 0 },
     sliceHalfWidth: { value: 0.5 },
+    sliceFloor: { value: 0.13 },
     isolated: { value: -1 },
     selecting: { value: 0 },
     gather: { value: 0 },
@@ -100,6 +103,7 @@ uniform float frontGlow;
 uniform float focus;
 uniform float sliceOn;
 uniform float sliceHalfWidth;
+uniform float sliceFloor;
 uniform float isolated;
 uniform float selecting;
 uniform float pixelRatio;
@@ -164,7 +168,7 @@ float inSliceOf(float pointMoment) {
 float timeLight(float pointMoment) {
   float reached = smoothstep(front - 0.03, front + 0.015, pointMoment);
   float newness = 1.0 - smoothstep(0.0, 0.4, pointMoment - front);
-  float slice = mix(1.0, mix(0.13, 1.45, inSliceOf(pointMoment)), sliceOn);
+  float slice = mix(1.0, mix(sliceFloor, 1.45, inSliceOf(pointMoment)), sliceOn);
   return reached * (1.0 + 1.6 * newness * frontGlow) * slice;
 }
 
