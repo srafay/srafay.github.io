@@ -70,7 +70,7 @@ export const offTheClock = {
   lines: [
     "When I am not shipping code, you can find me in a Dota 2 lobby.",
     "Ask me about cricket, or Python (the language, not the reptile).",
-    "This site is a cosmos I built: a black hole on the homepage, and a planet for every post.",
+    "This site has a cosmos I built: a black hole on the 404 page, and a planet for every post.",
   ],
-  backToTheSystem: { label: "Back to the system", address: "/?from=post" },
+  backHome: { label: "Back home", address: "/?from=post" },
 };

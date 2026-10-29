@@ -155,7 +155,7 @@ export class Controls {
     const backItem = element("li");
     const back = element("a", "letters-find-link");
     back.href = "/?from=post";
-    back.append(glyphElement(homeGlyph, "letters-icon"), element("span", undefined, "Back to the system"));
+    back.append(glyphElement(homeGlyph, "letters-icon"), element("span", undefined, "Back home"));
     backItem.append(back);
     list.append(backItem);
     this.findMePanel.append(list);

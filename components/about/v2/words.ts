@@ -88,7 +88,7 @@ export const tools = { title: "What I build with" };
 export const elsewhere = {
   title: "Where to find me",
   note: personalNote,
-  backToTheSystem: "Back to the system",
+  backHome: "Back home",
 };
 
 export { formatCount };

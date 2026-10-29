@@ -117,9 +117,9 @@ export function FlightChapters() {
           <p>
             <a
               className={styles.back}
-              href={offTheClock.backToTheSystem.address}
+              href={offTheClock.backHome.address}
             >
-              {offTheClock.backToTheSystem.label}
+              {offTheClock.backHome.label}
             </a>
           </p>
         </div>

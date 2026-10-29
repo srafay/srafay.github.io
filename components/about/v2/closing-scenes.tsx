@@ -16,7 +16,7 @@ import {
 
 /*
   The last three scenes: the repositories as a cluster, the tools as short lines of stars, and the links as the last
-  stars, with the way back to the homepage's system. Repository names are labels the sky's script hangs beside their
+  stars, with the way back home. Repository names are labels the sky's script hangs beside their
   stars. The tools and links keep their place in the words, and the script puts a star before each.
 */
 
@@ -146,7 +146,7 @@ export function ElsewhereScene() {
             ))}
           </ul>
           <a className={styles.back} href="/?from=post">
-            {elsewhere.backToTheSystem}
+            {elsewhere.backHome}
           </a>
         </div>
       </div>
