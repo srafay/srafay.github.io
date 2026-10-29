@@ -121,20 +121,26 @@ export class Say {
     });
     this.element.dataset.shown = "";
     this.lay(this.denSpace());
-    this.lookAround();
+    this.measureAround();
     this.chosen = -1;
     this.place();
     this.showTheDen();
-    this.giveWayToATray();
+  }
+
+  /** The open trays, measured with everything else the bubble keeps clear of, never per frame. */
+  private trays: Box[] = [];
+
+  private measureAround() {
+    this.lookAround();
+    this.trays = this.openTrays();
   }
 
   /**
    * On a small screen an open tray can leave no clear place for a line: rather than lie under the tray, unread, the
-   * line gives way. The reader is choosing a trick or a costume, which brings its own line.
+   * line gives way, wherever the agent takes it. The reader is choosing a trick or a costume, which brings its own line.
    */
-  private giveWayToATray() {
-    if (!this.shown || "inDen" in this.element.dataset) return;
-    if (this.openTrays().some((tray) => overlapArea(this.box, tray) > 0)) this.hide();
+  private underATray() {
+    return this.trays.some((tray) => overlapArea(this.box, tray) > 0);
   }
 
   /**
@@ -174,11 +180,10 @@ export class Say {
    */
   relook() {
     if (!this.shown) return;
-    this.lookAround();
+    this.measureAround();
     this.chosen = -1;
     this.place();
     this.showTheDen();
-    this.giveWayToATray();
   }
 
   /** Which of the places by the router the bubble took for this line: it keeps it while it still covers nothing. */
@@ -363,6 +368,7 @@ export class Say {
     this.chosen = bestIndex;
     this.box = best;
     this.overlapping = bestOverlap;
+    if (this.shown && this.underATray()) return this.hide();
     this.element.style.transform = `translate3d(${Math.round(best.left)}px, ${-Math.round(height - best.bottom)}px, 0)`;
   }
 
