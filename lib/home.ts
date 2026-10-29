@@ -186,8 +186,8 @@ ${list(o.posts)}
 
 <div class="reader" id="reader" hidden role="dialog" aria-modal="true" aria-labelledby="rdTitle">
   <header class="bar reader-bar">
-    <a class="mark" href="/" data-reader-leave="home">${BRAND}</a>
-    <nav aria-label="Site"><a href="/" data-reader-leave="home">Home</a><a href="/#posts" data-reader-leave="posts">Posts</a><a href="${site.about}">About</a>
+    <a class="mark" href="${barLinks.home}" data-reader-leave="home">${BRAND}</a>
+    <nav aria-label="Site"><a href="${barLinks.home}" data-reader-leave="home">Home</a><a href="${barLinks.posts}" data-reader-leave="posts">Posts</a><a href="${barLinks.about}">About</a>
       ${themeButton("")}
     </nav>
   </header>
