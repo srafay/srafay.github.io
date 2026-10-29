@@ -539,6 +539,7 @@ body.about-v6 {
 
 .guide-line[data-waiting] {
   opacity: 0;
+  pointer-events: none;
 }
 
 .guide-word {
@@ -943,7 +944,7 @@ body.about-v6 {
   display: block;
   padding: 8px;
   border-radius: 12px 12px 0 0;
-  background: var(--deep);
+  background: var(--card, var(--deep));
 }
 
 .guide-laptop-base {
@@ -951,7 +952,7 @@ body.about-v6 {
   height: 12px;
   margin: 0 -6%;
   border-radius: 0 0 10px 10px;
-  background: var(--deep);
+  background: var(--card, var(--deep));
 }
 
 .guide-phone {
@@ -964,7 +965,7 @@ body.about-v6 {
   display: block;
   padding: 6px;
   border-radius: 22px;
-  background: var(--deep);
+  background: var(--card, var(--deep));
 }
 
 .guide-laptop img,
