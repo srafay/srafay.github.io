@@ -6,7 +6,9 @@
   - public/about/v5/index.html is the prototype's page, from lib/hypercube/page.html. It stays out of search engines.
   - lib/hypercube/built/home.html is the homepage: the same page with a homepage's head
     (scripts/hypercube-home-head.ts). app/route.ts serves it at / (lib/hypercube/home-page.ts).
-  Each folder is made here every time, so none is committed. next build copies public/ into out/.
+  The template marks the few lines of the body that belong to one page only: the prototype's Home link, its line of
+  versions and its no-script words, and the homepage's no-script words. Each folder is made here every time, so none
+  is committed. next build copies public/ into out/.
 */
 import fs from "node:fs";
 import path from "node:path";
@@ -45,8 +47,15 @@ const PROTOTYPE_DESCRIPTION =
   "Syed Rafay, senior software engineer at Twin Technology: every role, degree, project, course and skill, as one object in four dimensions.";
 const PROTOTYPE_ROBOTS = "noindex, nofollow";
 
-/** What the head of a page says about it. Below the head every page that shows the scene is the same. */
-type PageHead = { robots: string; title: string; description: string; pageMeta: string };
+/**
+  The two pages the template is for. Below the head they are the same page, but for a few lines the template marks with
+  <!--only:prototype--> or <!--only:homepage--> before them and <!--end:prototype--> or <!--end:homepage--> after,
+  each marker on a line of its own.
+*/
+type PageKind = "prototype" | "homepage";
+
+/** What the head of a page says about it, and which of the two pages it is. */
+type PageHead = { kind: PageKind; robots: string; title: string; description: string; pageMeta: string };
 
 /** The scene's one build, and the addresses every page asks for its files at. */
 type SharedBuild = { scriptAddress: string; stylesheetAddress: string; art: ArtAddresses };
@@ -74,9 +83,22 @@ async function buildSharedFiles(): Promise<SharedBuild> {
   };
 }
 
-/** The page's template, with this build's files and the head of the page it is for. */
+const markerLine = (marker: "only" | "end", kind: PageKind) => `^[ \\t]*<!--${marker}:${kind}-->\\r?\\n`;
+
+/** Keeps the lines the template marks for this page, drops the lines marked for the other page, and drops the markers. */
+function keepBlocksFor(kind: PageKind, template: string) {
+  const otherKind: PageKind = kind === "prototype" ? "homepage" : "prototype";
+  const otherPagesLines = new RegExp(`${markerLine("only", otherKind)}[\\s\\S]*?${markerLine("end", otherKind)}`, "gm");
+  const thisPagesMarkers = new RegExp(`${markerLine("only", kind)}|${markerLine("end", kind)}`, "gm");
+  const page = template.replace(otherPagesLines, "").replace(thisPagesMarkers, "");
+  if (/<!--(only|end):/.test(page)) throw new Error("page.html has a marker with no partner on a line of its own");
+  return page;
+}
+
+/** The page's template, with this build's files and the head and the lines of the page it is for. */
 function fillPage(shared: SharedBuild, head: PageHead) {
-  return fillTemplate(fs.readFileSync(path.join(SOURCE, "page.html"), "utf8"), {
+  const template = keepBlocksFor(head.kind, fs.readFileSync(path.join(SOURCE, "page.html"), "utf8"));
+  return fillTemplate(template, {
     robots: head.robots,
     title: escapeHtml(head.title),
     description: escapeHtml(head.description),
@@ -99,6 +121,7 @@ function writePage(file: string, page: string) {
 function writePrototypePage(shared: SharedBuild) {
   const shareCard = shareMeta(shared.art, shareImage, PROTOTYPE_ADDRESS, PROTOTYPE_TITLE, PROTOTYPE_DESCRIPTION);
   const page = fillPage(shared, {
+    kind: "prototype",
     robots: PROTOTYPE_ROBOTS,
     title: PROTOTYPE_TITLE,
     description: PROTOTYPE_DESCRIPTION,
@@ -110,6 +133,7 @@ function writePrototypePage(shared: SharedBuild) {
 function writeHomePage(shared: SharedBuild) {
   const shareCard = shareMeta(shared.art, shareImage, HOME_ADDRESS, HOME_TITLE, HOME_DESCRIPTION);
   const page = fillPage(shared, {
+    kind: "homepage",
     robots: HOME_ROBOTS,
     title: HOME_TITLE,
     description: HOME_DESCRIPTION,
