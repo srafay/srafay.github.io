@@ -345,10 +345,10 @@ export class HypercubeScene {
 
   /**
     Whether a label may show now, whether it is lit, and whether it is in focus. With nothing lit, every word may show,
-    within the caps. Once a skill is lit, a card open or a search has found something, only the lit events carry
-    labels; with a world isolated or a year in focus, only that world's or that year's events. On a ride, the event at
-    the point and the events of its year it has already met, and only the city of its moment. The present, the cities
-    and the lit skills' own words always may.
+    within the caps. Once a skill is lit or a card open, only the lit events carry labels. With a world isolated or a
+    year in focus, only that world's or that year's events. On a ride, the event at the point and the events of its
+    year it has already met, and only the city of its moment. The present, the cities and the lit skills' own words
+    always may.
   */
   private standing(label: Label) {
     const focus = this.focus;
@@ -370,7 +370,6 @@ export class HypercubeScene {
       return { allowed: reached && (lit || !narrowed), lit, inFocus: false };
     }
     if (label.kind === "year") return { allowed: reached && !narrowed, lit: false, inFocus: false };
-    if (label.city && focus.found?.cities.has(label.city)) return { allowed: true, lit: true, inFocus: false };
     return { allowed: reached, lit: false, inFocus: false };
   }
 
@@ -450,13 +449,7 @@ export class HypercubeScene {
     this.relight();
   }
 
-  /** What a search found, or null when it closes. */
-  setFound(found: Focus["found"]) {
-    this.focus.found = found;
-    this.relight();
-  }
-
-  /** How many events are lit now: by the slice, by a lit skill, a search, a ride or an open card. */
+  /** How many events are lit now: by the slice, by a lit skill, a ride or an open card. */
   litCount() {
     return this.data.events.filter(
       (event) => this.focus.inSlice(event) || this.focus.isLit(event),

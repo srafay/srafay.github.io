@@ -358,6 +358,30 @@ body.about-v5 {
   }
 }
 
+/* Posts is a link to the posts, drawn as the buttons beside it are: no underline. */
+.about-v5 .cube-posts {
+  text-decoration: none;
+}
+
+/*
+  Under 400 px wide, on the page with a Home link (/about/v5/), Posts shows its glyph alone, so the top row fits
+  beside Home. The homepage has no Home link, so there Posts keeps its label at every width.
+*/
+@media (max-width: 399px) {
+  .about-v5 .cube-home ~ .cube-top .cube-posts {
+    justify-content: center;
+    min-width: 32px;
+  }
+  .about-v5 .cube-home ~ .cube-top .cube-posts span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
 /* Find me: a small panel of the profiles under its button. */
 .about-v5 .cube-find {
   position: absolute;
@@ -1043,7 +1067,7 @@ body.about-v5 {
   margin-top: 16px;
 }
 
-/* On a phone the top controls sit closer together, so Find me, Skills and Sound fit beside Home. */
+/* On a phone the top controls sit closer together, so Posts, Find me, Skills and Sound fit on one line. */
 @media (max-width: 899px) {
   .about-v5 .cube-top {
     right: 8px;
@@ -1112,103 +1136,6 @@ body.about-v5 {
   .about-v5 .cube-peek {
     top: calc(var(--cube-top) + 136px);
     max-width: 28rem;
-  }
-}
-
-/*
-  The search: a quiet field and its line on one panel, as the skill answer is, at the bottom left on a computer and
-  above the keyboard on a phone.
-*/
-.about-v5 .cube-search {
-  position: absolute;
-  left: 12px;
-  right: 12px;
-  bottom: var(--cube-search-bottom, calc(var(--cube-bottom) + 84px));
-  z-index: 7;
-  max-width: 30rem;
-  padding: 8px;
-  background: var(--cube-panel);
-  border: 1px solid var(--cube-panel-line);
-  border-radius: 10px;
-}
-
-.about-v5 .cube-search[hidden] {
-  display: none;
-}
-
-@media (min-width: 900px) {
-  .about-v5 .cube-search {
-    left: var(--cube-gutter);
-    right: auto;
-    bottom: 76px;
-    width: 30rem;
-  }
-}
-
-.about-v5 .cube-search-field {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 0 4px 0 10px;
-  color: var(--cube-light);
-  border: 1px solid #3a352f;
-  border-radius: 8px;
-}
-
-.about-v5 .cube-search-field input {
-  flex: 1;
-  min-width: 0;
-  min-height: 44px;
-  padding: 0;
-  font: inherit;
-  font-size: 17px;
-  color: var(--cube-light);
-  background: transparent;
-  border: 0;
-  outline: none;
-}
-
-.about-v5 .cube-search-field input::placeholder {
-  color: var(--cube-light-muted);
-}
-
-.about-v5 .cube-search-field input::-webkit-search-cancel-button {
-  display: none;
-}
-
-.about-v5 .cube-search-field:focus-within {
-  border-color: var(--cube-light-muted);
-}
-
-.about-v5 .cube-search .cube-search-close {
-  position: static;
-  flex: none;
-}
-
-.about-v5 .cube-search-line {
-  margin: 8px 4px 2px;
-  font-size: 15px;
-  line-height: 1.4;
-  color: var(--cube-light);
-}
-
-.about-v5 .cube-search-line:empty {
-  display: none;
-}
-
-/* Under 400 px wide the Search control shows its glyph alone, so the top row fits beside Home. */
-@media (max-width: 399px) {
-  .about-v5 .cube-search-button {
-    justify-content: center;
-    min-width: 32px;
-  }
-  .about-v5 .cube-search-button span {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-    white-space: nowrap;
   }
 }
 

@@ -1,8 +1,8 @@
 /*
-  What the reader has brought into focus: the slice through time, the isolated world, the lit skill, the open event,
-  what a search found and where a ride stands. The travel through time is version 4's reader (a place from 0 to 1 that
-  wheels, swipes, keys, the rail and the ride move, with a swipe's carrying on). Its first stretch fades the slice in
-  at the present; the rest of it carries the slice back, a calendar year at a time, to 2014.
+  What the reader has brought into focus: the slice through time, the isolated world, the lit skill, the open event
+  and where a ride stands. The travel through time is version 4's reader (a place from 0 to 1 that wheels, swipes,
+  keys, the rail and the ride move, with a swipe's carrying on). Its first stretch fades the slice in at the present.
+  The rest of it carries the slice back, a calendar year at a time, to 2014.
 */
 import { Follower } from "@/lib/about-cv/scene/follower";
 import type { WorldEvent } from "@/lib/about-cv/events";
@@ -35,9 +35,6 @@ export const travelAtYear = (year: number, present: number) => travelAtTime(Math
 /** The window of time a year lights: the calendar year, up to now for this one. */
 export const yearWindow = (year: number, present: number) => ({ from: year, to: Math.min(year + 1, present) });
 
-/** What a search found: the events it lights, the skills whose dust gathers, the cities named. */
-export type Found = { events: Set<string>; skills: Set<SkillWord>; cities: Set<string> };
-
 /** Where a ride stands: the event the point is at, the events it has met, and the city of its moment. */
 export type RideFocus = { current: WorldEvent | null; met: Set<string>; city: string | null };
 
@@ -50,7 +47,6 @@ export class Focus {
   isolated: WorldKey | null = null;
   litSkill: SkillWord | null = null;
   openEvent: WorldEvent | null = null;
-  found: Found | null = null;
   ride: RideFocus | null = null;
   private readonly sliceShown = new Follower(0, 60);
   private readonly centreShown: Follower;
@@ -71,38 +67,32 @@ export class Focus {
     return Math.min(event.start, beadTime(event, this.present)) < to && beadTime(event, this.present) >= from;
   }
 
-  /** Whether an event is lit by the reader: the lit skill names it, its card is open, a search found it, a ride is at it. */
+  /** Whether an event is lit by the reader: the lit skill names it, its card is open, or a ride is at it. */
   isLit(event: WorldEvent) {
     if (this.openEvent?.id === event.id) return true;
-    if (this.found?.events.has(event.id)) return true;
     if (this.ride?.current?.id === event.id) return true;
     return this.litSkill?.events.includes(event.id) ?? false;
   }
 
-  /** Whether a skill's dust is gathered to its events: the lit skill, or one a search found. */
+  /** Whether a skill's dust is gathered to its events: it is the lit skill. */
   isSkillLit(skill: SkillWord) {
-    return this.litSkill === skill || (this.found?.skills.has(skill) ?? false);
+    return this.litSkill === skill;
   }
 
-  /** Whether a search found anything to light. */
-  isFinding() {
-    return this.found !== null && (this.found.events.size > 0 || this.found.skills.size > 0 || this.found.cities.size > 0);
-  }
-
+  /** Whether the reader has picked something to light: an open card or a lit skill. */
   isSelecting() {
-    return this.openEvent !== null || this.litSkill !== null || this.isFinding();
+    return this.openEvent !== null || this.litSkill !== null;
   }
 
   /** Runs on by a frame's time. Says whether anything is still settling. */
   step(seconds: number) {
     const span = this.year === null ? null : yearWindow(this.year, this.present);
     const centre = span ? (span.from + span.to) / 2 : this.present;
-    const gathering = this.litSkill !== null || (this.found?.skills.size ?? 0) > 0;
     const targets: [Follower, number][] = [
       [this.sliceShown, this.year === null ? 0 : 1],
       [this.centreShown, centre],
       [this.selectingShown, this.isSelecting() ? 1 : this.ride?.current ? RIDE_STEPS_BACK : 0],
-      [this.gatherShown, gathering ? 1 : 0],
+      [this.gatherShown, this.litSkill !== null ? 1 : 0],
     ];
     let moving = false;
     for (const [follower, target] of targets) {

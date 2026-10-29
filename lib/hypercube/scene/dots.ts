@@ -400,8 +400,8 @@ function workingColours(shares: Float32Array) {
 }
 
 /**
-  The skills' dust, with where each speck flies when its skill is lit and the colour it lights in. Any number of
-  skills can be lit at once (a search lights every skill it finds): each speck says whether its skill is lit.
+  The skills' dust, with where each speck flies when its skill is lit and the colour it lights in. Each speck says
+  whether its skill is lit.
 */
 export function dustLayer(
   dots: Dots,

@@ -5,8 +5,8 @@
   later mount the scene as it is.
 
   window.hypercube is for the checks that drive the page in a test browser. It says how far the unfold has come, how
-  the object is turned and what is lit, where a bead or a word sits, where a ride stands and what a search found, and
-  it can set the unfold to a share, jump a ride to a stop and rest the object, so a crop lands on a set moment.
+  the object is turned and what is lit, where a bead or a word sits and where a ride stands, and it can set the
+  unfold to a share, jump a ride to a stop and rest the object, so a crop lands on a set moment.
 */
 import { allEvents } from "@/lib/about-cv/events";
 import { createScrollReader, type ScrollReader } from "@/lib/about-cv/scene/scroll";
@@ -26,7 +26,6 @@ import { Immersive } from "./immersive";
 import { Idle } from "./rest";
 import { RideControls } from "./ride-controls";
 import { cityAt, RidePlayer } from "./ride-player";
-import { Search, startsASearch } from "./search";
 import { Sound } from "./sound";
 import { Tilt } from "./tilt";
 
@@ -54,7 +53,6 @@ declare global {
         /** How far a lit skill's dust has flown to its events, from 0 to 1. */
         gather: number;
         ride: ReturnType<RidePlayer["report"]>;
-        search: ReturnType<Search["report"]>;
         rest: { resting: boolean; share: number };
         board: ReturnType<SkillBoard["report"]>;
         /** How much of the stage's height the framed object takes now. */
@@ -115,9 +113,9 @@ const TRAVEL_SCREENS = 8;
 
 /** What the gestures leave alone: the panels and controls take their own pointers, the card and sheet their wheel. */
 const GESTURE_OPTIONS: GestureOptions = {
-  ownPointers: ".cube-card, .cube-answer, .cube-sheet, .cube-search, .cube-peek, a, button, input, [data-cube-control]",
+  ownPointers: ".cube-card, .cube-answer, .cube-sheet, .cube-peek, a, button, input, [data-cube-control]",
   scrollsItself: ".cube-sheet, .cube-card",
-  keysStayInside: ".cube-card, .cube-sheet, .cube-search",
+  keysStayInside: ".cube-card, .cube-sheet",
 };
 
 /**
@@ -201,13 +199,12 @@ function handleTheObject(
 }
 
 /**
-  Escape closes the top thing: the search, Find me, the sheet, the card, the ride, the lit skill, the isolated world,
-  then the view.
+  Escape closes the top thing: Find me, the sheet, the card, the ride, the lit skill, the isolated world, then the
+  view.
 */
-function listenForEscape(search: Search, controls: Controls, interaction: Interaction, ride: RidePlayer) {
+function listenForEscape(controls: Controls, interaction: Interaction, ride: RidePlayer) {
   document.addEventListener("keydown", (event) => {
     if (event.key !== "Escape") return;
-    if (search.close()) return;
     if (controls.closeFindMe()) return;
     if (controls.closeSheet()) return;
     if (!interaction.card.hidden) return void interaction.stepBack();
@@ -215,18 +212,6 @@ function listenForEscape(search: Search, controls: Controls, interaction: Intera
     if (interaction.stepBack()) return;
     if (controls.clearIsolation()) return;
     controls.resetView();
-  });
-}
-
-/** A letter or a digit typed anywhere starts a search, unless a field has the focus or a panel is open. */
-function typingStartsASearch(search: Search, controls: Controls) {
-  document.addEventListener("keydown", (event) => {
-    if (!startsASearch(event)) return;
-    const target = event.target as Element | null;
-    if (target?.closest("input, textarea, select, [contenteditable]")) return;
-    if (search.isOpen() || controls.panelIsOpen()) return;
-    event.preventDefault();
-    search.open(event.key);
   });
 }
 
@@ -355,14 +340,12 @@ export function mountHypercube(root: HTMLElement, data: HypercubeData) {
   const rideControls = new RideControls(ride);
   const interaction = new Interaction(scene, sound);
   const controls = new Controls(scene, interaction, travel, sound, tilt, rideControls);
-  const search = new Search(scene, interaction);
   const idle = new Idle(scene);
   const immersive = new Immersive(elements.stage, sound);
   const board = new SkillBoard(scene, collectionPlan(scene.stops, data.skills));
   elements.stage.append(rideControls.peek, board.element);
   wireTheRide(scene, ride, rideControls, immersive, board, controls, interaction, sound);
-  const panelOrSearchOpen = () => controls.panelIsOpen() || search.isOpen();
-  const rideIsTop = () => ride.isOn() && !panelOrSearchOpen();
+  const rideIsTop = () => ride.isOn() && !controls.panelIsOpen();
   const holds = listenForHolds(scene, {
     isTop: rideIsTop,
     isPlaying: () => ride.state === "playing",
@@ -378,11 +361,6 @@ export function mountHypercube(root: HTMLElement, data: HypercubeData) {
     ride.pause();
     interaction.openEvent(event);
   };
-  search.onChange = () => {
-    if (search.isOpen()) ride.pause();
-    interaction.onChange();
-  };
-  controls.onSearch = () => (search.isOpen() ? search.close() : search.open());
   controls.onRailScrub = (progress) => ride.scrubTo(timeAtTravel(progress, data.present));
   // Every control but the ride's own and Sound is a hand on the object: a ride pauses for it. Reset view ends it.
   for (const control of [controls.top, controls.switches, controls.view])
@@ -397,14 +375,13 @@ export function mountHypercube(root: HTMLElement, data: HypercubeData) {
   elements.stage.addEventListener("pointerdown", () => (pressed = true));
   document.addEventListener("pointerup", () => (pressed = false));
   document.addEventListener("pointercancel", () => (pressed = false));
-  idle.mayRest = () => !pressed && !panelOrSearchOpen() && !ride.isAutoplaying();
+  idle.mayRest = () => !pressed && !controls.panelIsOpen() && !ride.isAutoplaying();
   idle.onRest = (resting) => {
     if (resting) ride.handled();
   };
   addKeyLayer(scene, interaction, controls);
   handleTheObject(scene, travel, holds, interaction, controls, sound, ride, immersive);
-  listenForEscape(search, controls, interaction, ride);
-  typingStartsASearch(search, controls);
+  listenForEscape(controls, interaction, ride);
   listenForRideKeys(ride, rideIsTop);
   // iOS answers a long press with the text loupe, the callout and a menu. The stage takes the press itself.
   elements.stage.addEventListener("contextmenu", (event) => event.preventDefault());
@@ -445,7 +422,6 @@ export function mountHypercube(root: HTMLElement, data: HypercubeData) {
         sound: sound.on,
         gather: scene.focus.gather(),
         ride: ride.report(),
-        search: search.report(),
         rest: { resting: idle.isResting(), share: scene.rest.share },
         board: board.report(),
         frameShare: scene.frameShare(),

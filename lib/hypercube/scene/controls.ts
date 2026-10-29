@@ -1,13 +1,13 @@
 /*
   The controls on the stage, quiet and unboxed, in version 4's language: muted at rest, full strength when pressed or
-  open. Search, Find me, Skills and Sound sit at the top right. The five world switches sit at the bottom, each
+  open. Posts, Find me, Skills and Sound sit at the top right. The five world switches sit at the bottom, each
   isolating its world, a long press saying how much it holds. The year rail runs down the right edge, All years at its
   top and 2014 at its foot. By the rail's foot sit Ride through time, Lay out time (the quarter turn that lays the years
   out in a line), Tilt on a phone, Reset view and the zoom. The year in focus is set large. The readouts sit small in
   the bottom left corner, each a real value of the object now. The hint names the gestures once.
 
-  Each control is a real button (or a slider, for the rail) and works by touch, mouse and keyboard. Each control's
-  place is given to the scene, so no word in the scene is drawn under it.
+  Each control is a real button (a slider for the rail, a link for Posts) and works by touch, mouse and keyboard.
+  Each control's place is given to the scene, so no word in the scene is drawn under it.
 */
 import { kindsInWords } from "@/lib/about-cv/answers";
 import { glyphOfWorld } from "@/lib/about-cv/glyphs";
@@ -24,7 +24,7 @@ import { SLICE_ARRIVES_BY, travelAtYear, yearAtTravel } from "./focus";
 import type { HypercubeScene } from "./hypercube-scene";
 import type { Interaction } from "./interaction";
 import type { Rectangle } from "./label-layer";
-import { postsPlace } from "./posts-place";
+import { postsLink } from "./posts-place";
 import type { RideControls } from "./ride-controls";
 import type { Sound } from "./sound";
 import type { Tilt } from "./tilt";
@@ -54,7 +54,7 @@ function controlButton(glyph: Glyph, text: string, className: string) {
 
 export class Controls {
   readonly top = element("div", "cube-top");
-  readonly searchButton = controlButton(controlGlyphs.search, "Search", "cube-control cube-search-button");
+  readonly postsLink = postsLink();
   readonly findMeButton = controlButton(controlGlyphs.findMe, "Find me", "cube-control");
   readonly findMePanel = element("nav", "cube-find");
   readonly skillsButton = controlButton(controlGlyphs.skills, "Skills", "cube-control");
@@ -80,8 +80,6 @@ export class Controls {
   private lastReadouts = 0;
   private hintSeen = false;
   private shownYear: number | null | undefined = undefined;
-  /** Called when the reader asks for the search. */
-  onSearch: () => void = () => {};
   /**
     A press or a drag on the year rail, to a place of the travel. A ride takes it as a scrub and says so; otherwise the
     travel goes there. While holding, the press is still down.
@@ -154,7 +152,6 @@ export class Controls {
       this.year,
       this.interaction.answer,
       this.interaction.card,
-      stage.querySelector<HTMLElement>(".cube-search"),
       stage.querySelector<HTMLElement>(".cube-skip"),
       stage.querySelector<HTMLElement>(".cube-player"),
       stage.querySelector<HTMLElement>(".cube-peek"),
@@ -203,9 +200,7 @@ export class Controls {
     this.findMePanel.id = "cube-find";
     this.findMePanel.hidden = true;
     this.findMePanel.setAttribute("aria-label", "Where to find me");
-    const places = findMeList("cube");
-    places.append(postsPlace());
-    this.findMePanel.append(places);
+    this.findMePanel.append(findMeList("cube"));
     this.findMeButton.setAttribute("aria-expanded", "false");
     this.findMeButton.setAttribute("aria-controls", this.findMePanel.id);
     this.findMeButton.addEventListener("click", () =>
@@ -223,11 +218,13 @@ export class Controls {
     this.soundButton.addEventListener("click", () => {
       this.soundButton.setAttribute("aria-pressed", String(this.sound.toggle()));
     });
-    this.searchButton.addEventListener("click", () => this.onSearch());
-    this.top.append(this.searchButton, this.findMeButton, this.skillsButton, this.soundButton, this.findMePanel);
+    this.top.append(this.postsLink, this.findMeButton, this.skillsButton, this.soundButton, this.findMePanel);
   }
 
-  /** Whether a panel the reader is reading is open: Find me, the sheet or a card. Then typing is not a search. */
+  /**
+    Whether a panel the reader is reading is open: Find me, the sheet or a card. Then a ride is not the top thing, and
+    the object does not rest.
+  */
   panelIsOpen() {
     return !this.findMePanel.hidden || !this.sheet.hidden || !this.interaction.card.hidden;
   }
@@ -535,7 +532,7 @@ export class Controls {
     this.hint.hidden = true;
     this.hint.textContent = this.scene.touch
       ? "Swipe up or down to move through time. Drag sideways to turn it through the fourth dimension. Tap any light, or ride through time from 2014 to now."
-      : "Scroll to move through time. Drag to turn it through the fourth dimension. Click any light, type to search, or ride through time from 2014 to now.";
+      : "Scroll to move through time. Drag to turn it through the fourth dimension. Click any light, or ride through time from 2014 to now.";
   }
 
   /** Shows the hint once, after the unfold, unless it was seen before or a gesture came first. */

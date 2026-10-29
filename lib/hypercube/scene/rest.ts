@@ -2,7 +2,7 @@
   A rest when the page is left alone. After 40 seconds with no input, or at once when the reader switches tabs, the
   object drops a dimension and rests as a cube (rest-motion.ts says how it looks), one quiet line shows under the bio
   and the tab's title says so. Any input wakes it over about a second, at once under reduced motion. Reading is not idle: it never starts while
-  a card, the sheet, Find me, a search or a ride is open, while a finger or a button is down, or during the unfold.
+  a card, the sheet, Find me or a ride is open, while a finger or a button is down, or during the unfold.
   On a tab switch no frame is drawn, so the rest is formed at once and the reader comes back to it.
 */
 import { element } from "@/lib/about-cv/scene/dom";
