@@ -80,7 +80,7 @@ export type WorldEvent = {
   isPresent?: boolean;
 };
 
-export const UNDATED = "Undated in the CV";
+export const UNDATED = "Undated";
 
 /** "Media Research & Innovations" as "media-research-innovations". */
 const slug = (words: string) =>

@@ -29,7 +29,7 @@ export const worlds: World[] = [
     key: "projects",
     name: "Projects",
     description:
-      "The projects the CV names, with their code where it is public.",
+      "Every project, with its code where it is public.",
   },
   {
     key: "courses",

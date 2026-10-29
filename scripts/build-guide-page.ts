@@ -24,7 +24,7 @@ const SOURCE = path.join("lib", "guide");
 const OUTPUT = path.join("public", "about", "v6");
 const TITLE = "About me · Syed Rafay";
 const DESCRIPTION =
-  "Syed Rafay, senior software engineer at Twin Technology: his whole CV, toured by an AI agent drawn as a graph.";
+  "Syed Rafay, senior software engineer at Twin Technology: his work, study and life, toured by an AI agent drawn as a graph.";
 
 /** A section's own look, from the theme, as custom properties: only what it sets beyond the field's colours. */
 function themeProperties(colours: FieldColours) {

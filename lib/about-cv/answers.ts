@@ -63,7 +63,7 @@ export function skillAnswer(
   if (!events.length)
     return {
       skill: skill.word,
-      sentence: `Listed in the CV under ${skill.group}. No role, project or course names it.`,
+      sentence: `Listed under ${skill.group}. No role, project or course names it.`,
       events,
     };
   const count =

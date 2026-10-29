@@ -21,9 +21,9 @@ export type City = {
   only) to AIMS's end in May 2025. Sydney: CommBank from June 2025, and on since.
 */
 const CV_YEARS: Record<string, string> = {
-  Karachi: "In the CV from 2014 to February 2020.",
-  Darwin: "In the CV from 2020 to May 2025.",
-  Sydney: "In the CV since June 2025.",
+  Karachi: "Work and study here from 2014 to February 2020.",
+  Darwin: "Work and study here from 2020 to May 2025.",
+  Sydney: "Work here since June 2025.",
 };
 
 export const cities: City[] = stays.map((stay) => ({

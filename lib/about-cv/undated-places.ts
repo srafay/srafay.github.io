@@ -1,6 +1,6 @@
 /*
   Where the scene draws the things the CV gives no date. Each is placed by the one clue there is. Its card says
-  "Undated in the CV" and gives that clue, so the place is never mistaken for a date. One function per clue, so a
+  "Undated" and gives that clue, so the place is never mistaken for a date. One function per clue, so a
   better clue changes one line.
 */
 import { middleOfYear } from "@/lib/about-cv/time";
@@ -29,21 +29,21 @@ export const placedInTheNedYears = (
 export const mediaIconPlace: UndatedPlace = {
   time: 2018.62,
   evidence:
-    "Drawn in 2018, beside the CV's one dated piece of broadcast monitoring work, the internship that year.",
+    "Drawn in 2018, beside the one dated piece of broadcast monitoring work, the internship that year.",
 };
 
 /** RCAI: the CV's IoT weather station is dated 2016 and marked RCAI/NED. */
 export const researchCentrePlace: UndatedPlace = {
   time: 2016.3,
   evidence:
-    "Drawn in 2016 beside the IoT weather station, which the CV dates 2016 and marks RCAI/NED.",
+    "Drawn in 2016 beside the IoT weather station, which is dated 2016 and marked RCAI/NED.",
 };
 
 /** Love For Data: an image classifier, like the CV's YOLO classifier of 2017. */
 export const loveForDataPlace: UndatedPlace = {
   time: 2017.3,
   evidence:
-    "Drawn in 2017, beside the CV's other early image classifier, the YOLO classifier of that year.",
+    "Drawn in 2017, beside the other early image classifier, the YOLO classifier of that year.",
 };
 
 /** The GTA San Andreas server's running: beside the server's code, which went up on GitHub in 2016. */
@@ -69,5 +69,5 @@ export const ieeeGraphicsPlace = placedInTheNedYears(
 export const greenSocietyPlace: UndatedPlace = {
   time: 2015.1,
   evidence:
-    "The CV names no year or school for it, so it is drawn beside the IEEE NED graphics work.",
+    "It has no year or school, so it is drawn beside the IEEE NED graphics work.",
 };

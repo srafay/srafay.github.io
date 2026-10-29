@@ -54,7 +54,7 @@ export class Search {
     this.input.autocomplete = "off";
     this.input.spellcheck = false;
     this.input.enterKeyHint = "search";
-    field.append(glyphElement(controlGlyphs.search, "cube-icon"), element("span", "cube-hidden", "Search the CV"), this.input);
+    field.append(glyphElement(controlGlyphs.search, "cube-icon"), element("span", "cube-hidden", "Search"), this.input);
     const close = closeButton("cube", () => this.close(), "Close the search");
     close.classList.add("cube-search-close");
     field.append(close);

@@ -170,7 +170,7 @@ export class SkillBoard {
     this.finaleWaiting = false;
     const left = this.plan.finale.filter((skill) => !this.slotOf.get(skill)?.filled);
     if (!left.length) return;
-    this.caption.textContent = `And ${left.length} more that the CV lists.`;
+    this.caption.textContent = `And ${left.length} more he lists.`;
     this.cascadeSlots = left.map((skill) => this.slotOf.get(skill) as Slot);
     this.cascadeFilled = 0;
     this.cascadeStarted = performance.now();

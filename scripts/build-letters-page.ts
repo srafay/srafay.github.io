@@ -22,7 +22,7 @@ import { bundleScript, escapeHtml, fillTemplate, fontPreloads, hashOf } from "./
 const SOURCE = path.join("lib", "letters");
 const OUTPUT = path.join("public", "about", "v7");
 const DESCRIPTION =
-  "Syed Rafay, senior software engineer at Twin Technology: his whole CV drawn as a landscape of its own letters.";
+  "Syed Rafay, senior software engineer at Twin Technology: his work, study and life drawn as a landscape of their own letters.";
 
 /** The name in two spans, so a phone sets it on two lines and a computer on one. */
 const nameLines = () =>

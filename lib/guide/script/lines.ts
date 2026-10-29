@@ -14,8 +14,8 @@ export type Exchange = { line: string; eventId?: string; extra?: "mockups" | "sk
 /** The tour, section by section. Every event of the CV appears in at least one section, checked at build time. */
 export const narration = (): Record<SectionKey, Exchange[]> => ({
   hello: [
-    { line: `I am an AI agent. No face, six tools, one CV: ${FULL_NAME}'s.` },
-    { line: `Scroll down and I will route you through ${his()} CV, all of it.` },
+    { line: `I am an AI agent. No face, six tools, one life to show you: ${FULL_NAME}'s.` },
+    { line: "I will route you through all of it. Scroll on whenever you like." },
   ],
   now: [
     { line: `${FULL_NAME} is a senior software engineer at Twin Technology, in Sydney. Since August 2026.`, eventId: "work-twin-technology" },
@@ -23,7 +23,7 @@ export const narration = (): Record<SectionKey, Exchange[]> => ({
     { line: "Together they are building the next generation of an AI platform." },
   ],
   work: [
-    { line: `Now the work. ${FULL_NAME} has had seven roles, newest first, then two internships the CV does not date.` },
+    { line: `Now the work. ${FULL_NAME} has had seven roles, newest first, then two internships with no dates.` },
     { line: "You met this one already. Twin Technology, since August 2026.", eventId: "work-twin-technology" },
     { line: "Atelier, in Sydney. Serverless backends on AWS, and a multi-agent AI assistant built with LangChain and LangGraph. Most of my tricks are its tools.", eventId: "work-atelier" },
     { line: "CommBank, also Sydney. Tools that automate banking work, tested with Pytest, Vitest and Playwright.", eventId: "work-commbank" },
@@ -31,7 +31,7 @@ export const narration = (): Record<SectionKey, Exchange[]> => ({
     { line: "The Northern Land Council, in Darwin. Web apps and REST APIs in C#, on .NET Core with Blazor.", eventId: "work-northern-land-council" },
     { line: "Foree Pay, in Karachi. Payment APIs in Python, built to PCI-DSS.", eventId: "work-foree-pay" },
     { line: "The earliest dated role, in 2018. An internship at Media Research & Innovations, for a broadcast monitoring startup.", eventId: "work-media-research-innovations" },
-    { line: "Love For Data. One month, one working image classifier. The CV gives it no date.", eventId: "work-love-for-data" },
+    { line: "Love For Data. One month, one working image classifier. It has no date.", eventId: "work-love-for-data" },
     { line: "RCAI, the Research Centre for Artificial Intelligence. Arduino and ZigBee devices, Java for Android, and the official website.", eventId: "work-rcai" },
   ],
   study: [
@@ -41,9 +41,9 @@ export const narration = (): Record<SectionKey, Exchange[]> => ({
     { line: "Before that, a Bachelor of Engineering in Computer and Information Systems, at NED in Karachi. 2014 to 2018.", eventId: "study-ned-university-of-engineering-technology" },
   ],
   projects: [
-    { line: `Projects next. One of ${FULL_NAME}'s projects is not in the CV. You are standing in it.` },
+    { line: `Projects next. One of ${FULL_NAME}'s projects is this page. You are standing in it.` },
     { line: `${His()} homepage is a sky of planets round a black hole. Earth carries ${his()} post about daylight saving.`, extra: "mockups" },
-    { line: "Now the fifteen in the CV. Each one with code on GitHub comes with its repository." },
+    { line: "Now the other fifteen. Each one with code on GitHub comes with its repository." },
     { line: "The airport screening thesis. You met it in Study.", eventId: "study-airport-screening-thesis" },
     { line: "An e-commerce app on .NET Core and Angular, in 2021. Three tiers, and an Android build with Ionic.", eventId: "projects-e-commerce-app" },
     { line: "Handwritten signatures, recognised with OpenCV.", eventId: "projects-signature-recognition" },
@@ -89,7 +89,7 @@ export const narration = (): Record<SectionKey, Exchange[]> => ({
     { line: `And Python, the language. ${His()} GitHub says so in brackets.`, eventId: "off-python" },
   ],
   skills: [
-    { line: `Skills. All 211, grouped as the CV groups them. Tap one and I will find every place ${FULL_NAME} used it.`, extra: "skills" },
+    { line: `Skills. All 211, in ${FULL_NAME}'s own groups. Tap one and I will find every place he used it.`, extra: "skills" },
   ],
   findMe: [
     { line: `That is the tour. ${FULL_NAME} is easiest to find here.`, extra: "links" },
@@ -126,8 +126,8 @@ export const routeLine = (sectionName: string | null) => (sectionName ? `Routing
  */
 export const trickLines = {
   search: [`Searching the web for ${FULL_NAME}. Top result: you are already on it.`],
-  research: ["Researching. Deep research takes a few seconds.", `Deep research done. One source, ${FULL_NAME}'s CV. It checks out.`],
-  chart: [`Chart done. ${FULL_NAME}'s CV by year. The tallest bar is 2018, with 13 items.`],
+  research: ["Researching. Deep research takes a few seconds.", `Deep research done. One source, ${FULL_NAME} himself. It checks out.`],
+  chart: [`Chart done. Everything ${FULL_NAME} had under way, year by year. The tallest bar is 2018, with 13 items.`],
   similar: ["Three visually similar results. All of them are me."],
   focusGroup: [
     `Focus group of three personas. The topic is ${FULL_NAME}.`,

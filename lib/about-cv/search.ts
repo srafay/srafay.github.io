@@ -63,7 +63,7 @@ const counted = (count: number, one: string, many: string) =>
 
 /** The line under the field: what the search lights, or that nothing in the CV holds it. */
 export function searchLine({ query, events, skills }: SearchResult) {
-  if (!events.length && !skills.length) return `Nothing in the CV holds "${query}".`;
+  if (!events.length && !skills.length) return `Nothing here holds "${query}".`;
   return `"${query}" lights ${counted(events.length, "event", "events")} and ${counted(skills.length, "skill", "skills")}. Enter goes to the first.`;
 }
 
