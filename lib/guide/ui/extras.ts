@@ -8,9 +8,9 @@ import { element } from "@/lib/about-cv/scene/dom";
 import type { SkillWord } from "@/lib/about-cv/skills";
 import { buildSkillsSheet, findMeList } from "@/lib/about-cv/ui/skills-sheet";
 import { costumeGlyphs, guideGlyphs, trickGlyphs } from "@/lib/guide/icons";
-import type { CostumeKey } from "@/lib/guide/python/costumes";
-import type { TrickKey } from "@/lib/guide/python/tricks";
-import { COSTUME_NAMES, controlButton, TRICK_NAMES } from "./bars";
+import type { CostumeKey } from "@/lib/guide/agent/costumes";
+import type { TrickKey } from "@/lib/guide/agent/tricks";
+import { COSTUME_NAMES, controlButton, namedTricks } from "./bars";
 
 /** Where the homepage is: the cosmos, entered as if coming back from a post. */
 export const BACK_TO_THE_SYSTEM = "/?from=post";
@@ -52,7 +52,7 @@ export function playgroundBlock(onTrick: (key: TrickKey) => void, onCostume: (ke
   const tricks = element("div", "guide-play-group");
   tricks.setAttribute("role", "group");
   tricks.setAttribute("aria-label", "Tricks");
-  for (const [key, name] of Object.entries(TRICK_NAMES) as [TrickKey, string][]) {
+  for (const [key, name] of namedTricks()) {
     const button = controlButton(name, trickGlyphs[key], "guide-tray-button guide-play-button");
     button.dataset.trick = key;
     button.addEventListener("click", () => onTrick(key));

@@ -1,5 +1,5 @@
 /*
-  Where a skill was used: the python says the short answer beside its head, and this panel names every role, project
+  Where a skill was used: the agent says the short answer beside its router, and this panel names every role, project
   and course behind it, each a button that opens its full entry. A sheet from the bottom on a phone and a panel at the
   side on a computer, like an entry, so it never sits on the page's words the way a bubble would.
 */

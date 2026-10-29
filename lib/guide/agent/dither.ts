@@ -1,22 +1,24 @@
 /*
-  The python in 1-bit. The first pass draws it in grey into a small target whose every pixel is one dither cell. The
+  The agent in 1-bit. The first pass draws it in grey into a small target whose every pixel is one dither cell. The
   second pass reads each cell exactly (no filtering) and compares it with a 4 x 4 Bayer threshold: darker becomes the
-  field's deep shade, lighter becomes near white, nothing stays clear. Every cell is a whole block of device pixels,
-  and the canvas is drawn at the device's own pixels and never scaled by CSS, so nothing is resampled into moire.
+  field's deep shade, lighter becomes near white, nothing stays clear. A lit cell is one flat colour, with no dither:
+  near white on a dark field, the deep shade on a light one, where near white would vanish. Every cell is a whole
+  block of device pixels, and the canvas is drawn at the device's own pixels and never scaled by CSS, so nothing is
+  resampled into moire.
 */
 import * as THREE from "three";
-import { PYTHON_LIGHT, rgbOf, type FieldColours } from "@/lib/guide/palette";
+import { AGENT_LIGHT, rgbOf, type FieldColours } from "@/lib/guide/palette";
 
 /**
  * How many device pixels across one dither cell is: about 1.5 to 2 CSS pixels, always whole device pixels. One cell
- * per device pixel would be a third of a CSS pixel on a phone at 3x, too fine to see, and the python would read as
+ * per device pixel would be a third of a CSS pixel on a phone at 3x, too fine to see, and the agent would read as
  * smooth grey instead of 1-bit.
  */
 export function ditherCellInDevicePixels(devicePixelRatio: number) {
   return Math.max(1, Math.round(devicePixelRatio * 1.6));
 }
 
-/** Where two fields meet behind the python: the field below a line on the canvas and the field above it. */
+/** Where two fields meet behind the agent: the field below a line on the canvas and the field above it. */
 export type FieldsBehind = {
   below: FieldColours;
   above: FieldColours;
@@ -55,9 +57,14 @@ const ditherFragment = /* glsl */ `
     tone = floor(tone * 4.0 + 0.5) / 4.0;
     int bayerIndex = (cellIndex.y % 4) * 4 + (cellIndex.x % 4);
     float threshold = (float(BAYER[bayerIndex]) + 0.5) / 16.0;
-    // Something fading (a shed skin) keeps only its share of cells, so it dissolves in dither, never in grey.
+    // Something faint (a copy, a phantom) keeps only its share of cells, so it shows and fades in dither, never grey.
     if (sampled.g < threshold) discard;
     vec3 dark = above ? deepAbove : deepBelow;
+    float ceiling = above ? ceilingAbove : ceilingBelow;
+    if (sampled.b > 0.5) {
+      colour = vec4(ceiling < 1.0 ? dark : light, 1.0);
+      return;
+    }
     colour = vec4(tone > threshold ? light : dark, 1.0);
   }
 `;
@@ -102,7 +109,7 @@ export class DitherRenderer {
         cell: { value: 1 },
         deepBelow: { value: new THREE.Vector3() },
         deepAbove: { value: new THREE.Vector3() },
-        light: { value: new THREE.Vector3(...rgbOf(PYTHON_LIGHT)) },
+        light: { value: new THREE.Vector3(...rgbOf(AGENT_LIGHT)) },
         ceilingBelow: { value: 1 },
         ceilingAbove: { value: 1 },
         lineFromBottom: { value: 0 },

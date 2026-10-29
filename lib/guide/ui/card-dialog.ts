@@ -1,7 +1,7 @@
 /*
   An item's full entry, opened from its card: the shared card body (lib/about-cv/ui/event-card.ts) in a panel of its
   own, a sheet from the bottom on a phone and a panel at the side on a computer. Previous and Next step along its
-  world. A skill in it asks the python where else that skill was used. Escape or the close button puts the focus back
+  world. A skill in it asks the agent where else that skill was used. Escape or the close button puts the focus back
   on the card it came from.
 */
 import type { WorldEvent } from "@/lib/about-cv/events";

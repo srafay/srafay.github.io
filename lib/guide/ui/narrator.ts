@@ -2,14 +2,14 @@
   The tour's lines, said as they come into view. The newest line in view is the one being said; any line above it
   that is still being said, or still waiting, is shown whole at once. So a reader who reads along hears each line in
   turn, and a reader who jumps lands on a whole chat with only the newest line typing. A tap on a line finishes it.
-  While a line is said, the python turns to it.
+  While a line is said, the agent turns to it.
 */
 import { typeInto, type Typing } from "./typing";
 
 export type NarratorOptions = {
   instant: boolean;
   onWord(word: string): void;
-  /** A line began: the python looks at it. */
+  /** A line began: the agent looks at it. */
   onLineStarted(line: HTMLElement): void;
 };
 

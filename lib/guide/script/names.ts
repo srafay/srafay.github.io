@@ -1,6 +1,6 @@
 /*
-  How the python names the owner. The full name the first time in each section, then "he". Which of his two names he
-  goes by is not known yet, so the python never uses one alone. When it is known, LATER_NAME becomes that name and
+  How the agent names the owner. The full name the first time in each section, then "he". Which of his two names he
+  goes by is not known yet, so the agent never uses one alone. When it is known, LATER_NAME becomes that name and
   every later mention follows: a one-line change.
 */
 import { site } from "@/lib/site";
@@ -8,7 +8,7 @@ import { site } from "@/lib/site";
 /** "Syed Rafay", from the site's own name. */
 export const FULL_NAME = site.name;
 
-/** What the python calls him after the first mention in a section. Null until the owner says which name he goes by. */
+/** What the agent calls him after the first mention in a section. Null until the owner says which name he goes by. */
 export const LATER_NAME: string | null = null;
 
 /** The later mention at the start of a sentence: "He", or his name once known. */

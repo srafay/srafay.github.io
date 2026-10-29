@@ -1,6 +1,6 @@
 /*
   The tour's sections after the first screen, built from the narration and the CV. Each is a flat field with its name
-  set huge beside its world's glyph, then a chat: the python's line, light, and the item it presents beside it, as a
+  set huge beside its world's glyph, then a chat: the agent's line, light, and the item it presents beside it, as a
   dark card. A tap on a card opens its full entry. A project with public code shows a repository card: its name, the
   CV's line and the link, nothing else.
 */

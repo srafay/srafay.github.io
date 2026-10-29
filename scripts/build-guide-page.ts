@@ -23,7 +23,7 @@ const SOURCE = path.join("lib", "guide");
 const OUTPUT = path.join("public", "about", "v6");
 const TITLE = "About me · Syed Rafay";
 const DESCRIPTION =
-  "Syed Rafay, senior software engineer at Twin Technology: his whole CV, toured by a python. The reptile, not the language.";
+  "Syed Rafay, senior software engineer at Twin Technology: his whole CV, toured by an AI agent drawn as a graph.";
 
 /** Each field's colours as custom properties, and the bars' words over each, from lib/guide/palette.ts. */
 function fieldStyles() {
@@ -32,7 +32,9 @@ function fieldStyles() {
     rules.push(`.guide-field-${key}{--field:${colours.field};--words:${colours.words};--deep:${colours.deep}}`);
     rules.push(`[data-under-top="${key}"] .guide-top{--bar-top-words:${colours.words};--bar-top-field:${colours.field};--bar-pressed-words:${colours.deep}}`);
     rules.push(`[data-under-bottom="${key}"] .guide-bottom{--bar-bottom-words:${colours.words};--bar-bottom-field:${colours.field};--bar-pressed-words:${colours.deep}}`);
-    rules.push(`[data-under-python="${key}"] .guide-say{--say-words:${colours.deep}}`);
+    rules.push(`[data-under-agent="${key}"] .guide-say{--say-words:${colours.deep}}`);
+    rules.push(`[data-under-agent="${key}"] .guide-chart-labels{color:${colours.words}}`);
+    rules.push(`[data-under-bottom="${key}"] .guide-chart-labels[data-in-den]{color:${colours.words}}`);
   }
   return rules.join("\n");
 }

@@ -1,5 +1,5 @@
 /*
-  How the python's words appear: word by word, at about the pace a person reads aloud, with a pause after each
+  How the agent's words appear: word by word, at about the pace a person reads aloud, with a pause after each
   sentence. The words are all laid out from the start and only shown in turn, so the bubble never changes size while
   it types and nothing below it moves. A screen reader gets the whole line at once from a hidden twin, never a word at
   a time. A tap finishes the line.
@@ -13,6 +13,13 @@ const SENTENCE_PAUSE_MILLISECONDS = 260;
 /** The pause after a word: longer after the end of a sentence. */
 export const pauseAfter = (word: string) =>
   WORD_MILLISECONDS + (/[.?!:]$/.test(word) ? SENTENCE_PAUSE_MILLISECONDS : 0);
+
+/** How long a line takes to type, in seconds: the sum of every word's pause. */
+export const secondsToSay = (line: string) =>
+  line
+    .split(/\s+/)
+    .filter(Boolean)
+    .reduce((total, word) => total + pauseAfter(word), 0) / 1000;
 
 export type Typing = {
   /** Shows every word now. */

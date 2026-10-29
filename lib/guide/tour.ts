@@ -32,7 +32,7 @@ export const SECTION_TITLES: Record<SectionKey, string> = {
   findMe: "Find me",
 };
 
-/** Which side the python perches on in each section on a computer, so it moves between sections. */
+/** Which side the agent rests on in each section on a computer, so it moves between sections. */
 export const PERCH_SIDE: Record<SectionKey, "left" | "right"> = {
   hello: "left",
   now: "right",

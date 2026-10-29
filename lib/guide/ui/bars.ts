@@ -1,25 +1,27 @@
 /*
-  The quiet bars. At the top: Find me and Skills, to open at any time. At the bottom: what the python does on asking,
+  The quiet bars. At the top: Find me and Skills, to open at any time. At the bottom: what the agent does on asking,
   its Tricks and its costumes (Dress me up), and Sound. Each is a real button with a name and a glyph. A tray opens
   above the bottom bar with one button a trick or a costume, and closes on a press elsewhere or Escape.
 */
 import { controlGlyphs, glyphElement, type Glyph } from "@/lib/about-cv/icons";
 import { element } from "@/lib/about-cv/scene/dom";
 import { costumeGlyphs, guideGlyphs, trickGlyphs } from "@/lib/guide/icons";
-import type { CostumeKey } from "@/lib/guide/python/costumes";
-import type { TrickKey } from "@/lib/guide/python/tricks";
+import type { CostumeKey } from "@/lib/guide/agent/costumes";
+import { TRICK_ORDER, type TrickKey } from "@/lib/guide/agent/tricks";
 
+/** The tricks by name, in the order they are offered: the six tools of the Atelier assistant, then one more. */
 export const TRICK_NAMES: Record<TrickKey, string> = {
-  coil: "Coil",
-  knot: "Knot",
-  peekaboo: "Peekaboo",
-  sneeze: "Sneeze",
-  dance: "Dance",
-  selfie: "Selfie",
-  hiss: "Hiss",
-  shed: "Shed",
-  eatBug: "Eat a bug",
+  search: "Web search",
+  research: "Deep research",
+  chart: "Make a chart",
+  similar: "Find similar images",
+  focusGroup: "Focus group",
+  route: "Route",
+  hallucinate: "Hallucinate",
 };
+
+/** Every trick, in order, with its name. */
+export const namedTricks = () => TRICK_ORDER.map((key) => [key, TRICK_NAMES[key]] as const);
 
 export const COSTUME_NAMES: Record<CostumeKey, string> = {
   cricketCap: "Cricket cap",
@@ -71,7 +73,7 @@ export class Bars {
     bottom.append(this.tricks, this.dressUp, this.sound);
 
     this.trickTray = this.tray("Tricks", "guide-trick-tray");
-    for (const [key, name] of Object.entries(TRICK_NAMES) as [TrickKey, string][]) {
+    for (const [key, name] of namedTricks()) {
       const button = controlButton(name, trickGlyphs[key], "guide-tray-button");
       button.dataset.trick = key;
       button.addEventListener("click", () => handlers.onTrick(key));

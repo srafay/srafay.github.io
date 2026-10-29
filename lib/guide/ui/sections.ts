@@ -1,9 +1,9 @@
 /*
   Where each section of the tour lies on the page. Measured only when something changes size (a ResizeObserver on the
   tour, and the fonts arriving), never while scrolling: on scroll the page's position alone says which field is under
-  the top bar, under the bottom bar, behind the python and in the middle of the screen.
+  the top bar, under the bottom bar, behind the agent and in the middle of the screen.
 */
-import type { FieldsBehind } from "@/lib/guide/python/dither";
+import type { FieldsBehind } from "@/lib/guide/agent/dither";
 import { fieldColours, type SectionKey } from "@/lib/guide/palette";
 
 type Span = { key: SectionKey; top: number; bottom: number };
@@ -43,7 +43,7 @@ export class Sections {
   }
 
   /**
-   * The fields behind the python's canvas. The canvas runs from bottom to top in stage space (CSS pixels up from the
+   * The fields behind the agent's canvas. The canvas runs from bottom to top in stage space (CSS pixels up from the
    * screen's bottom). The field at its bottom edge is below; if a section edge crosses it, the field above that edge
    * is above, and the edge's height from the canvas's bottom is the line between them.
    */

@@ -1,5 +1,5 @@
 /*
-  The colour of each field of the tour. A field is one flat colour with its words at full strength, and the python
+  The colour of each field of the tour. A field is one flat colour with its words at full strength, and the agent
   drawn over it in two colours only: a deep shade of that field, and near white. The build checks every pair below for
   contrast (checkPalette), so a colour changed here can never leave a word unreadable.
 */
@@ -20,17 +20,17 @@ export type FieldColours = {
   field: string;
   /** Every word set on the field. */
   words: string;
-  /** The python's dark cells, and the words in its bubbles, and the panel of a card. */
+  /** The agent's dark cells, and the words in its bubbles, and the panel of a card. */
   deep: string;
   /**
-   * How light the python may get on this field, from 0 to 1. On a light field near white cells vanish into it, so
-   * the brightest tone becomes sparse dark dots and the python still reads by its dark cells, with no outline.
+   * How light the agent may get on this field, from 0 to 1. On a light field near white cells vanish into it, so
+   * the brightest tone becomes sparse dark dots and the agent still reads by its dark cells, with no outline.
    */
   toneCeiling: number;
 };
 
-/** The python's light cells and the bubbles' paper, on every field. */
-export const PYTHON_LIGHT = "#f6f3ea";
+/** The agent's light cells and the bubbles' paper, on every field. */
+export const AGENT_LIGHT = "#f6f3ea";
 
 export const fieldColours: Record<SectionKey, FieldColours> = {
   hello: { field: "#1f6b48", words: "#ffffff", deep: "#0a2617", toneCeiling: 1 },
@@ -73,8 +73,8 @@ export function checkPalette() {
   for (const [key, colours] of Object.entries(fieldColours)) {
     const pairs: [string, string, string][] = [
       ["words on the field", colours.words, colours.field],
-      ["a bubble's words", colours.deep, PYTHON_LIGHT],
-      ["a card's words", PYTHON_LIGHT, colours.deep],
+      ["a bubble's words", colours.deep, AGENT_LIGHT],
+      ["a card's words", AGENT_LIGHT, colours.deep],
     ];
     for (const [what, front, back] of pairs) {
       const ratio = contrastRatio(front, back);

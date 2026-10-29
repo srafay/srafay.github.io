@@ -1,5 +1,5 @@
 /*
-  Every word the python says, in one place, so all of it can be read and checked at once. Facts follow the CV (and
+  Every word the agent says, in one place, so all of it can be read and checked at once. Facts follow the CV (and
   content/about/profile.ts, which is the CV in the site's voice), word for word where it names things. The house rules
   hold: no contractions, no dashes, no semicolons, short sentences, the full name the first time in each section's
   narration and "he" after. Asides (tricks, costumes, taps, the grab) each stand alone, so any that names him says the
@@ -14,8 +14,8 @@ export type Exchange = { line: string; eventId?: string; extra?: "mockups" | "sk
 /** The tour, section by section. Every event of the CV appears in at least one section, checked at build time. */
 export const narration = (): Record<SectionKey, Exchange[]> => ({
   hello: [
-    { line: `I am Python. The reptile. ${FULL_NAME} uses the other one.` },
-    { line: `Scroll down. I will take you through ${his()} CV, all of it.` },
+    { line: `I am an AI agent. No face, six tools, one CV: ${FULL_NAME}'s.` },
+    { line: `Scroll down and I will route you through ${his()} CV, all of it.` },
   ],
   now: [
     { line: `${FULL_NAME} is a senior software engineer at Twin Technology, in Sydney. Since August 2026.`, eventId: "work-twin-technology" },
@@ -25,11 +25,11 @@ export const narration = (): Record<SectionKey, Exchange[]> => ({
   work: [
     { line: `Now the work. ${FULL_NAME} has had seven roles, newest first, then two internships the CV does not date.` },
     { line: "You met this one already. Twin Technology, since August 2026.", eventId: "work-twin-technology" },
-    { line: "Atelier, in Sydney. Serverless backends on AWS, and a multi-agent AI assistant built with LangChain and LangGraph.", eventId: "work-atelier" },
+    { line: "Atelier, in Sydney. Serverless backends on AWS, and a multi-agent AI assistant built with LangChain and LangGraph. Most of my tricks are its tools.", eventId: "work-atelier" },
     { line: "CommBank, also Sydney. Tools that automate banking work, tested with Pytest, Vitest and Playwright.", eventId: "work-commbank" },
-    { line: "AIMS, the Australian Institute of Marine Science. ReefCloud and new science apps. Sea snakes live on reefs. I feel represented.", eventId: "work-aims" },
+    { line: "AIMS, the Australian Institute of Marine Science. ReefCloud and new science apps, remote and in Darwin.", eventId: "work-aims" },
     { line: "The Northern Land Council, in Darwin. Web apps and REST APIs in C#, on .NET Core with Blazor.", eventId: "work-northern-land-council" },
-    { line: "Foree Pay, in Karachi. Payment APIs in Python, built to PCI-DSS. The language, not me.", eventId: "work-foree-pay" },
+    { line: "Foree Pay, in Karachi. Payment APIs in Python, built to PCI-DSS.", eventId: "work-foree-pay" },
     { line: "The earliest dated role, in 2018. An internship at Media Research & Innovations, for a broadcast monitoring startup.", eventId: "work-media-research-innovations" },
     { line: "Love For Data. One month, one working image classifier. The CV gives it no date.", eventId: "work-love-for-data" },
     { line: "RCAI, the Research Centre for Artificial Intelligence. Arduino and ZigBee devices, Java for Android, and the official website.", eventId: "work-rcai" },
@@ -71,7 +71,7 @@ export const narration = (): Record<SectionKey, Exchange[]> => ({
     { line: "ChatGPT Prompt Mastery, April 2025.", eventId: "courses-chatgpt-prompt-mastery" },
     { line: "Rocking AWS Serverless, at the end of 2022. The name is the course's own.", eventId: "courses-rocking-aws-serverless" },
     { line: "Build an E-commerce App with .NET Core and Angular, August to October 2021.", eventId: "courses-e-commerce-with-net-and-angular" },
-    { line: "Python design patterns, November 2018. The language again. Still not me.", eventId: "courses-python-design-patterns" },
+    { line: "Python design patterns, a LinkedIn course, November 2018.", eventId: "courses-python-design-patterns" },
     { line: "The Ultimate Hands-On Hadoop, July to September 2018.", eventId: "courses-hands-on-hadoop" },
     { line: "Python REST APIs with Flask, Docker, MongoDB and AWS DevOps. May to June 2018.", eventId: "courses-flask-rest-apis" },
     { line: "Python for data science, at DataCamp, March 2018.", eventId: "courses-python-for-data-science" },
@@ -86,70 +86,76 @@ export const narration = (): Record<SectionKey, Exchange[]> => ({
     { line: `Graphics for the IEEE NED Computer Society: logos, membership cards and posters. That is where ${he()} learned Illustrator.`, eventId: "off-ieee-graphics" },
     { line: `Cricket. ${His()} GitHub says to ask him about it.`, eventId: "off-cricket" },
     { line: `Dota 2. When ${he()} is not shipping code, you can find him in a lobby.`, eventId: "off-dota-2" },
-    { line: `And Python. ${His()} GitHub says the language, not the reptile. Rude, but fair.`, eventId: "off-python" },
+    { line: `And Python, the language. ${His()} GitHub says so in brackets.`, eventId: "off-python" },
   ],
   skills: [
-    { line: `Skills. All 211, grouped as the CV groups them. Tap one and I will name every place ${FULL_NAME} used it.`, extra: "skills" },
+    { line: `Skills. All 211, grouped as the CV groups them. Tap one and I will find every place ${FULL_NAME} used it.`, extra: "skills" },
   ],
   findMe: [
     { line: `That is the tour. ${FULL_NAME} is easiest to find here.`, extra: "links" },
-    { line: "Before you go, I still have tricks.", extra: "playground" },
+    { line: "Before you go, here are all my tricks again.", extra: "playground" },
   ],
 });
 
-/** The python's first words, and its one hint about being picked up. */
+/** The agent's first words, and its one hint about being picked up. */
 export const asides = {
-  pickMeUp: "Psst. You can pick me up.",
-  pickedUp: ["Hello up there.", "I am not venomous. Just long.", "Put me down when you are done."],
-  dropped: ["I meant to land like that.", "Back to the floor.", "That was fun. Again?"],
+  pickMeUp: "Psst. You can pick me up by my router, the big node.",
+  pickedUp: ["Hello up there.", "Careful. My tools are hanging on.", "Put me down when you are done."],
+  dropped: ["Floating home.", "Back in position.", "That was fun. Again?"],
   soundOn: "Sound on. I will keep it soft.",
 };
 
 /** What it says when tapped, one after another. */
 export const tapLines = [
   "Hello again.",
-  "Snakes cannot blink. I practise anyway.",
-  "I am not venomous. Pythons squeeze instead.",
-  "Tap Tricks for tricks. I know nine.",
+  "No face. You can tell where I am looking by how I lean.",
+  "My big node is the router. It sends each message to the right tool.",
+  "Tap Tricks. I know seven, and six are real tools.",
   `Try Dress me up. Everything in it is from ${FULL_NAME}'s life.`,
-  "Python the language is named after Monty Python, not me. I checked.",
+  `At Atelier, ${FULL_NAME} also built file analysis and 3D packaging previews. I left those tools at home.`,
 ];
 
+/** The section a route goes to, by its own name; the start when it goes back to the top. */
+export const routeLine = (sectionName: string | null) => (sectionName ? `Routing you to ${sectionName}.` : "Routing you back to the start.");
+
+/**
+ * What each trick says, in turn. Each line is said as its part of the trick begins. A line stands alone once the one
+ * before it is gone, so each that names him says the full name.
+ */
 export const trickLines = {
-  coil: "Boing.",
-  knot: "Do not worry. I can undo this.",
-  peekaboo: "Peekaboo.",
-  sneeze: "Bless me.",
-  dance: "One, two, three, four.",
-  selfie: "Hold still. Got it.",
-  hiss: "Hsss.",
-  shed: "New skin. Same snake.",
-  eatBug: "I ate a bug. Someone has to.",
+  search: [`Searching the web for ${FULL_NAME}. Top result: you are already on it.`],
+  research: ["Researching. Deep research takes a few seconds.", `Deep research done. One source, ${FULL_NAME}'s CV. It checks out.`],
+  chart: [`Chart done. ${FULL_NAME}'s CV by year. The tallest bar is 2018, with 13 items.`],
+  similar: ["Three visually similar results. All of them are me."],
+  focusGroup: [
+    `Focus group of three personas. The topic is ${FULL_NAME}.`,
+    `Persona one. ${FULL_NAME} has worked for a bank, a marine science institute and a land council.`,
+    `Persona two. ${FULL_NAME} has a Masters of IT from Charles Darwin University, and a thesis on airport X-ray images.`,
+    `Persona three. Ask ${FULL_NAME} about cricket.`,
+  ],
+  hallucinate: ["Look, eleven tools.", `Wait. I made five of those up. Every fact on this page comes from ${FULL_NAME} himself.`],
 } as const;
 
 export const costumeLines = {
   cricketCap: `Cricket. ${FULL_NAME} asks people to ask him about it. So ask him.`,
   headset: `When ${FULL_NAME} is not shipping code, you can find him in a Dota 2 lobby. His words.`,
   graduationCap: "Two degrees. Computer and Information Systems at NED in Karachi, then a Masters of IT at Charles Darwin University.",
-  readingGlasses: "Fifteen courses, from Android in 2016 to the Model Context Protocol in 2026.",
+  readingGlasses: `No eyes, but I can read. ${FULL_NAME} has done fifteen courses, from Android in 2016 to the Model Context Protocol in 2026.`,
   hardHat: `${FULL_NAME} once kept order on a GTA San Andreas server. Forums, reports, ban applications and in-game moderation.`,
-  none: "Back to just me.",
+  none: "Back to plain nodes.",
 } as const;
 
-/** What it says before a skill's answer: Python gets its own disclaimer. */
-export const skillLead = (skill: string) => (skill === "Python" ? "Python the language, not me." : `${skill}.`);
-
-const COUNTS = ["No", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve"];
+const COUNTS = ["no", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve"];
 
 /**
- * Where a skill was used, said short: "Flask. Four places, 2018." The places themselves follow as buttons, each
- * named, so no sentence runs long. A skill no event names says where the CV lists it, in the shared answer's words.
+ * Where a skill was used, said short: "Flask. I found four places, 2018." The places themselves follow as buttons,
+ * each named, so no sentence runs long. A skill no event names says where the CV lists it, in the shared answer's words.
  */
 export function skillAnswerLine(skill: string, events: { start: number; end?: number }[], sharedSentence: string) {
-  if (!events.length) return `${skillLead(skill)} ${sharedSentence}`;
+  if (!events.length) return `${skill}. ${sharedSentence}`;
   const first = Math.min(...events.map((event) => Math.floor(event.start)));
   const last = Math.max(...events.map((event) => Math.floor(event.end ?? event.start)));
   const years = first === last ? String(first) : `${first} to ${last}`;
   const count = COUNTS[events.length] ?? String(events.length);
-  return `${skillLead(skill)} ${count} ${events.length === 1 ? "place" : "places"}, ${years}. Tap one to open it.`;
+  return `${skill}. I found ${count} ${events.length === 1 ? "place" : "places"}, ${years}. Tap one to open it.`;
 }
