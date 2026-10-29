@@ -1,17 +1,14 @@
 /*
-  Builds the scripts the About page's versions draw their scenes with, each from its entry file into public/, where
-  its page adds it with a hash of its contents in the address (lib/content-hash.ts). Run before `next build` and
-  `next dev`, like scripts/build-site-menu.ts. The files are made here every time, so they are not committed.
-  A new version with a script of its own adds one line to SCENES.
+  Builds the scripts the About page and the homepage draw with. The About page's script is bundled from its entry file
+  into public/about.js, which the page adds with a hash of its contents in the address (lib/content-hash.ts). The
+  homepage is built whole by scripts/build-hypercube-page.ts. Run before `next build` and `next dev`, like
+  scripts/build-site-menu.ts. The files are made here every time, so they are not committed.
 
   The site's typecheck has no Bun types (Next builds under Node), so the one call made to Bun here is typed by hand.
 */
 import fs from "node:fs";
 import path from "node:path";
-import { buildGuidePage } from "./build-guide-page";
 import { buildHypercubePage } from "./build-hypercube-page";
-import { buildLettersPage } from "./build-letters-page";
-import { buildWorldLinesPage } from "./build-world-lines-page";
 
 type Bundler = {
   build(options: {
@@ -23,27 +20,13 @@ type Bundler = {
 };
 const { Bun } = globalThis as unknown as { Bun: Bundler };
 
-type Scene = { entry: string; output: string };
+// The About page itself: a pressed skill lights its roles, the ruler, the calendar's days, the time in Sydney.
+const ABOUT_SCRIPT = {
+  entry: path.join("lib", "about", "script", "main.ts"),
+  output: path.join("public", "about.js"),
+};
 
-const SCENES: Scene[] = [
-  // The About page itself: a pressed skill lights its roles, the ruler, the calendar's days, the time in Sydney.
-  {
-    entry: path.join("lib", "about", "script", "main.ts"),
-    output: path.join("public", "about.js"),
-  },
-  // Version 2, "A year of nights": the contribution year as a night sky.
-  {
-    entry: path.join("lib", "year-of-nights", "scene", "main.ts"),
-    output: path.join("public", "about-v2.js"),
-  },
-  // Version 3, "Flight": the real Earth at night, flown from Karachi to Darwin to Sydney (three.js).
-  {
-    entry: path.join("lib", "flight", "main.ts"),
-    output: path.join("public", "about-v3.js"),
-  },
-];
-
-async function buildScene({ entry, output }: Scene) {
+async function buildAboutScript({ entry, output }: typeof ABOUT_SCRIPT) {
   const result = await Bun.build({
     entrypoints: [entry],
     target: "browser",
@@ -56,17 +39,7 @@ async function buildScene({ entry, output }: Scene) {
   console.log(`${output}: ${fs.statSync(output).size} bytes`);
 }
 
-for (const scene of SCENES) await buildScene(scene);
+await buildAboutScript(ABOUT_SCRIPT);
 
-// Version 4, "World lines": a page of its own, not a Next page, so it is built whole (scripts/build-world-lines-page.ts).
-await buildWorldLinesPage();
-
-// Version 5, "Hypercube": the life as one object in four dimensions, built once for the homepage and for its prototype page
-// (scripts/build-hypercube-page.ts).
+// The homepage, "Hypercube" (version 5 of the About page): the life as one object in four dimensions.
 await buildHypercubePage();
-
-// Version 6, "Guide": a python tours the whole CV down flat fields of colour, a page of its own (scripts/build-guide-page.ts).
-await buildGuidePage();
-
-// Version 7, "Letters": the life as a landscape drawn in the CV's own words, a page of its own (scripts/build-letters-page.ts).
-await buildLettersPage();

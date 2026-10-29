@@ -1,7 +1,7 @@
 /*
-  What every version of the About page built as a page of its own shares, outside Next: its script bundled by Bun, its
-  template filled in, the site's fonts preloaded, and a hash of each file's contents for its address. So a phone that
-  cached an older build fetches the new one.
+  What the homepage needs to be built as a page of its own, outside Next (scripts/build-hypercube-page.ts): its script
+  bundled by Bun, its template filled in, the site's fonts preloaded, and a hash of each file's contents for its
+  address. So a phone that cached an older build fetches the new one.
 
   The site's typecheck has no Bun types (Next builds under Node), so the one call made to Bun here is typed by hand.
 */

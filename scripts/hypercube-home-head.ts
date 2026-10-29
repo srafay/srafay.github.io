@@ -1,8 +1,8 @@
 /*
-  The head of the homepage, which is version 5 of the About page at /. The scene and the body are the same as
-  /about/v5/'s, but for the few lines the template marks for one page (scripts/build-hypercube-page.ts). The head is
-  what differs: the homepage may be indexed, it is the site's own address, it carries the site's icons and feed, it
-  tells search engines who the site is about, and it counts the visit (lib/visit-counter.ts).
+  The head of the homepage, which is version 5 of the About page at /. The scene and the body come from
+  lib/hypercube/page.html (scripts/build-hypercube-page.ts). The head is the homepage's own: it may be indexed, it is
+  the site's own address, it carries the site's icons and feed, it tells search engines who the site is about, and it
+  counts the visit (lib/visit-counter.ts).
 
   Everything here says only what the page shows: the name, the bio, the life drawn as one object, and the profiles
   under Find me. The notes are not on the page, so their structured data is not either. It is on /posts/. The page is
@@ -21,7 +21,7 @@ export const HOME_TITLE = site.name;
 export const HOME_DESCRIPTION =
   "Syed Rafay is a senior software engineer at Twin Technology. This page draws every role, degree, project, course and skill as one object in four dimensions.";
 
-/** Unlike the prototype it is made from, the homepage may be indexed and followed. */
+/** The homepage may be indexed and followed. */
 export const HOME_ROBOTS = "index, follow";
 
 const metaName = (name: string, content: string) => `<meta name="${name}" content="${escapeHtml(content)}">`;
