@@ -37,6 +37,8 @@ export type BarHandlers = {
   onSound(): boolean;
   onSkills(): void;
   onFindMe(): void;
+  /** A tray opened or closed. */
+  onTraysChanged(): void;
 };
 
 export function controlButton(label: string, glyph: Glyph, className = "guide-control") {
@@ -123,6 +125,7 @@ export class Bars {
     if (!opening) return;
     tray.hidden = false;
     opener.setAttribute("aria-expanded", "true");
+    this.handlers.onTraysChanged();
   }
 
   /** Closes an open tray. Says whether one was open, for the Escape order. */
@@ -132,6 +135,7 @@ export class Bars {
     this.costumeTray.hidden = true;
     this.tricks.setAttribute("aria-expanded", "false");
     this.dressUp.setAttribute("aria-expanded", "false");
+    if (open) this.handlers.onTraysChanged();
     return open;
   }
 

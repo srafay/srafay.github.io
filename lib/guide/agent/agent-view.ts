@@ -30,6 +30,8 @@ const FLOAT_STIFFNESS = 26;
 /** A press becomes a grab after this much movement (CSS pixels) or this long held (seconds). */
 const GRAB_AFTER_PIXELS = 6;
 const GRAB_AFTER_SECONDS = 0.18;
+/** How far from home, in CSS pixels, the agent counts as flying, its discs letting presses through. */
+const FLYING_DISTANCE = 8;
 /** How long a pointer or a finger holds the agent's attention after it last moved, in seconds. */
 const POINTER_HOLDS_FOR = 2.5;
 /** How much the den's strip grows to hold the chart, in CSS pixels, and how tall its tallest bar stands there. */
@@ -415,6 +417,14 @@ export class AgentView {
     requestAnimationFrame(() => this.frame());
   }
 
+  /**
+   * Whether the agent is visibly flying between homes: its router more than a few pixels from home. The last stretch
+   * of a float, under a few pixels, is not flying: the agent can be taken hold of again.
+   */
+  private get flying() {
+    return this.awayFromHome > FLYING_DISTANCE;
+  }
+
   /** Whether the agent is on its way somewhere: floating home, growing or folding. */
   private get travelling() {
     const place = this.placeNow();
@@ -523,14 +533,19 @@ export class AgentView {
     const links = this.linksFor(nodes, radius, now, toolScales);
     const frame = routerFrame(this.gaze);
     const route = nodeOfTool("route");
-    const outward = normalise(point(nodes[route].x - nodes[ROUTER].x, nodes[route].y - nodes[ROUTER].y, 0));
-    nodes[route] = add(nodes[route], scale(outward, this.conePush.value));
-    links[route - 1] = { ...links[route - 1], to: nodes[route] };
-    const conePoint = nodes[route];
-    const coneAim = this.held ? normalise(subtract(conePoint, nodes[ROUTER])) : normalise(point(target.x - conePoint.x, target.y - conePoint.y, 0));
-    this.cone = { place: conePoint, aim: coneAim, angle: this.gaze.aim };
-    this.model.layOut(nodes, radius, frame, breath, links, toolScales, coneAim);
-    this.keepTheConeClearOfTheCostume(outward, step);
+    const unpushedCone = nodes[route];
+    const outward = normalise(point(unpushedCone.x - nodes[ROUTER].x, unpushedCone.y - nodes[ROUTER].y, 0));
+    const layTheGraph = () => {
+      nodes[route] = add(unpushedCone, scale(outward, this.conePush.value));
+      links[route - 1] = { ...links[route - 1], to: nodes[route] };
+      const conePoint = nodes[route];
+      const coneAim = this.held ? normalise(subtract(conePoint, nodes[ROUTER])) : normalise(point(target.x - conePoint.x, target.y - conePoint.y, 0));
+      this.cone = { place: conePoint, aim: coneAim, angle: this.gaze.aim };
+      this.model.layOut(nodes, radius, frame, breath, links, toolScales, coneAim);
+    };
+    layTheGraph();
+    // Laid again at once when the cone has to move out further, so it never shows on a costume even for a frame.
+    if (this.keepTheConeClearOfTheCostume(outward, step)) layTheGraph();
     this.lit = pose ? pose.lit : message?.atTool ? message.tool : null;
     this.model.setLit(this.lit);
     this.messageCells = messageSizeInCells(radius / largestRadius(this.stage));
@@ -546,6 +561,7 @@ export class AgentView {
     this.drawnBounds = mergeBounds(this.graphBounds, extras);
     this.placeCanvasAndDraw(this.drawnBounds);
     this.hits.place(nodes, radius, toolScales, this.held);
+    this.hits.letPressesThrough(this.flying && !this.held && !this.press);
     // The bubble keeps clear of everything but the cone, which turns to aim at it and stays within the router's reach.
     const withoutCone = nodes.map((node, index) => (index === nodeOfTool("route") && !this.held ? nodes[ROUTER] : node));
     const reach = radius * 1.65 + this.conePush.value;
@@ -562,14 +578,22 @@ export class AgentView {
     if (!worn) {
       this.coneClearOfCostume = true;
       this.follow(this.conePush, 0, seconds);
-      return;
+      return false;
     }
     const cone = this.model.coneBox();
     const costume = flatBoxOf(worn);
-    this.coneClearOfCostume = !boxesOverlap(cone, costume, 0);
     // How far the cone would have to move from where it would be with no push: boxes move with what they hold.
     const unpushed = shiftedBox(cone, scale(outward, -this.conePush.value));
-    this.follow(this.conePush, separationAlong(unpushed, costume, outward, 4), seconds);
+    const needed = separationAlong(unpushed, costume, outward, 4);
+    // Out at once, back in smoothly: the cone is never seen on the costume, and never snaps back toward it.
+    if (needed > this.conePush.value) {
+      this.conePush.jump(needed);
+      this.coneClearOfCostume = !boxesOverlap(shiftedBox(unpushed, scale(outward, needed)), costume, 0);
+      return true;
+    }
+    this.follow(this.conePush, needed, seconds);
+    this.coneClearOfCostume = !boxesOverlap(shiftedBox(unpushed, scale(outward, this.conePush.value)), costume, 0);
+    return false;
   }
 
   /**
@@ -776,6 +800,11 @@ export class AgentView {
       const toward = normalise(subtract(node, router));
       return { from: { x: router.x + toward.x * this.radius * 0.85, y: router.y + toward.y * this.radius * 0.85 }, to: { x: node.x, y: node.y } };
     });
+  }
+
+  /** Where the den's room right of the resting agent starts, from the screen's left edge. */
+  get denRoomLeft() {
+    return denRoomLeft(this.stage);
   }
 
   /** How far the router floats from its home now, for checks. */

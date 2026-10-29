@@ -396,6 +396,11 @@ body.about-v6 {
   cursor: grabbing;
 }
 
+/* Flying between homes, the agent lets every press through to what it passes over. */
+.guide-hits[data-passing] .guide-hit {
+  pointer-events: none;
+}
+
 /* The agent's own bubble, beside its router: plain, rounded, in the page's type. */
 .guide-say {
   position: fixed;

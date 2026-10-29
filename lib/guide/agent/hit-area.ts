@@ -73,6 +73,16 @@ export class HitArea {
     return most < 3;
   }
 
+  /**
+   * While the agent flies between homes its targets let every press through, so a click on a control it passes over
+   * reaches the control. Written only when it changes.
+   */
+  letPressesThrough(through: boolean) {
+    if (through === ("passing" in this.element.dataset)) return;
+    if (through) this.element.dataset.passing = "";
+    else delete this.element.dataset.passing;
+  }
+
   /** Whether an element is one of the agent's targets. */
   owns(target: EventTarget | null) {
     return target instanceof HTMLElement && target.closest(".guide-hits") === this.element;

@@ -12,6 +12,7 @@ import { skillWords, type SkillWord } from "@/lib/about-cv/skills";
 import { presentTime } from "@/lib/about-cv/time";
 import { AgentView, DEN_CHART_ROOM, type Home } from "@/lib/guide/agent/agent-view";
 import { cvByYear } from "@/lib/guide/agent/chart";
+import { sideMargin } from "@/lib/guide/agent/proportions";
 import type { CostumeKey } from "@/lib/guide/agent/costumes";
 import { NODE_COUNT } from "@/lib/guide/agent/topology";
 import type { Part, TrickKey } from "@/lib/guide/agent/tricks";
@@ -178,16 +179,23 @@ export function mountGuide(root: HTMLElement, data: GuideData) {
     ],
     // The whole bottom strip, not only its buttons: on a phone it is the agent's den, never a place for a bubble.
     () => [parts.bottom, ...root.querySelectorAll<HTMLElement>(".guide-tray")],
-    () => [...parts.tour.querySelectorAll<HTMLElement>("button, a, input")],
+    // The tour's own lines and cards too: the agent's bubble never lies over the narration or an item.
+    () => [...parts.tour.querySelectorAll<HTMLElement>("button, a, input, .guide-line, .guide-card")],
   );
   const say = new Say(
     root,
     () => reducedMotion,
     (height) => keepClear.boxes(window.scrollY, height),
-    () => keepClear.measureControlsInView(),
+    () => {
+      keepClear.measure();
+      keepClear.measureControlsInView();
+    },
     () => denSpace(),
+    // In a computer's side margin, a bubble as wide as the margin, so it stays out of the tour's column.
+    () => (agent && !agent.stage.den && agent.currentHome !== "hello" ? Math.max(220, sideMargin(window.innerWidth) - 24) : null),
   );
   say.onWord = (word) => sound.blip(word);
+  say.openTrays = () => [...root.querySelectorAll<HTMLElement>(".guide-tray:not([hidden])")].map((tray) => tray.getBoundingClientRect());
 
   // The tour: every section after the first screen, with its lines and cards.
   const lines = buildTour(parts.tour, narration(), data.events, {
@@ -213,11 +221,14 @@ export function mountGuide(root: HTMLElement, data: GuideData) {
     return { top: height + floor, floor: floor + 4 };
   };
 
-  /** On a phone, while the agent rests in the den, an aside is said in the den, right of it. */
+  /**
+   * On a phone, while the den is the agent's home (resting there, on its way there, or picked up out of it), an aside is
+   * said in the den, right of where the agent rests: a section full of narration and cards has no clear place for it.
+   */
   const denSpace = () => {
-    if (!agent?.stage.den || !agent.inDen) return null;
+    if (!agent?.stage.den || agent.currentHome !== "den") return null;
     return {
-      left: agent.graphBounds.right + 10,
+      left: agent.inDen ? agent.graphBounds.right + 10 : agent.denRoomLeft,
       right: window.innerWidth - 12,
       floor: agent.stage.denFloor,
       top: agent.stage.denTop,
@@ -313,9 +324,11 @@ export function mountGuide(root: HTMLElement, data: GuideData) {
     agent.stopTrick();
   };
 
+  /** A costume: the agent wears it and says its line; the tray closes, as it does after a trick, so it can be seen. */
   function wear(key: CostumeKey | null) {
     agent.wear(key);
     bars.showWorn(key);
+    bars.closeTrays();
     say.say(key ? costumeLines[key] : costumeLines.none);
   }
 
@@ -347,6 +360,8 @@ export function mountGuide(root: HTMLElement, data: GuideData) {
       },
       onSkills: () => panels.toggleSheet(bars.skills),
       onFindMe: () => panels.toggleFindMe(bars.findMe),
+      // A tray opened or closed: a line shown looks again at what to keep clear of.
+      onTraysChanged: () => say.relook(),
     },
     sound.available,
     sound.on,
@@ -388,10 +403,15 @@ export function mountGuide(root: HTMLElement, data: GuideData) {
       const home: Home = middle === "hello" ? "hello" : agent.stage.den ? "den" : PERCH_SIDE[middle];
       agent.goHome(home);
       if (middle !== "hello" && !say.isHolding) say.hide();
+      else say.relook();
     }
     followLine();
     agent.nudge();
+    // A line still shown when a scroll comes to rest looks again at what is now on screen.
+    window.clearTimeout(scrollRest);
+    scrollRest = window.setTimeout(() => say.relook(), 160);
   };
+  let scrollRest = 0;
   window.addEventListener("scroll", onScroll, { passive: true });
   sections.onMeasured = () => {
     keepClear.measure();

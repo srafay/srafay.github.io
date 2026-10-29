@@ -27,6 +27,20 @@ function showDenSpeaking(speaking: boolean, grow = 0) {
   if (document.body.style.getPropertyValue("--guide-den-grow") !== growth) document.body.style.setProperty("--guide-den-grow", growth);
 }
 
+/** What a place for the bubble would cover: the page and the agent's body, and the room round its router. */
+type Cover = { kept: number; face: number };
+
+/**
+ * Covering the page or the agent's body is worse than any amount of the room round its router: that room is where the
+ * cone swings, and at most its tip touches the bubble it points at.
+ */
+const coversLess = (cover: Cover, than: Cover) => cover.kept < than.kept || (cover.kept === than.kept && cover.face < than.face);
+
+/** The lowest edge of the boxes above a line (y) that a span across the screen (left to right) would touch. */
+function floorAbove(boxes: Box[], left: number, right: number, line: number) {
+  return boxes.reduce((lowest, box) => (box.bottom <= line && box.right > left && box.left < right ? Math.max(lowest, box.bottom) : lowest), 0);
+}
+
 export class Say {
   readonly element: HTMLElement;
   private readonly words: HTMLElement;
@@ -45,6 +59,8 @@ export class Say {
   private held = false;
   onWord: (word: string) => void = () => {};
   onHidden: () => void = () => {};
+  /** The trays open now, on the screen: a line never lies under one. */
+  openTrays: () => Box[] = () => [];
   /** Called when the reader taps a line away. */
   onDismissed: () => void = () => {};
 
@@ -56,10 +72,12 @@ export class Say {
     /** Called as a line starts, to take in what is on screen to keep clear of. */
     private readonly lookAround: () => void = () => {},
     /**
-     * The den's space beside the agent, when it rests in the den on a phone: an aside is said there, in
-     * place of the bar's buttons. Null when it is not in the den.
+     * The den's space beside the agent, while the den is its home on a phone (resting there, on its way there, or
+     * picked up out of it): an aside is said there, in place of the bar's buttons. Null when the den is not its home.
      */
     private readonly denSpace: () => DenSpace | null = () => null,
+    /** The widest a bubble may be beside the agent, or null for its own width: a computer's side margin. */
+    private readonly widest: () => number | null = () => null,
   ) {
     this.element = element("div", "guide-say");
     this.element.setAttribute("aria-live", "polite");
@@ -95,20 +113,65 @@ export class Say {
       },
     });
     this.element.dataset.shown = "";
-    const den = this.denSpace();
+    this.lay(this.denSpace());
+    this.lookAround();
+    this.chosen = -1;
+    this.place();
+    this.showTheDen();
+    this.giveWayToATray();
+  }
+
+  /**
+   * On a small screen an open tray can leave no clear place for a line: rather than lie under the tray, unread, the
+   * line gives way. The reader is choosing a trick or a costume, which brings its own line.
+   */
+  private giveWayToATray() {
+    if (!this.shown || "inDen" in this.element.dataset) return;
+    if (this.openTrays().some((tray) => overlapArea(this.box, tray) > 0)) this.hide();
+  }
+
+  /**
+   * Lays the bubble out for where it is said: in the den's strip, as wide as the room beside the agent, or free beside
+   * the router. Measured once a line, or when it moves between the two, never a frame.
+   */
+  private lay(den: DenSpace | null) {
     if (den) {
       this.element.dataset.inDen = "";
       this.element.style.width = `${Math.round(den.right - den.left)}px`;
+      this.element.style.maxWidth = "";
     } else {
       delete this.element.dataset.inDen;
       this.element.style.width = "";
+      const widest = this.widest();
+      this.element.style.maxWidth = widest ? `${Math.round(widest)}px` : "";
     }
-    this.lookAround();
-    // Measured once a line, never a frame: where it goes beside the head depends on its size.
     const box = this.element.getBoundingClientRect();
     this.size = { width: box.width, height: box.height };
+  }
+
+  /**
+   * The den speaks, its buttons away, while a line is shown in it or room is kept in it for the chart, and only then.
+   * Derived from that state every time it may change, so the mark can never outlive what it stands for.
+   */
+  private showTheDen() {
+    const den = this.denSpace();
+    const lineInDen = Boolean(den) && this.shown && "inDen" in this.element.dataset;
+    const room = den && this.denRoom > 0 ? this.denRoom : 0;
+    const lineGrowth = den && lineInDen ? Math.max(0, this.size.height - (den.top - den.floor) + 12) : 0;
+    showDenSpeaking(lineInDen || room > 0, lineGrowth + room);
+  }
+
+  /**
+   * Looks again at what is on screen and places the line again, choosing afresh: a tray opened or closed, the page
+   * moved to another section, or a scroll came to rest.
+   */
+  relook() {
+    if (!this.shown) return;
+    this.lookAround();
     this.chosen = -1;
     this.place();
+    this.showTheDen();
+    this.giveWayToATray();
   }
 
   /** Which of the places by the router the bubble took for this line: it keeps it while it still covers nothing. */
@@ -128,7 +191,7 @@ export class Say {
     this.typing?.finish();
     window.clearTimeout(this.hideTimer);
     delete this.element.dataset.shown;
-    if ("inDen" in this.element.dataset) showDenSpeaking(this.denRoom > 0, this.denRoom);
+    this.showTheDen();
     this.held = false;
     this.keptUntil = 0;
     this.onHidden();
@@ -143,15 +206,15 @@ export class Say {
   /** The den keeps room above its line for the chart, its buttons away, even before a line is said. */
   reserveDenRoom(pixels: number) {
     this.denRoom = pixels;
-    if (pixels > 0 && this.denSpace()) showDenSpeaking(true, pixels);
     if (this.shown) this.place();
+    this.showTheDen();
   }
 
   releaseDenRoom() {
     if (!this.denRoom) return;
     this.denRoom = 0;
-    if (this.shown && "inDen" in this.element.dataset) this.place();
-    else showDenSpeaking(false);
+    if (this.shown) this.place();
+    this.showTheDen();
   }
 
   /** The line now stays through a change of section for a while, as a route scrolls the page. */
@@ -175,12 +238,24 @@ export class Say {
   /** Everything the agent draws, in stage space: a bubble keeps clear of it as well as of the router. */
   private body = { left: 0, right: 0, bottom: 0, top: 0 };
 
-  /** The agent moved: the bubble keeps beside its router, and clear of the rest of it. */
+  /**
+   * The agent moved: the bubble keeps beside its router, and clear of the rest of it. A line follows the agent into
+   * the den's strip when the den becomes its home, and goes when it leaves for the first screen.
+   */
   follow(router: Point, reach: number, body?: { left: number; right: number; bottom: number; top: number }) {
     this.head = router;
     this.reach = reach;
     if (body) this.body = body;
-    if (this.shown) this.place();
+    if (this.shown) {
+      const den = this.denSpace();
+      const inDen = "inDen" in this.element.dataset;
+      if (den && !inDen) {
+        this.lay(den);
+        this.chosen = -1;
+      } else if (!den && inDen) return this.hide();
+      this.place();
+    }
+    this.showTheDen();
   }
 
   /**
@@ -195,7 +270,6 @@ export class Say {
       const den = this.denSpace();
       // The agent left the den (the reader went back to the top): the aside goes with the den.
       if (!den) return this.hide();
-      showDenSpeaking(true, Math.max(0, this.size.height - (den.top - den.floor) + 12) + this.denRoom);
       this.element.style.transform = `translate3d(${Math.round(den.left)}px, ${-Math.round(den.floor)}px, 0)`;
       this.box = { left: den.left, right: den.left + this.size.width, bottom: height - den.floor, top: height - den.floor - this.size.height };
       this.overlapping = 0;
@@ -213,15 +287,21 @@ export class Say {
       top: centreY - bubbleHeight * 0.75,
     });
     const along = [0.85, 0.5, 0.15].map((share) => centreX - bubbleWidth * share);
-    // Beside the whole agent, not only its router: its tools spread wider than the router does.
+    // Beside the whole agent, not only its router: its tools spread wider than the router does. Clear of the margin
+    // kept round its body too.
+    const bodyMargin = this.reach * 0.08;
     const besideAll = (onLeft: boolean) => ({
-      left: onLeft ? this.body.left - gap - bubbleWidth : this.body.right + gap,
+      left: onLeft ? this.body.left - bodyMargin - gap - bubbleWidth : this.body.right + bodyMargin + gap,
       top: centreY - bubbleHeight * 0.75,
     });
     // When every place by the router covers something (the agent held up by the name), a clear place further off is
     // better than words on words: the open band just above the bottom strip, at either side, or the middle.
-    const bottomStrip = this.keepClear(height).reduce((highest, box) => (box.bottom >= height - 2 ? Math.min(highest, box.top) : highest), height);
+    const pageBoxes = this.keepClear(height);
+    const bottomStrip = pageBoxes.reduce((highest, box) => (box.bottom >= height - 2 ? Math.min(highest, box.top) : highest), height);
     const farTop = Math.min(bottomStrip, height) - bubbleHeight - 16;
+    // Just under the page's words above the agent, for when the room above its router is too short for the line:
+    // the bubble then lies in the cone's swing, never on the words.
+    const underThePage = (left: number) => ({ left, top: floorAbove(pageBoxes, left, left + bubbleWidth, centreY) });
     const candidates = [
       beside(roomierOnLeft),
       besideAll(roomierOnLeft),
@@ -229,6 +309,7 @@ export class Say {
       beside(!roomierOnLeft),
       besideAll(!roomierOnLeft),
       ...along.map((left) => ({ left, top: centreY + reach + gap })),
+      ...along.map(underThePage),
       { left: 16, top: farTop },
       { left: width - bubbleWidth - 16, top: farTop },
       { left: (width - bubbleWidth) / 2, top: height / 2 - bubbleHeight / 2 },
@@ -237,32 +318,35 @@ export class Say {
       const clampedTop = Math.min(Math.max(8, top), height - bubbleHeight - 8);
       return { left: clampedLeft, top: clampedTop, right: clampedLeft + bubbleWidth, bottom: clampedTop + bubbleHeight };
     });
-    const thickness = this.reach * 0.08;
     const bodyBox: Box = {
-      left: this.body.left - thickness,
-      right: this.body.right + thickness,
-      top: height - this.body.top - thickness,
-      bottom: height - this.body.bottom + thickness,
+      left: this.body.left - bodyMargin,
+      right: this.body.right + bodyMargin,
+      top: height - this.body.top - bodyMargin,
+      bottom: height - this.body.bottom + bodyMargin,
     };
-    const avoid = [face, bodyBox, ...this.keepClear(height)];
-    const overlapOf = (candidate: Box) => avoid.reduce((sum, box) => sum + overlapArea(candidate, box), 0);
+    const kept = [bodyBox, ...pageBoxes];
+    const overlapOf = (candidate: Box, boxes: Box[]) => boxes.reduce((sum, box) => sum + overlapArea(candidate, box), 0);
     let best = candidates[0];
     let bestOverlap = Infinity;
+    let bestCover: Cover = { kept: Infinity, face: Infinity };
     let bestIndex = 0;
-    // The place taken for this line stays while it covers nothing, so the bubble does not hop as the agent turns to it.
-    if (this.chosen >= 0 && overlapOf(candidates[this.chosen]) === 0) {
+    // The place taken for this line stays while it covers nothing on the page and nothing of the agent but the room
+    // round its router, where the cone swings and reaches out past a costume: so the bubble does not hop as the cone
+    // turns to it, and at most the cone's tip touches the bubble it points at.
+    if (this.chosen >= 0 && overlapOf(candidates[this.chosen], kept) === 0) {
       best = candidates[this.chosen];
       bestOverlap = 0;
       bestIndex = this.chosen;
     } else
       for (const [index, candidate] of candidates.entries()) {
-        const overlap = overlapOf(candidate);
-        if (overlap < bestOverlap) {
+        const cover = { kept: overlapOf(candidate, kept), face: overlapOf(candidate, [face]) };
+        if (coversLess(cover, bestCover)) {
           best = candidate;
-          bestOverlap = overlap;
+          bestCover = cover;
+          bestOverlap = cover.kept + cover.face;
           bestIndex = index;
         }
-        if (overlap === 0) break;
+        if (bestOverlap === 0) break;
       }
     this.chosen = bestIndex;
     this.box = best;
