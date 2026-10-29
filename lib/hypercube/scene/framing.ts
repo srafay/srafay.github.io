@@ -59,10 +59,18 @@ export function screenPlaceFor(width: number, height: number): ScreenPlace {
 }
 
 /**
-  Where a ride holds the object on a phone: a little higher, in the open space between the peek under the bio and the
-  big year and controls at the foot, so the moving point and the events it meets stay clear of both.
+  Where a ride holds the object, with every bar, name and control stepped away: framed by the height alone, so on a
+  phone the object fills 0.82 of the height and its sides run off the screen (the reader is inside it), held just over
+  the board of skills at the foot; on a computer it fills 0.9 of the height, a little right of the middle, clear of the
+  board at the bottom left.
 */
-export const ridingDown = (place: ScreenPlace, portrait: boolean) => (portrait ? 0.5 : place.down);
+export function immersivePlaceFor(width: number, height: number): ScreenPlace {
+  if (height > width) return { across: 0.5, down: 0.42, fillWidth: 2, fillHeight: 0.82 };
+  return { across: 0.56, down: 0.47, fillWidth: 0.9, fillHeight: 0.9 };
+}
+
+/** Where the cube rests on a phone: as high as the middle, in the open space between the title and the controls. */
+export const restingDown = (place: ScreenPlace, portrait: boolean) => (portrait ? 0.5 : place.down);
 
 /**
   Where the cube rests on a phone: as high as a ride, and a little left of the middle, in the middle of the open span

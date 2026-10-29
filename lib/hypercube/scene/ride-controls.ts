@@ -88,12 +88,13 @@ export class RideControls {
       this.peek.onclick = () => this.onOpen(event);
       this.peek.dataset.cubePeekChanging = "";
       requestAnimationFrame(() => delete this.peek.dataset.cubePeekChanging);
+      // Each event's words take their own room, so the scene's words are kept off the peek again, once per event.
+      this.onPeekShown();
     };
     const wasHidden = this.peek.hidden;
     if (wasHidden || this.player.state !== "playing") {
-      fill();
       this.peek.hidden = false;
-      if (wasHidden) this.onPeekShown();
+      fill();
       return;
     }
     this.peek.dataset.cubePeekChanging = "";

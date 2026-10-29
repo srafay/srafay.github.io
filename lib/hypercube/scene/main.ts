@@ -14,12 +14,15 @@ import { listenForGestures, type GestureHandlers, type GestureOptions } from "@/
 import { skillWords } from "@/lib/about-cv/skills";
 import { presentTime } from "@/lib/about-cv/time";
 import type { HypercubeData } from "@/lib/hypercube/shape";
+import { collectionPlan } from "@/lib/hypercube/collection";
+import { SkillBoard } from "./board";
 import { Controls } from "./controls";
 import { timeAtTravel } from "./focus";
 import { listenForHolds, type Holds } from "./hold";
 import { HypercubeScene, type HypercubeElements } from "./hypercube-scene";
 import { Interaction } from "./interaction";
 import { addKeyLayer, listenForKeys } from "./keys";
+import { Immersive } from "./immersive";
 import { Idle } from "./rest";
 import { RideControls } from "./ride-controls";
 import { cityAt, RidePlayer } from "./ride-player";
@@ -53,6 +56,9 @@ declare global {
         ride: ReturnType<RidePlayer["report"]>;
         search: ReturnType<Search["report"]>;
         rest: { resting: boolean; share: number };
+        board: ReturnType<SkillBoard["report"]>;
+        /** How much of the stage's height the framed object takes now. */
+        frameShare: number;
       };
       /** Sets the unfold to a share from 0 to 1, for crops of the opening at a set moment. */
       setUnfold(share: number): void;
@@ -116,7 +122,9 @@ const GESTURE_OPTIONS: GestureOptions = {
 
 /**
   Every hand on the object: the gestures, and what each one moves. A hold is not a gesture that sends the hint away,
-  and it hurries a ride rather than pausing it. Any other gesture pauses a ride where it is.
+  and it hurries a ride. During a ride the view gestures never pause it: a turn and a zoom are kept as the reader's own
+  offsets on top of the ride's, and a vertical swipe or the wheel scrubs it through time and it plays on from there. A
+  tap that opens a card or lights a skill pauses it; a tap on empty space only brings its control back.
 */
 function handleTheObject(
   scene: HypercubeScene,
@@ -126,6 +134,7 @@ function handleTheObject(
   controls: Controls,
   sound: Sound,
   ride: RidePlayer,
+  immersive: Immersive,
 ) {
   const moved = () => {
     holds.cancel();
@@ -139,6 +148,7 @@ function handleTheObject(
       moveBy(pixels) {
         moved();
         travel.moveBy(pixels);
+        if (ride.scrubTo(timeAtTravel(travel.progress(), scene.data.present))) immersive.poke();
       },
       release(speed) {
         travel.release(speed);
@@ -147,11 +157,14 @@ function handleTheObject(
     },
     turnBy: (across, up) => {
       // One finger has no yw turn: a vertical swipe moves through time. A mouse turns in both planes.
-      scene.turn.turnBy(across, holds.lastPointerWasMouse() ? up : 0);
+      const upward = holds.lastPointerWasMouse() ? up : 0;
+      if (ride.isOn()) ride.turnBy(across, upward);
+      else scene.turn.turnBy(across, upward);
       moved();
     },
     zoomBy: (amount) => {
-      scene.zoom.zoomBy(amount);
+      if (ride.isOn()) ride.zoomBy(amount);
+      else scene.zoom.zoomBy(amount);
       moved();
     },
     tap: (x, y) => {
@@ -160,11 +173,15 @@ function handleTheObject(
       if (held) return;
       controls.dismissHint();
       ride.handled();
-      interaction.tap(x, y);
+      const opened = interaction.tap(x, y);
+      if (!ride.isOn()) return;
+      if (opened) ride.pause();
+      else immersive.poke();
     },
     doubleTap: (x, y) => {
       holds.end();
       ride.handled();
+      if (ride.isOn()) return immersive.poke();
       interaction.doubleTap(x, y);
     },
     hover: (x, y) => interaction.hover(x, y),
@@ -179,7 +196,7 @@ function handleTheObject(
     began: () => {},
   };
   listenForGestures(scene.elements.stage, handlers, GESTURE_OPTIONS);
-  listenForKeys(handlers, scene);
+  listenForKeys(handlers, scene, (amount) => (ride.isOn() ? ride.turnBy(0, amount) : scene.turn.turnBy(0, amount)));
   document.addEventListener("keydown", () => sound.wake());
 }
 
@@ -225,6 +242,93 @@ function listenForRideKeys(ride: RidePlayer, rideIsTop: () => boolean) {
   });
 }
 
+/**
+  The end, in milliseconds: the screen stays the ride's while the camera pulls back and time lands laid out, then the
+  chrome returns, and the board folds into Skills as it does. Leaving the ride (Escape, Reset view) gives the page back
+  at once.
+*/
+const PULL_BACK_MILLISECONDS = 2000;
+const BOARD_FOLDS_AFTER_MILLISECONDS = 300;
+
+/**
+  The ride and everything that follows it: the immersive chrome and its control, the peek, the board of skills, the
+  hint and the Skills control the board folds into.
+*/
+function wireTheRide(
+  scene: HypercubeScene,
+  ride: RidePlayer,
+  rideControls: RideControls,
+  immersive: Immersive,
+  board: SkillBoard,
+  controls: Controls,
+  interaction: Interaction,
+  sound: Sound,
+) {
+  const showRideState = ride.onState;
+  const showPeek = ride.onReach;
+  let foldTimer = 0;
+  ride.onStart = () => {
+    window.clearTimeout(foldTimer);
+    board.reset();
+    immersive.setAutoplay(true);
+  };
+  ride.onState = (state) => {
+    showRideState(state);
+    const on = state === "playing" || state === "paused";
+    if (on) immersive.setPlaying(state === "playing");
+    else immersive.hidePlayer();
+    // Words in the scene take back the places of the chrome once it has faded (0.4 s).
+    if (on) {
+      window.clearTimeout(endTimer);
+      immersive.setImmersive(true);
+      return void window.setTimeout(() => controls.measure(), 450);
+    }
+    if (!immersive.isImmersive() && board.element.hidden) return;
+    // The ride gives the page back: after the pull back at its end (at once when the reader left it), the chrome
+    // returns, the hint shows once, and the board folds into Skills.
+    window.clearTimeout(endTimer);
+    endTimer = window.setTimeout(() => giveThePageBack(), state === "ended" && !scene.reducedMotion ? PULL_BACK_MILLISECONDS : 0);
+  };
+  let endTimer = 0;
+  const giveThePageBack = () => {
+    immersive.setImmersive(false);
+    immersive.setAutoplay(false);
+    window.setTimeout(() => controls.measure(), 600);
+    controls.showHintOnce();
+    window.clearTimeout(foldTimer);
+    foldTimer = window.setTimeout(() => board.foldInto(controls.skillsButton, controls.sheet), BOARD_FOLDS_AFTER_MILLISECONDS);
+  };
+  ride.onReach = (event, index) => {
+    showPeek(event, index);
+    if (index >= 0 && ride.isOn()) board.reach(index, scene.pointOnStage(ride.headPoint()));
+  };
+  ride.onFinale = () => board.finale();
+  board.paceOf = () => ride.pace();
+  ride.onSkip = () => board.fillEverything();
+  immersive.onToggle = () => ride.toggle();
+  immersive.onSkip = () => ride.skipToEnd();
+  immersive.soundButton.addEventListener("click", () => controls.soundButton.setAttribute("aria-pressed", String(sound.on)));
+  controls.soundButton.addEventListener("click", () => immersive.showSound(sound.on));
+  board.onPick = (skill) => {
+    interaction.lightSkill(skill);
+    if (scene.stageSize().width < 900) controls.closeSheet();
+  };
+  // The thin rail scrubs the ride by a share of the whole.
+  let scrubbing = false;
+  const seek = (event: PointerEvent) => {
+    const box = immersive.thinRail.getBoundingClientRect();
+    ride.seekShare(1 - (event.clientY - box.top) / Math.max(1, box.height));
+    immersive.poke();
+  };
+  immersive.thinRail.addEventListener("pointerdown", (event) => {
+    scrubbing = true;
+    immersive.thinRail.setPointerCapture(event.pointerId);
+    seek(event);
+  });
+  immersive.thinRail.addEventListener("pointermove", (event) => scrubbing && seek(event));
+  for (const type of ["pointerup", "pointercancel"]) immersive.thinRail.addEventListener(type, () => (scrubbing = false));
+}
+
 export function mountHypercube(root: HTMLElement, data: HypercubeData) {
   const elements = elementsUnder(root);
   if (!elements) return null;
@@ -249,6 +353,10 @@ export function mountHypercube(root: HTMLElement, data: HypercubeData) {
   const controls = new Controls(scene, interaction, travel, sound, tilt, rideControls);
   const search = new Search(scene, interaction);
   const idle = new Idle(scene);
+  const immersive = new Immersive(elements.stage, sound);
+  const board = new SkillBoard(scene, collectionPlan(scene.stops, data.skills));
+  elements.stage.append(rideControls.peek, board.element);
+  wireTheRide(scene, ride, rideControls, immersive, board, controls, interaction, sound);
   const panelOrSearchOpen = () => controls.panelIsOpen() || search.isOpen();
   const rideIsTop = () => ride.isOn() && !panelOrSearchOpen();
   const holds = listenForHolds(scene, {
@@ -267,12 +375,11 @@ export function mountHypercube(root: HTMLElement, data: HypercubeData) {
     interaction.openEvent(event);
   };
   search.onChange = () => {
-    if (search.isOpen()) ride.handled();
+    if (search.isOpen()) ride.pause();
     interaction.onChange();
   };
   controls.onSearch = () => (search.isOpen() ? search.close() : search.open());
-  controls.onRailScrub = (progress, holding) => ride.scrubTo(timeAtTravel(progress, data.present), holding);
-  controls.onRailLetGo = () => ride.release();
+  controls.onRailScrub = (progress) => ride.scrubTo(timeAtTravel(progress, data.present));
   // Every control but the ride's own and Sound is a hand on the object: a ride pauses for it. Reset view ends it.
   for (const control of [controls.top, controls.switches, controls.view])
     control.addEventListener("click", (event) => {
@@ -291,7 +398,7 @@ export function mountHypercube(root: HTMLElement, data: HypercubeData) {
     if (resting) ride.handled();
   };
   addKeyLayer(scene, interaction, controls);
-  handleTheObject(scene, travel, holds, interaction, controls, sound, ride);
+  handleTheObject(scene, travel, holds, interaction, controls, sound, ride, immersive);
   listenForEscape(search, controls, interaction, ride);
   typingStartsASearch(search, controls);
   listenForRideKeys(ride, rideIsTop);
@@ -300,11 +407,16 @@ export function mountHypercube(root: HTMLElement, data: HypercubeData) {
   let unfoldedSeen = false;
   scene.onFrame(() => {
     sound.follow(scene.angleThroughW(), scene.turn.spinPace());
+    if (ride.isOn()) immersive.follow(ride.progress());
     if (unfoldedSeen || !scene.unfold.isDone()) return;
     unfoldedSeen = true;
     elements.stage.dataset.cubeUnfolded = "";
-    controls.showHintOnce();
+    // With nothing playing by itself (reduced motion), the hint shows now; otherwise when the ride gives the page back.
+    if (!ride.isAutoplaying()) controls.showHintOnce();
   });
+  // The ride plays by itself on every load, from the frame the unfold reaches 2014. Never under reduced motion.
+  ride.armAutoplay();
+  immersive.setAutoplay(ride.isAutoplaying());
   void scene.addLabels(cityAt);
   window.hypercube = {
     state: () => {
@@ -331,6 +443,8 @@ export function mountHypercube(root: HTMLElement, data: HypercubeData) {
         ride: ride.report(),
         search: search.report(),
         rest: { resting: idle.isResting(), share: scene.rest.share },
+        board: board.report(),
+        frameShare: scene.frameShare(),
       };
     },
     setUnfold: (share) => {

@@ -1,9 +1,12 @@
 /*
   The ride, played. A clock runs through the schedule (lib/hypercube/ride.ts): the moving point rests at each event and
   moves quickly to the next. As it goes it drives what is already there: the travel reader (so the year in focus, the
-  rail, the big year and the readouts follow), the camera (which looks at the point), the turn through w (eased from
-  wherever it is toward time laid out in a line, landing there at the present), and what is lit. The reader stays in
-  charge: pause, resume, step, scrub, hold to hurry, and any other hand on the object pauses it where it is.
+  rail and the big year follow), the camera (which looks toward the point), the turn through w (from where the ride
+  began toward time laid out in a line, landing there at the present), and what is lit.
+
+  It plays by itself once the unfold reaches 2014, and plays on while the reader looks around: a turn, a zoom or a tilt
+  is kept as the reader's own offset on top of the ride's, and a vertical swipe scrubs it through time. Only the pause
+  control, a card or a panel pause it. Holding still hurries it. Skip goes straight to the end.
 */
 import { stays } from "@/content/about/profile";
 import type { WorldEvent } from "@/lib/about-cv/events";
@@ -28,17 +31,19 @@ export type RideState = "off" | "playing" | "paused" | "ended";
 
 /**
   How the camera rides: how close (on the zoom's scale, from -1 nearest to 1 the whole), and how far from the object's
-  middle toward the moving point it looks. A phone's narrow frame stays further back, so the whole object stays in it.
+  middle toward the moving point it looks.
 */
-const RIDE_CAMERA = { phone: { zoom: 0, follow: 0.75 }, computer: { zoom: -0.22, follow: 0.65 } };
+const RIDE_CAMERA = { phone: { zoom: 0, follow: 0.7 }, computer: { zoom: 0, follow: 0.65 } };
 /** Where the turn through w is heading by the present: a quarter turn, time laid out in a line. */
 const LAID_OUT = -Math.PI / 2;
+/** How far the reader may turn up and down through w on top of the ride, so the object never turns over its top. */
+const LARGEST_UP_OFFSET = (85 * Math.PI) / 180;
 /** Holding the stage or Space runs the ride this many times quicker. */
 const HURRIED = 4;
 /** How long the circle of a move between cities answers after the point crosses it, in seconds. */
 const CROSSING_SECONDS = 0.6;
-/** The soonest the turn must land, in seconds, so it never swings faster than this near the end. */
-const SHORTEST_LANDING = 0.5;
+/** How long after reaching the present the finale plays, in seconds of the ride: once Twin Technology's skills land. */
+const FINALE_AFTER = 0.6;
 
 /** The city a moment falls in: the last stay begun by then. */
 export function cityAt(time: number) {
@@ -58,19 +63,27 @@ export class RidePlayer {
   private hurried = false;
   /** How many seconds of the ride pass in one second: 1, unless a check runs it quicker. */
   private checkPace = 1;
-  /** While a scrub on the rail holds the point, the clock stands still. */
-  private held = false;
   /** Set when a ride control moved the clock, so the travel follows even while paused. */
   private jumped = false;
+  /** Set on load: the ride starts by itself on the frame the unfold reaches 2014. */
+  private autoplayArmed = false;
+  private finaleDone = false;
   private reached = -1;
   private along = 0;
   private time: number;
   private head: Point4;
   private readonly light = new Follower(0, 30);
   private crossing = 0;
-  /** Called when the state changes, and when the point reaches an event (or null before the first). */
+  /** Where the turn through w stood as the ride began: the ride's own turn runs from here to laid out. */
+  private startAcross = 0;
+  /** The reader's own turn (across and up through w) and zoom, kept on top of the ride's while it plays. */
+  private readonly offset = { across: 0, up: 0, zoom: 0 };
+  /** Called when the state changes, when a ride starts, when the point reaches a stop, and at the finale. */
   onState: (state: RideState) => void = () => {};
-  onReach: (event: WorldEvent | null) => void = () => {};
+  onStart: () => void = () => {};
+  onReach: (event: WorldEvent | null, index: number) => void = () => {};
+  onFinale: () => void = () => {};
+  onSkip: () => void = () => {};
 
   constructor(
     private readonly scene: HypercubeScene,
@@ -88,17 +101,34 @@ export class RidePlayer {
     return this.state === "playing" || this.state === "paused";
   }
 
+  /** The ride waits for the unfold, then starts by itself. Never under reduced motion. */
+  armAutoplay() {
+    this.autoplayArmed = !this.scene.reducedMotion;
+  }
+
+  /** Whether the ride is waiting for the unfold to start by itself, or running: Skip shows for both. */
+  isAutoplaying() {
+    return this.autoplayArmed || this.isOn();
+  }
+
   /** Starts the ride from 2014. A ride asked for during the unfold finishes the unfold first, at once. */
   start() {
     const { scene } = this;
+    this.autoplayArmed = false;
     if (!scene.unfold.isDone()) scene.unfold.setShare(1);
     this.clock = 0;
     this.reached = -1;
     this.jumped = true;
+    this.finaleDone = false;
+    this.startAcross = scene.turn.readerAcross();
+    this.offset.across = 0;
+    this.offset.up = 0;
+    this.offset.zoom = 0;
     scene.focus.ride = { current: null, met: new Set(), city: cityAt(scene.stops[0].time) };
     this.followThePoint();
+    this.onStart();
     this.setState("playing");
-    this.onReach(null);
+    this.onReach(null, -1);
     scene.relight();
   }
 
@@ -125,13 +155,24 @@ export class RidePlayer {
     const camera = this.scene.touch ? RIDE_CAMERA.phone : RIDE_CAMERA.computer;
     this.scene.follow(() => this.head, camera.follow);
     this.scene.setRiding(true);
-    this.scene.zoom.zoomTo(camera.zoom);
   }
 
-  /** Any other hand on the object: a playing ride pauses where it is, and an ended one lets its thread go. */
+  /** A hand on the object once the ride has ended lets its thread go. During a ride it changes the view only. */
   handled() {
-    if (this.state === "playing") this.pause();
-    else if (this.state === "ended") this.setState("off");
+    if (this.state === "ended") this.setState("off");
+  }
+
+  /** The reader turns the object while it rides: kept as an offset on top of the ride's own turn. */
+  turnBy(across: number, up: number) {
+    this.offset.across += across;
+    this.offset.up = Math.max(-LARGEST_UP_OFFSET, Math.min(LARGEST_UP_OFFSET, this.offset.up + up));
+    this.scene.requestFrame();
+  }
+
+  /** The reader zooms while it rides: kept as an offset on top of the ride's own zoom. */
+  zoomBy(amount: number) {
+    this.offset.zoom = Math.max(-1, Math.min(1, this.offset.zoom + amount));
+    this.scene.requestFrame();
   }
 
   /** Holding the stage or Space hurries a playing ride; letting go returns it to its pace. */
@@ -146,26 +187,44 @@ export class RidePlayer {
     this.goToStop(Math.max(0, Math.min(this.scene.stops.length - 1, Math.max(0, this.reached) + direction)));
   }
 
-  /** A scrub along the rail to a moment: the point goes to the last event begun by then, and holds while held. */
-  scrubTo(time: number, holding: boolean) {
+  /** A scrub to a moment, by the rail or a vertical swipe: the point goes to the last event begun by then. */
+  scrubTo(time: number) {
     if (!this.isOn()) return false;
-    this.held = holding;
-    this.goToStop(stopAtTime(this.scene.stops, time));
+    const index = stopAtTime(this.scene.stops, time);
+    if (index !== this.reached) this.goToStop(index);
     return true;
   }
 
-  release() {
-    this.held = false;
-    this.scene.requestFrame();
+  /** A scrub along the thin rail, by a share of the whole ride: the point goes to the last stop reached by then. */
+  seekShare(share: number) {
+    if (!this.isOn()) return;
+    const clock = Math.max(0, Math.min(1, share)) * this.schedule.pullBack;
+    let index = 0;
+    this.schedule.arrivals.forEach((arrival, place) => {
+      if (arrival <= clock) index = place;
+    });
+    if (index !== this.reached) this.goToStop(index);
   }
 
   /** Ends the ride now: the camera lets the point go and its thread fades. Says whether there was one. */
   end() {
+    this.autoplayArmed = false;
     if (this.state === "off") return false;
     const wasOn = this.isOn();
     this.setState("off");
     if (wasOn) this.letGo();
     return true;
+  }
+
+  /** Skip: straight to the end, the board full, the object laid out, the thread drawn whole. */
+  skipToEnd() {
+    if (!this.isOn()) this.start();
+    this.clock = this.schedule.pullBack;
+    this.jumped = true;
+    this.place();
+    this.onSkip();
+    this.finaleDone = true;
+    this.finish();
   }
 
   private goToStop(index: number) {
@@ -182,8 +241,8 @@ export class RidePlayer {
   }
 
   /**
-    The point reaches the present and the ride is over: the camera pulls back to the whole, time lies laid out (landed
-    there even when steps or a scrub left the turn short of it), and the thread stays.
+    The point reaches the present and the ride is over: the camera pulls back to the whole, and time lands laid out as
+    the reader's offsets ease away (the turn and zoom glide to the ride's last pose), and the thread stays.
   */
   private finish() {
     this.scene.turn.turnTo(LAID_OUT, 0);
@@ -198,29 +257,36 @@ export class RidePlayer {
     scene.setRiding(false);
     scene.zoom.zoomTo(0);
     this.travel.scrollToProgress(0);
-    this.onReach(null);
+    this.onReach(null, this.reached);
     scene.relight();
   }
 
   /** Every frame, before the camera: the clock, the point, the thread, what is lit and what follows. */
   private frame(seconds: number) {
     const { scene } = this;
+    if (this.autoplayArmed && scene.unfold.isDone()) this.start();
     let moving = this.light.step(this.state === "off" ? 0 : 1, seconds);
     if (scene.reducedMotion) this.light.jump(this.state === "off" ? 0 : 1);
     scene.uniforms.rideLight.value = this.light.value;
-    if (this.state === "playing" && !this.held) {
+    if (this.state === "playing") {
       this.clock += seconds * this.pace();
       moving = true;
     }
-    if (this.state === "playing" || this.jumped) this.place(seconds);
+    if (this.state === "playing" || this.jumped) this.place();
+    if (this.isOn()) this.holdTheView();
     this.answerCrossing(seconds);
     moving = moving || this.crossing > 0;
+    const finaleAt = this.schedule.arrivals[this.schedule.arrivals.length - 1] + FINALE_AFTER;
+    if (this.isOn() && !this.finaleDone && this.clock >= finaleAt) {
+      this.finaleDone = true;
+      this.onFinale();
+    }
     if (this.state === "playing" && this.clock >= this.schedule.pullBack) this.finish();
     return moving;
   }
 
-  /** Puts the point where the clock says, lights what it has reached, and has the travel and the turn follow. */
-  private place(seconds: number) {
+  /** Puts the point where the clock says, lights what it has reached, and has the travel follow. */
+  private place() {
     const { scene } = this;
     const at = rideAt(this.schedule, this.clock, scene.reducedMotion);
     this.along = at.along;
@@ -232,8 +298,18 @@ export class RidePlayer {
     this.time = time;
     if (at.reached !== this.reached) this.reach(at.reached);
     this.travel.scrollToProgress(travelAtTime(time, scene.data.present));
-    if (this.state === "playing" && !this.jumped) this.turnWithTime(seconds * (this.held ? 0 : 1));
     this.jumped = false;
+  }
+
+  /**
+    The turn and zoom the ride holds: its own turn runs evenly with its clock from where it began to laid out, and the
+    reader's offsets sit on top of it, so the ride's motion carries on under whatever the reader did.
+  */
+  private holdTheView() {
+    const share = Math.min(1, this.clock / this.schedule.pullBack);
+    const across = this.startAcross + (LAID_OUT - this.startAcross) * share;
+    this.scene.turn.turnTo(across + this.offset.across, this.offset.up);
+    this.scene.zoom.zoomTo((this.scene.touch ? RIDE_CAMERA.phone : RIDE_CAMERA.computer).zoom + this.offset.zoom);
   }
 
   private reach(index: number) {
@@ -246,7 +322,7 @@ export class RidePlayer {
     ride.met = new Set(scene.stops.slice(0, index + 1).map((stop) => stop.event.id));
     ride.city = cityAt(index >= 0 ? scene.stops[index].time : scene.stops[0].time);
     if (event && this.state === "playing") this.sound.tone(event.world);
-    this.onReach(event);
+    this.onReach(event, index);
     scene.relight();
   }
 
@@ -266,24 +342,18 @@ export class RidePlayer {
     this.scene.uniforms.crossingGlow.value = this.crossing;
   }
 
-  /**
-    The turn through w follows time: from wherever the reader left it, it heads for time laid out in a line at the pace
-    that lands there as the point reaches the present, and the turn up and down settles to level on the way.
-  */
-  private turnWithTime(seconds: number) {
-    const { turn } = this.scene;
-    const left = Math.max(SHORTEST_LANDING, (this.schedule.pullBack - this.clock) / this.pace());
-    const share = Math.min(1, seconds / left);
-    turn.turnTo(turn.readerAcross() + (LAID_OUT - turn.readerAcross()) * share, turn.readerUp() * (1 - share));
-  }
-
   /** Where the moving point is now, in four dimensions. */
   headPoint() {
     return this.head;
   }
 
+  /** How far through the whole ride the clock is, from 0 to 1, for the thin rail. */
+  progress() {
+    return Math.min(1, this.clock / this.schedule.pullBack);
+  }
+
   /** How many seconds of the ride pass in one second now. */
-  private pace() {
+  pace() {
     return (this.hurried ? HURRIED : 1) * this.checkPace;
   }
 
@@ -304,6 +374,8 @@ export class RidePlayer {
       time: this.time,
       hurried: this.hurried,
       light: this.light.value,
+      offset: { ...this.offset },
+      autoplay: this.autoplayArmed,
     };
   }
 

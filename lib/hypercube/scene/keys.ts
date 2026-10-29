@@ -22,7 +22,11 @@ const TRAVEL_STEP_SHARE = 0.5;
 /** Where the keys belong to what has focus, not to the object. */
 const KEYS_STAY_INSIDE = "input, textarea, [role=slider], .cube-card, .cube-sheet";
 
-export function listenForKeys(handlers: GestureHandlers, scene: HypercubeScene) {
+/**
+  The keys on the object. turnUp turns it up or down through w (yw) by an amount; the page gives it, since a ride keeps
+  the reader's turn as its own offset.
+*/
+export function listenForKeys(handlers: GestureHandlers, scene: HypercubeScene, turnUpBy: (amount: number) => void) {
   document.addEventListener("keydown", (event) => {
     if (event.ctrlKey || event.metaKey || event.altKey) return;
     const target = event.target as Element | null;
@@ -30,7 +34,7 @@ export function listenForKeys(handlers: GestureHandlers, scene: HypercubeScene) 
     const travelStep = scene.stageSize().height * TRAVEL_STEP_SHARE;
     // Shift with Up and Down turns in the yw plane whatever pointer was used last: a key is not a finger.
     const turnUp = (amount: number) => () => {
-      scene.turn.turnBy(0, amount);
+      turnUpBy(amount);
       scene.requestFrame();
     };
     const up = event.shiftKey ? turnUp(-TURN_STEP) : () => handlers.travel.moveBy(-travelStep);

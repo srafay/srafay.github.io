@@ -111,16 +111,20 @@ export class Interaction {
     return hit ? (labels?.labels[hit.index].city ?? null) : null;
   }
 
+  /** Answers a tap. Says whether it opened or lit something (a ride pauses for that), rather than only clearing. */
   tap(x: number, y: number) {
     const sure = this.nearestBead(x, y, SURE_REACH);
-    if (sure) return this.openEvent(sure);
-    const skill = this.skillAt(x, y);
-    if (skill) return this.lightSkill(skill);
-    const city = this.cityAt(x, y);
-    if (city) return this.openPlace(city);
-    const near = this.nearestBead(x, y, TAP_REACH);
-    if (near) return this.openEvent(near);
-    this.clear();
+    const skill = sure ? null : this.skillAt(x, y);
+    const city = sure || skill ? null : this.cityAt(x, y);
+    const near = sure || skill || city ? null : this.nearestBead(x, y, TAP_REACH);
+    if (sure ?? near) this.openEvent((sure ?? near) as WorldEvent);
+    else if (skill) this.lightSkill(skill);
+    else if (city) this.openPlace(city);
+    else {
+      this.clear();
+      return false;
+    }
+    return true;
   }
 
   doubleTap(x: number, y: number) {

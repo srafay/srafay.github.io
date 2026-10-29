@@ -123,7 +123,12 @@ export class Controls {
       this.readouts,
       this.sheet,
     );
-    scene.elements.title.querySelector(".cube-hold")?.after(this.hint, ride.peek);
+    scene.elements.title.querySelector(".cube-hold")?.after(this.hint);
+    // Where the board of skills goes once the ride has folded it into Skills: the top of the sheet.
+    const boardHome = element("div", "cube-board-home");
+    boardHome.hidden = true;
+    boardHome.append(element("h3", undefined, "Collected on the ride"));
+    this.sheet.querySelector("h2")?.after(boardHome);
     scene.onFrame((_scene, moving) => this.followScene(moving));
     // A press on any control is a first gesture too: the hint goes.
     for (const control of [this.top, this.switches, this.view, this.rail])
@@ -149,9 +154,14 @@ export class Controls {
       this.interaction.answer,
       this.interaction.card,
       stage.querySelector<HTMLElement>(".cube-search"),
+      stage.querySelector<HTMLElement>(".cube-skip"),
+      stage.querySelector<HTMLElement>(".cube-player"),
+      stage.querySelector<HTMLElement>(".cube-peek"),
+      stage.querySelector<HTMLElement>(".cube-board"),
     ];
     for (const control of elements) {
-      if (!control || control.hidden) continue;
+      // Chrome a ride has stepped away (visibility hidden) leaves its place to the words.
+      if (!control || control.hidden || getComputedStyle(control).visibility === "hidden") continue;
       const box = control.getBoundingClientRect();
       if (!box.width || !box.height) continue;
       rectangles.push({ left: box.left - 6, top: box.top - 6, right: box.right + 6, bottom: box.bottom + 6 });

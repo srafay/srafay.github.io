@@ -47,8 +47,9 @@ import { Focus } from "./focus";
 import {
   boundOf,
   distanceToFrame,
+  immersivePlaceFor,
   restingAcross,
-  ridingDown,
+  restingDown,
   screenPlaceFor,
   SMALLEST_FRAMED_RADIUS,
   type Bound,
@@ -597,19 +598,20 @@ export class HypercubeScene {
     const cubeRadius = this.touch ? CUBE_FRAMED_RADIUS.phone : CUBE_FRAMED_RADIUS.computer;
     const framedRadius = Math.max(SMALLEST_FRAMED_RADIUS, bound.radius) * (1 - flatten) + cubeRadius * flatten;
     const aspect = this.width / this.height;
+    // A ride frames the object for the whole screen (framing.ts immersivePlaceFor).
+    const place = this.riding ? immersivePlaceFor(this.width, this.height) : this.place;
     // At rest the reader's zoom gives way too, so the whole cube is in view.
     const distance =
-      distanceToFrame(framedRadius, FIELD_OF_VIEW, aspect, this.place) * this.zoom.distanceShare() ** (1 - flatten);
+      distanceToFrame(framedRadius, FIELD_OF_VIEW, aspect, place) * this.zoom.distanceShare() ** (1 - flatten);
     const followed = this.followed?.();
     const seen = followed ? seenInThree(turned(this.matrixNow, followed)) : bound.centre;
     const looked = bound.centre.map((value, axis) => value + (seen[axis] - value) * this.followShare) as [number, number, number];
     const target = looked.map((value) => value * (1 - flatten)) as [number, number, number];
     let moving = false;
-    // A ride, and the cube at rest, sit a little higher on a phone, in the open space between the title and the controls.
+    // The cube at rest sits a little higher on a phone, in the open space between the title and the controls.
     const portrait = this.height > this.width;
-    const higher = ridingDown(this.place, portrait);
-    const down = this.riding ? higher : this.place.down + (higher - this.place.down) * flatten;
-    const across = this.place.across + (restingAcross(this.place, portrait) - this.place.across) * flatten;
+    const down = this.riding ? place.down : place.down + (restingDown(place, portrait) - place.down) * flatten;
+    const across = this.riding ? place.across : place.across + (restingAcross(place, portrait) - place.across) * flatten;
     if (!this.hasFramed || this.reducedMotion) {
       this.placeDown.jump(down);
       this.placeAcross.jump(across);
@@ -645,7 +647,15 @@ export class HypercubeScene {
     this.uniforms.referenceDepth.value = away;
     this.uniforms.fogNear.value = away - framedRadius * 0.2;
     this.uniforms.fogFar.value = away + framedRadius * 1.1;
+    this.framedShare = (2 * framedRadius) / (2 * away * Math.tan((FIELD_OF_VIEW * Math.PI) / 360));
     return moving;
+  }
+
+  /** How much of the stage's height the framed object takes now, as drawn: the immersion share the checks read. */
+  private framedShare = 0;
+
+  frameShare() {
+    return this.framedShare;
   }
 
   /** The point the camera looks at instead of the whole object: a flown-to bead, or the ride's moving point. */
@@ -669,7 +679,7 @@ export class HypercubeScene {
     this.requestFrame();
   }
 
-  /** A ride holds the object where its moving point and the events it meets stay clear of the words and controls. */
+  /** A ride frames the object for the whole screen, every bar, name and control stepped away. */
   setRiding(riding: boolean) {
     this.riding = riding;
     this.requestFrame();

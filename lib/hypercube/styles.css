@@ -1057,24 +1057,31 @@ body.about-v5 {
   }
 }
 
-/* The ride's peek: the event the moving point has reached, under the bio where the hint was. A tap opens its card. */
+/*
+  The ride's peek: the event the moving point has reached, a caption under the year at the top left. No panel: its
+  words carry the title's dark shadow over the object. A tap opens its card.
+*/
 .about-v5 .cube-peek {
+  position: absolute;
+  left: var(--cube-gutter);
+  top: calc(var(--cube-top) + 64px);
+  z-index: 6;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 2px;
-  margin: 14px 0 0;
-  max-width: 100%;
-  padding: 8px 12px 9px;
+  max-width: calc(100% - var(--cube-gutter) - 64px);
+  margin: 0;
+  padding: 4px 0;
   font: inherit;
   text-align: left;
   color: var(--cube-light);
-  background: var(--cube-panel);
-  border: 1px solid var(--cube-panel-line);
-  border-radius: 10px;
-  pointer-events: auto;
+  background: transparent;
+  border: 0;
   cursor: pointer;
-  text-shadow: none;
+  text-shadow:
+    0 0 14px #000,
+    0 0 4px #000;
   transition: opacity 150ms ease;
 }
 
@@ -1103,7 +1110,8 @@ body.about-v5 {
 
 @media (min-width: 900px) {
   .about-v5 .cube-peek {
-    margin-top: 22px;
+    top: calc(var(--cube-top) + 136px);
+    max-width: 28rem;
   }
 }
 
@@ -1232,6 +1240,362 @@ body.about-v5 {
   .about-v5 .cube-peek,
   .about-v5 .cube-readouts,
   .about-v5 .cube-year {
+    transition: none;
+  }
+}
+
+/*
+  The ride holds the screen. Everything that is not the scene steps away: the top bar, the name and the bio, the hint,
+  the readouts, the world switches, the view controls and the rail's ticks and words. It fades in 0.4 s, then is
+  hidden so it costs nothing, and comes back in 0.5 s when the ride gives the page back.
+*/
+.about-v5 .cube-home,
+.about-v5 .cube-versions,
+.about-v5 .cube-top,
+.about-v5 .cube-title,
+.about-v5 .cube-worlds,
+.about-v5 .cube-view,
+.about-v5 .cube-rail {
+  transition:
+    opacity 500ms ease,
+    visibility 0s;
+}
+
+.about-v5 .cube-stage[data-cube-immersive] :is(
+    .cube-home,
+    .cube-versions,
+    .cube-top,
+    .cube-title,
+    .cube-readouts,
+    .cube-worlds,
+    .cube-view,
+    .cube-rail,
+    .cube-count
+  ),
+.about-v5 .cube-stage[data-cube-autoplay] .cube-top {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity 400ms ease,
+    visibility 0s linear 400ms;
+}
+
+/* The year in focus, while the ride holds the screen: a quiet caption at the top left, the peek under it. */
+.about-v5 .cube-stage[data-cube-immersive] .cube-year {
+  top: var(--cube-top);
+  bottom: auto;
+  font-size: 56px;
+  color: rgba(236, 230, 220, 0.85);
+}
+
+@media (min-width: 900px) {
+  .about-v5 .cube-stage[data-cube-immersive] .cube-year {
+    top: calc(var(--cube-top) + 8px);
+    font-size: 120px;
+  }
+}
+
+/* Skip: on its own at the top right, from the first frame of the unfold until the ride ends. It never fades. */
+.about-v5 .cube-skip {
+  position: absolute;
+  top: var(--cube-top);
+  right: 8px;
+  z-index: 8;
+  display: none;
+  justify-content: center;
+  min-height: 32px;
+  color: var(--cube-light);
+}
+
+.about-v5 .cube-stage[data-cube-autoplay] .cube-skip {
+  display: inline-flex;
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .about-v5 .cube-skip {
+    min-width: 72px;
+    min-height: 44px;
+    margin-top: -6px;
+  }
+}
+
+@media (min-width: 900px) {
+  .about-v5 .cube-skip {
+    right: 24px;
+  }
+}
+
+/* The player: Pause or Play, and Sound, just above the board on a phone, at the bottom middle on a computer. */
+.about-v5 .cube-player {
+  position: absolute;
+  left: 50%;
+  bottom: calc(var(--cube-bottom) + var(--cube-board-height) + 12px);
+  z-index: 8;
+  display: flex;
+  gap: 10px;
+  transform: translateX(-50%);
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 400ms ease,
+    visibility 0s linear 400ms;
+}
+
+.about-v5 .cube-stage[data-cube-player-shown] .cube-player {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 200ms ease;
+}
+
+@media (min-width: 900px) {
+  .about-v5 .cube-player {
+    bottom: 26px;
+  }
+}
+
+.about-v5 .cube-player-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  color: var(--cube-light);
+  background: rgba(13, 12, 16, 0.78);
+  border: 1px solid var(--cube-panel-line);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.about-v5 .cube-player-button[hidden] {
+  display: none;
+}
+
+.about-v5 .cube-player-button .cube-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.about-v5 .cube-player-button[aria-pressed="false"] {
+  color: var(--cube-light-muted);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .about-v5 .cube-player-button {
+    width: 36px;
+    height: 36px;
+  }
+}
+
+/* The thin rail: where the ride is in the whole, a line and its moving point, shown with the player. */
+.about-v5 .cube-thin-rail {
+  position: absolute;
+  top: calc(var(--cube-top) + 72px);
+  bottom: calc(var(--cube-bottom) + var(--cube-board-height) + 72px);
+  right: 4px;
+  z-index: 7;
+  width: 28px;
+  touch-action: none;
+  cursor: ns-resize;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 400ms ease,
+    visibility 0s linear 400ms;
+}
+
+.about-v5 .cube-thin-rail::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 13px;
+  width: 1px;
+  background: rgba(236, 230, 220, 0.3);
+}
+
+.about-v5 .cube-thin-point {
+  position: absolute;
+  top: -4px;
+  right: 9px;
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  background: var(--cube-present);
+}
+
+.about-v5 .cube-stage[data-cube-player-shown] .cube-thin-rail {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 200ms ease;
+}
+
+@media (min-width: 900px) {
+  .about-v5 .cube-thin-rail {
+    right: 12px;
+    bottom: 84px;
+  }
+}
+
+/*
+  The board of skills: every slot a faint dot from the start, filled with its skill's mark in the skill's own colour.
+  The groups run one after another, each opened by its glyph. 28 cells a row; the cell gives on a narrow phone, never
+  the count. At most a sixth of a phone's height, at the foot; on a computer at the bottom left.
+*/
+.about-v5 {
+  --cube-cell: clamp(11px, calc((100vw - 24px) / 28), 14px);
+  --cube-board-height: calc(var(--cube-cell) * 9 + 30px);
+}
+
+@media (min-width: 900px) {
+  .about-v5 {
+    --cube-cell: 16px;
+  }
+}
+
+.about-v5 .cube-board {
+  position: absolute;
+  left: 12px;
+  bottom: var(--cube-bottom);
+  z-index: 6;
+  width: calc(var(--cube-cell) * 28);
+  margin: 0;
+  pointer-events: auto;
+}
+
+.about-v5 .cube-board[hidden] {
+  display: none;
+}
+
+@media (min-width: 900px) {
+  .about-v5 .cube-board {
+    left: var(--cube-gutter);
+    bottom: 26px;
+  }
+}
+
+.about-v5 .cube-board-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 0 6px;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--cube-light);
+  text-shadow:
+    0 0 10px #000,
+    0 0 3px #000;
+}
+
+.about-v5 .cube-board-count {
+  flex: none;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.about-v5 .cube-board-caption {
+  min-width: 0;
+  color: var(--cube-light-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.about-v5 .cube-board-slots {
+  display: grid;
+  grid-template-columns: repeat(28, var(--cube-cell));
+  grid-auto-rows: var(--cube-cell);
+}
+
+.about-v5 .cube-slot,
+.about-v5 .cube-board-group {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.about-v5 .cube-slot::before {
+  content: "";
+  width: 3px;
+  height: 3px;
+  border-radius: 999px;
+  background: rgba(236, 230, 220, 0.28);
+}
+
+.about-v5 .cube-slot[data-cube-filled]::before {
+  display: none;
+}
+
+.about-v5 .cube-slot .cube-icon {
+  width: calc(var(--cube-cell) * 0.78);
+  height: calc(var(--cube-cell) * 0.78);
+}
+
+.about-v5 .cube-board-group {
+  color: var(--cube-light-muted);
+  opacity: 0.7;
+}
+
+.about-v5 .cube-board-group .cube-icon {
+  width: calc(var(--cube-cell) * 0.7);
+  height: calc(var(--cube-cell) * 0.7);
+}
+
+/* A mark on its way from the moving point to its slot. */
+.about-v5 .cube-flying {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 9;
+  width: 24px;
+  height: 24px;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+.about-v5 .cube-flying .cube-icon {
+  width: 24px;
+  height: 24px;
+  vertical-align: top;
+}
+
+/* Folded into the Skills sheet: the board at its top, under its heading, the cells sized to the sheet. */
+.about-v5 .cube-board-home[hidden] {
+  display: none;
+}
+
+.about-v5 .cube-board-home h3 {
+  margin: 4px 0 8px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--cube-light-muted);
+}
+
+.about-v5 .cube-board-home .cube-board {
+  position: static;
+  --cube-cell: clamp(10px, calc((100vw - 64px) / 28), 12px);
+  margin-bottom: 14px;
+}
+
+.about-v5 .cube-board-home .cube-board-head {
+  text-shadow: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .about-v5 .cube-stage[data-cube-immersive] :is(
+      .cube-home,
+      .cube-versions,
+      .cube-top,
+      .cube-title,
+      .cube-readouts,
+      .cube-worlds,
+      .cube-view,
+      .cube-rail,
+      .cube-count
+    ),
+  .about-v5 .cube-player,
+  .about-v5 .cube-thin-rail {
     transition: none;
   }
 }
