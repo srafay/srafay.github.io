@@ -102,7 +102,7 @@ function elementsUnder(root: HTMLElement): HypercubeElements | null {
 function sayTheSceneCannotShow(root: HTMLElement) {
   const line = document.createElement("p");
   line.className = "cube-plain";
-  line.append("This version needs graphics this browser cannot give it. ");
+  line.append("This page needs graphics this browser cannot give it. ");
   const link = document.createElement("a");
   link.href = "/about/";
   link.textContent = "The About page";
