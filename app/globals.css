@@ -2,7 +2,7 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
-/* next-themes sets data-theme on <html>; the homepage's script uses the same attribute and storage key. */
+/* next-themes sets data-theme on <html>; the cosmos pages' script uses the same attribute and storage key. */
 @custom-variant dark (&:is([data-theme="dark"] *));
 
 @theme inline {
@@ -39,7 +39,7 @@
 }
 
 /*
-  Site tokens, matching the homepage's (cosmos.css): an astronomer's ink chart by day, the night sky by night.
+  Site tokens, matching the cosmos pages' (cosmos.css): an astronomer's ink chart by day, the night sky by night.
   A post can override any of these on its own page through `metadata.theme`.
 */
 :root {
@@ -111,7 +111,7 @@
   }
 }
 
-/* The bar across the top, as on the homepage. */
+/* The bar across the top, as on the cosmos pages. */
 .bar {
   display: flex;
   justify-content: space-between;
@@ -145,7 +145,7 @@
 }
 /*
   On a narrow phone, Home, Posts, About and the theme button fit beside the name only a little closer together, at the
-  name's own size. The homepage's bar has the same rule, in the cosmos stylesheet.
+  name's own size. The cosmos pages' bar has the same rule, in the cosmos stylesheet.
 */
 @media (max-width: 400px) {
   .bar nav {
@@ -215,7 +215,7 @@
 }
 
 /*
-  A post's own page: laid out like the reader the homepage opens it in. The sky shows behind it
+  A post's own page: laid out like the reader the cosmos pages open it in. The sky shows behind it
   (components/cosmos-backdrop.tsx), so the words sit on a soft wash of the page's ground and read cleanly over it.
 */
 .post {
@@ -264,7 +264,7 @@
   text-wrap: balance;
 }
 
-/* Long-form text. The homepage's reader (cosmos.css) styles the same markup the same way. */
+/* Long-form text. The cosmos pages' reader (cosmos.css) styles the same markup the same way. */
 .prose {
   margin-top: 40px;
   font-size: 1.125rem;
@@ -344,7 +344,7 @@
   color: var(--shiki-dark);
 }
 
-/* The archive and the 404: the homepage's writing list, without the planets. */
+/* The archive and the 404: the cosmos pages' writing list, without the planets. */
 .page-intro {
   width: min(100%, 42rem);
   margin-inline: auto;

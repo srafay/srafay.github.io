@@ -4,7 +4,7 @@ export default function NotFound() {
       <h1>Lost in the dark</h1>
       <p>Nothing here. The page may have moved, or the link has a typo.</p>
       <a href="/" className="go">
-        Back to the system
+        Back home
       </a>
     </section>
   );

@@ -24,6 +24,7 @@ import { SLICE_ARRIVES_BY, travelAtYear, yearAtTravel } from "./focus";
 import type { HypercubeScene } from "./hypercube-scene";
 import type { Interaction } from "./interaction";
 import type { Rectangle } from "./label-layer";
+import { postsPlace } from "./posts-place";
 import type { RideControls } from "./ride-controls";
 import type { Sound } from "./sound";
 import type { Tilt } from "./tilt";
@@ -202,7 +203,9 @@ export class Controls {
     this.findMePanel.id = "cube-find";
     this.findMePanel.hidden = true;
     this.findMePanel.setAttribute("aria-label", "Where to find me");
-    this.findMePanel.append(findMeList("cube"));
+    const places = findMeList("cube");
+    places.append(postsPlace());
+    this.findMePanel.append(places);
     this.findMeButton.setAttribute("aria-expanded", "false");
     this.findMeButton.setAttribute("aria-controls", this.findMePanel.id);
     this.findMeButton.addEventListener("click", () =>

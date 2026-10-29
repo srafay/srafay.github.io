@@ -1,9 +1,10 @@
 import { site } from "@/lib/site";
 
 /*
-  Visits are counted with GoatCounter (https://www.goatcounter.com/help/js). Every page ends with the script below,
-  except the sky page, which is only ever seen inside a post's frame. Earth's post counts itself the same way, from
-  its own script in the cosmos repo, once its globe's first imagery is in.
+  Visits are counted with GoatCounter (https://www.goatcounter.com/help/js). Every page carries the script below, at
+  its end (in the head of the homepage, which is a template with no end of its own), except the sky page, which is only
+  ever seen inside a post's frame. Earth's post counts itself the same way, from its own script in the cosmos repo, once
+  its globe's first imagery is in.
 
   Nothing may slow a page for it. GoatCounter's script (about 3 KB) is added only after the page has loaded, then a
   couple of seconds later at a quiet moment, and it counts the page in one small request. It runs on the live site

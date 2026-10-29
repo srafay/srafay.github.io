@@ -62,8 +62,11 @@ CLAUDE.md
 /public/about*.js
 # version 4 of the About page, a page of its own, built whole by scripts/build-world-lines-page.ts
 /public/about/v4/
-# version 5 of the About page, built whole by scripts/build-hypercube-page.ts
+# version 5 of the About page, built by scripts/build-hypercube-page.ts: its prototype page, the scene's one build that
+# the prototype and the homepage both ask for, and the homepage itself, which app/route.ts serves
 /public/about/v5/
+/public/hypercube/
+/lib/hypercube/built/
 # version 6 of the About page, built whole by scripts/build-guide-page.ts
 /public/about/v6/
 # version 7 of the About page, built whole by scripts/build-letters-page.ts

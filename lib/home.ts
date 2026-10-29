@@ -1,7 +1,8 @@
 /*
-  The cosmos pages: a black hole with the real Solar System and each post's star system orbiting it. Three pages use
-  it: the homepage; the 404 page, where the sky fills the screen; and the sky page (/sky/), the sky alone, which posts
-  show behind themselves in a frame (see backdropScriptAddress).
+  The cosmos pages: a black hole with the real Solar System and each post's star system orbiting it. Two pages use it:
+  the 404 page, where the sky fills the screen; and the sky page (/sky/), the sky alone, which posts show behind
+  themselves in a frame (see backdropScriptAddress). The homepage is not one of them. It is version 5 of the About
+  page (lib/hypercube/home-page.ts).
 
   They are plain HTML, not React pages. The cosmos script takes over the whole document (it splits the name into letters,
   moves every piece of the page into orbit, and drives the address bar as posts open and close), so nothing else
@@ -24,7 +25,6 @@ const esc = (s: string) =>
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
-const postUrl = (post: Post) => `${site.url}/posts/${post.slug}/`;
 
 const built = (name: string) =>
   fs.readFileSync(path.join(process.cwd(), "public", "cosmos", name));
@@ -32,7 +32,7 @@ const built = (name: string) =>
 const builtScript = (name: string) => addressWithContentHash(`cosmos/${name}`);
 
 /*
-  Nothing blocks the first paint: the stylesheet is inlined (it's small and only this page uses it), the fonts are
+  Nothing blocks the first paint: the stylesheet is inlined (it's small and only the cosmos pages use it), the fonts are
   self-hosted and preloaded, and the script is deferred. The script hands the planets' surfaces to a worker
   (surfaces.js, named on its tag), so painting them never blocks the page either.
   While the cosmos source's dev build is running (bun run dev in cosmos/), `next dev` loads that instead.
@@ -61,69 +61,6 @@ async function assets() {
   };
 }
 
-function homeHead(posts: Post[]) {
-  const t = esc(site.name),
-    d = esc(site.description),
-    u = esc(`${site.url}/`);
-  const person = { "@id": `${site.url}/#person` };
-  const ld = {
-    "@context": "https://schema.org",
-    "@graph": [
-      {
-        "@type": "Person",
-        ...person,
-        name: site.name,
-        url: `${site.url}/`,
-        sameAs: site.links.map((l) => l.href),
-      },
-      {
-        "@type": "WebSite",
-        "@id": `${site.url}/#website`,
-        url: `${site.url}/`,
-        name: site.name,
-        description: site.description,
-        author: person,
-      },
-      {
-        "@type": "Blog",
-        "@id": `${site.url}/#blog`,
-        url: `${site.url}/`,
-        name: `${site.name}: notes`,
-        author: person,
-        blogPost: posts.map((p) => ({
-          "@type": "BlogPosting",
-          headline: p.title,
-          description: p.summary,
-          datePublished: p.date,
-          url: postUrl(p),
-          author: person,
-        })),
-      },
-    ],
-  };
-  return [
-    `<title>${t}</title>`,
-    `<meta name="description" content="${d}">`,
-    `<link rel="canonical" href="${u}">`,
-    `<meta name="robots" content="index, follow">`,
-    `<meta name="author" content="${t}">`,
-    `<meta property="og:type" content="website">`,
-    `<meta property="og:site_name" content="${t}">`,
-    `<meta property="og:title" content="${t}">`,
-    `<meta property="og:description" content="${d}">`,
-    `<meta property="og:url" content="${u}">`,
-    `<meta name="twitter:card" content="summary">`,
-    `<meta name="twitter:title" content="${t}">`,
-    `<meta name="twitter:description" content="${d}">`,
-    `<meta name="theme-color" content="#07060b" media="(prefers-color-scheme: dark)">`,
-    `<meta name="theme-color" content="#e5e5df" media="(prefers-color-scheme: light)">`,
-    `<link rel="icon" href="/favicon.ico" sizes="any">`,
-    `<link rel="apple-touch-icon" href="/apple-touch-icon.png">`,
-    `<link rel="alternate" type="application/rss+xml" title="${t}" href="${site.rss}">`,
-    `<script type="application/ld+json">${JSON.stringify(ld).replace(/</g, "\\u003c")}</script>`,
-  ].join("\n");
-}
-
 /** The writing list: real links to each post's own page. The script adds the planets and opens them in place. */
 const list = (posts: Post[]) =>
   posts
@@ -144,17 +81,13 @@ const footer = () =>
     `<a href="${site.rss}">RSS</a>`,
   ].join("");
 
-const nav = {
-  // On the homepage the bar moves between its two sections; anywhere else it leads back to them. About is a page of
-  // its own from everywhere.
-  home: { mark: "#home", home: "#home", posts: "#posts", about: site.about },
-  away: { mark: "/", home: "/", posts: "/#posts", about: site.about },
-};
+/** Where the bar leads: the homepage, the list of posts and the About page are each a page of their own. */
+const barLinks = { home: "/", posts: "/posts/", about: site.about };
 
 /** The name in the header, the same on every page, styled as on the daylight saving post. */
 const BRAND = "srafay<span>.github.io</span>";
 
-/** The light and dark switch. The homepage's own bar gives it an id; the reader's copy has none. */
+/** The light and dark switch. The page's own bar gives it an id; the reader's copy has none. */
 const themeButton = (attributes: string) =>
   `<button class="flip"${attributes} type="button">
         <svg class="moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"/></svg>
@@ -169,7 +102,7 @@ const themeButton = (attributes: string) =>
 type CosmosView = "sky" | "backdrop";
 
 /** The theme the page starts in: the visitor's choice, or on the sky page, the theme its post asks for. */
-function themeScript(view?: CosmosView) {
+function themeScript(view: CosmosView) {
   const chosen =
     view === "backdrop"
       ? `new URLSearchParams(location.search).get("theme")`
@@ -177,56 +110,42 @@ function themeScript(view?: CosmosView) {
   return `<script>try{const t=${chosen};if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch{}</script>`;
 }
 
-/*
-  On a phone or tablet the homepage scrolls inside its body and the document itself never scrolls, so the browser's
-  bars stay where they are (the cosmos script's 01-scroller.js says why). Chosen here, before anything is painted,
-  with the touch test the script uses. Only the homepage has a page to scroll: the 404 page fits the screen, and the
-  sky page is only seen in a post's frame.
-*/
-const scrollBoxScript = (view?: CosmosView) =>
-  view
-    ? ""
-    : `\n<script>if(matchMedia("(hover: none) and (pointer: coarse)").matches)document.documentElement.classList.add("scrolls-in-a-box")</script>`;
-
 /** The fonts, preloaded. The sky page has no words, so it loads none. */
-const fontsFor = (view?: CosmosView) =>
+const fontsFor = (view: CosmosView) =>
   view === "backdrop"
     ? ""
     : `${preloadedFonts.map((href) => `<link rel="preload" href="${href}" as="font" type="font/woff2" crossorigin>`).join("\n")}
 <style>${fontFaceCss}</style>`;
 
 /** The right-click menu (lib/site-menu). The sky page is only seen in a post's frame, and the post has the menu. */
-const menuFor = (view: CosmosView | undefined, posts: Post[]) =>
+const menuFor = (view: CosmosView, posts: Post[]) =>
   view === "backdrop"
     ? ""
     : `\n<script>${menuStartScript({ posts, look: cosmosPageLook })}</script>`;
 
 /** Counts the visit (lib/visit-counter.ts). The sky page is only seen in a post's frame, and the post counts it. */
-const visitCounterFor = (view?: CosmosView) =>
+const visitCounterFor = (view: CosmosView) =>
   view === "backdrop" ? "" : `<script>${visitCounterScript}</script>\n`;
 
 async function cosmosPage(o: {
   head: string;
-  nav: keyof typeof nav;
   hero: string;
   posts: Post[];
-  view?: CosmosView;
+  view: CosmosView;
 }) {
   const { styles, js, worker } = await assets();
-  const n = nav[o.nav];
-  const hidden = o.view ? " hidden" : "";
   return `<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, viewport-fit=cover">
 ${o.head}
-${themeScript(o.view)}${scrollBoxScript(o.view)}${menuFor(o.view, o.posts)}
+${themeScript(o.view)}${menuFor(o.view, o.posts)}
 ${fontsFor(o.view)}
 ${styles}
 <script src="${js}" data-surfaces="${worker}" defer></script>
 </head>
-<body${o.view ? ` data-view="${o.view}"` : ""}>
+<body data-view="${o.view}">
 
 <div class="sky" aria-hidden="true">
   <canvas id="back"></canvas>
@@ -237,8 +156,8 @@ ${styles}
 
 <div class="page" id="page">
   <header class="bar" id="bar">
-    <a class="mark" href="${n.mark}">${BRAND}</a>
-    <nav aria-label="Sections"><a href="${n.home}"${o.nav === "home" ? ' aria-current="true"' : ""}>Home</a><a href="${n.posts}">Posts</a><a href="${n.about}">About</a>
+    <a class="mark" href="${barLinks.home}">${BRAND}</a>
+    <nav aria-label="Sections"><a href="${barLinks.home}">Home</a><a href="${barLinks.posts}">Posts</a><a href="${barLinks.about}">About</a>
       ${themeButton(' id="flip"')}
     </nav>
   </header>
@@ -248,7 +167,7 @@ ${o.hero}
     </div>
   </section>
 
-  <section class="writing" id="posts"${hidden}>
+  <section class="writing" id="posts" hidden>
     <div class="col">
       <h2>Posts</h2>
       <ul class="readable" id="list">
@@ -257,7 +176,7 @@ ${list(o.posts)}
     </div>
   </section>
 
-  <footer${hidden}>${footer()}</footer>
+  <footer hidden>${footer()}</footer>
 </div>
 <p class="hint" id="hint">Pick a named planet to read it.</p>
 <div class="flash" id="flash"></div>
@@ -284,18 +203,6 @@ ${visitCounterFor(o.view)}</body>
 `;
 }
 
-export async function homePage() {
-  const posts = await getPosts();
-  return cosmosPage({
-    head: homeHead(posts),
-    nav: "home",
-    posts,
-    hero: `      <h1 id="name" class="visually-hidden" aria-label="${esc(site.name)}">${esc(site.name)}</h1>
-      <p>Most things fall in. A few notes made it back out.</p>
-      <a class="down" href="#posts">Read the notes</a>`,
-  });
-}
-
 /** GitHub Pages serves this for every address that doesn't exist (the build writes it to 404.html). */
 export async function lostPage() {
   const title = `Lost in the dark · ${site.name}`;
@@ -308,12 +215,11 @@ export async function lostPage() {
       `<link rel="icon" href="/favicon.ico" sizes="any">`,
       `<link rel="apple-touch-icon" href="/apple-touch-icon.png">`,
     ].join("\n"),
-    nav: "away",
     posts: await getPosts(),
     view: "sky",
     hero: `      <h1 id="name" aria-label="Lost in the dark">Lost <i>in the dark</i></h1>
       <p>Error 404. Whatever was here fell in, or never existed.</p>
-      <a class="down" href="/">Back to the system</a>`,
+      <a class="down" href="${barLinks.home}">Back home</a>`,
   });
 }
 
@@ -327,7 +233,6 @@ export async function skyPage() {
       `<title>Sky · ${esc(site.name)}</title>`,
       `<meta name="robots" content="noindex">`,
     ].join("\n"),
-    nav: "away",
     posts: await getPosts(),
     view: "backdrop",
     hero: `      <h1 id="name">Sky</h1>`,

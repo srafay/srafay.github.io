@@ -34,7 +34,7 @@ export async function generateMetadata({
   };
 }
 
-/** What search engines read about a post: a BlogPosting by the site's author, as on the homepage. */
+/** What search engines read about a post: a BlogPosting by the site's author. */
 function structuredData(post: Post) {
   const url = `${site.url}/posts/${post.slug}/`;
   return {
@@ -73,9 +73,8 @@ export default async function PostPage({ params }: PageProps<"/posts/[slug]">) {
         planet={post.planet}
         scriptAddress={backdropScriptAddress()}
       />
-      {/* Tells the homepage to open inside the black hole and play the system coming back out. */}
-      <a href="/?from=post" className="back">
-        Back to the system
+      <a href="/" className="back">
+        Back home
       </a>
       <p className="des">
         {post.planet}{" "}
@@ -84,7 +83,7 @@ export default async function PostPage({ params }: PageProps<"/posts/[slug]">) {
         </span>
       </p>
       <h1>{post.title}</h1>
-      {/* The homepage's reader fetches this page and shows what's inside data-post-body. */}
+      {/* The cosmos pages' reader fetches this page and shows what's inside data-post-body. */}
       <div className="prose" data-post-body="">
         <Content />
       </div>

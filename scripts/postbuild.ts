@@ -1,6 +1,7 @@
 /*
   Route handlers are written by the static export to files with no extension. These are pages:
-  - the homepage (app/route.ts) is written to out/index; GitHub Pages serves / from index.html.
+  - the homepage (app/route.ts), version 5 of the About page, is written to out/index; GitHub Pages serves / from
+    index.html.
   - the 404 page (app/lost/route.ts) is written to out/lost; GitHub Pages serves 404.html for any missing address.
     It replaces the 404.html Next renders from app/not-found.tsx.
   - the sky page (app/sky/route.ts) is written to out/sky; it moves to out/sky/index.html, served at /sky/.

@@ -12,7 +12,7 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
-    // The cosmos homepage source lives in its own private repo; public/cosmos/ is its build.
+    // The cosmos source (the 404 page, the sky behind the posts, Earth's post) lives in its own private repo; public/cosmos/ is its build.
     "cosmos/**",
     "public/cosmos/**",
     // The site's menu, built from lib/site-menu/ by scripts/build-site-menu.ts.
@@ -21,8 +21,9 @@ const eslintConfig = defineConfig([
     "public/about*.js",
     // Version 4 of the About page, a page of its own, built whole by scripts/build-world-lines-page.ts.
     "public/about/v4/**",
-    // Version 5, built whole by scripts/build-hypercube-page.ts.
+    // Version 5, built by scripts/build-hypercube-page.ts: its prototype page and the scene's one build.
     "public/about/v5/**",
+    "public/hypercube/**",
     // Version 6, built whole by scripts/build-guide-page.ts.
     "public/about/v6/**",
     "public/about/v7/**",

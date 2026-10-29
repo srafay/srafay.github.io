@@ -21,7 +21,7 @@ Everything on this site is written by ${site.name} and is © ${site.name}. All r
 
 ## How to read this site
 
-- The homepage (${site.url}/) is an interactive animation drawn on a canvas: a black hole with the Solar System and each post's star system orbiting it. Its text is in the HTML itself: the name, a one-line introduction, and the list of posts with links.
+- The homepage (${site.url}/) is an interactive animation drawn on a canvas: ${site.name}'s roles, degrees, projects, courses and skills as one object in four dimensions. The HTML holds only the name and a one-line introduction. The posts are not on it. They are listed at ${site.url}/posts/.
 - Each post has its own page at \`${site.url}/posts/<slug>/\`. Its text is in the static HTML, so it reads without JavaScript. Some posts also draw figures and animations with scripts. The title is the \`<h1>\`, and the post's text is inside the element marked \`data-post-body\`. Each post's planet and date are in the list below.
 - Each post belongs to a planet. An exoplanet (always a real, confirmed one) labels the post but is not its subject. A post about one of the Sun's own planets belongs to that planet.
 - All posts, newest first: the list below, the RSS feed (${site.url}${site.rss}) and the sitemap (${site.url}/sitemap.xml).

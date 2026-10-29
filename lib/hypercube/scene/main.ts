@@ -1,5 +1,5 @@
 /*
-  Version 5 of the About page, "Hypercube": the script (public/about/v5/hypercube.js, built by
+  Version 5 of the About page, "Hypercube": the script (public/hypercube/hypercube.js, built by
   scripts/build-hypercube-page.ts). It reads the CV from content/about/profile.ts, bundled in, through lib/about-cv/.
   mountHypercube takes the root and the data and assumes nothing else about the document, so a React component can
   later mount the scene as it is.

@@ -2,9 +2,9 @@
   The site's menu, opened by a right click (start-script.ts takes the click and adds this script to the page). Built
   into public/site-menu.js by scripts/build-site-menu.ts.
 
-  Its panels are made when it opens and removed when it closes: the homepage's script moves the page's own elements
+  Its panels are made when it opens and removed when it closes: the cosmos pages' script moves the page's own elements
   into orbit, so nothing of the menu is in the page's HTML. They sit in a shadow root, out of reach of the page's rules,
-  and in the browser's top layer, above everything a page draws (the homepage's canvases, Earth's stage, sheets and
+  and in the browser's top layer, above everything a page draws (the cosmos pages' canvases, Earth's stage, sheets and
   bars). Where a browser has no top layer they sit above the page by z-index instead.
 
   It opens at the pointer; a submenu opens on hover or a click, or from the keys. Arrow keys move, Enter and Space
@@ -281,7 +281,7 @@ function startMenu(start: MenuStart) {
     event.ctrlKey || event.metaKey || event.altKey;
 
   // Every key belongs to the menu while it is open, so a page's own keys (Earth's arrows turn its pages, the
-  // homepage's Escape closes a post) wait. The browser's own shortcuts still work.
+  // cosmos pages' Escape closes a post) wait. The browser's own shortcuts still work.
   function onKey(event: KeyboardEvent) {
     event.stopPropagation();
     if (hasModifier(event) || event.isComposing) return;
@@ -366,7 +366,7 @@ function startMenu(start: MenuStart) {
   );
   shadow.addEventListener("click", (event) => onClick(event as MouseEvent));
   shadow.addEventListener("auxclick", (event) => onClick(event as MouseEvent));
-  // A press in the menu is the menu's: the homepage would throw an asteroid from it.
+  // A press in the menu is the menu's: the cosmos pages would throw an asteroid from it.
   host.addEventListener("pointerdown", (event) => event.stopPropagation());
 
   /* ---------- Ways out ---------- */

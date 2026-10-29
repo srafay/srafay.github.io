@@ -61,7 +61,8 @@ for (const scene of SCENES) await buildScene(scene);
 // Version 4, "World lines": a page of its own, not a Next page, so it is built whole (scripts/build-world-lines-page.ts).
 await buildWorldLinesPage();
 
-// Version 5, "Hypercube": the life as one object in four dimensions, also a page of its own (scripts/build-hypercube-page.ts).
+// Version 5, "Hypercube": the life as one object in four dimensions, built once for the homepage and for its prototype page
+// (scripts/build-hypercube-page.ts).
 await buildHypercubePage();
 
 // Version 6, "Guide": a python tours the whole CV down flat fields of colour, a page of its own (scripts/build-guide-page.ts).

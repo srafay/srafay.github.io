@@ -5,7 +5,7 @@ import { useTheme } from "next-themes";
 
 const subscribe = () => () => {};
 
-/** The homepage's toggle: a moon in light mode, a sun at night (globals.css shows the right one). */
+/** The cosmos pages' toggle: a moon in light mode, a sun at night (globals.css shows the right one). */
 export function ThemeToggle() {
   const { resolvedTheme, setTheme } = useTheme();
   // The theme is only known in the browser; label it generically on the server.

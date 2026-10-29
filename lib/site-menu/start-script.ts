@@ -27,7 +27,7 @@ const TEXT_FIELDS = [
   'input:not([type="button"], [type="checkbox"], [type="color"], [type="file"], [type="hidden"], [type="image"], [type="radio"], [type="range"], [type="reset"], [type="submit"])',
 ].join(", ");
 
-/** The homepage's tokens, and the 404 page's (the cosmos repo's cosmos.css). */
+/** The cosmos pages' tokens, as on the 404 page (the cosmos repo's cosmos.css). */
 export const cosmosPageLook: MenuLook = {
   panel: "var(--ground)",
   ink: "var(--ink)",

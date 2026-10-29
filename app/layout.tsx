@@ -12,11 +12,11 @@ import { visitCounterScript } from "@/lib/visit-counter";
 import "./globals.css";
 
 /*
-  Every page except the homepage, which is plain HTML (app/route.ts and lib/home.ts). Both use the same self-hosted
-  typefaces (lib/fonts.ts); code is set in JetBrains Mono, used only here.
+  Every page except the homepage, which is plain HTML (app/route.ts and lib/hypercube/home-page.ts). Both use the same
+  self-hosted typefaces (lib/fonts.ts); code is set in JetBrains Mono, used only here.
   These pages don't preload their fonts: the faces are declared inline at the top of the page, so the browser finds
-  them almost as early anyway. Preloads here also reached the homepage, which fetches a post's page to show its text
-  (in dev as a Link header), and the browser then warned that the preloaded fonts went unused.
+  them almost as early anyway. Preloads here also reached the cosmos pages (lib/home.ts), which fetch a post's page to
+  show its text (in dev as a Link header), and the browser then warned that the preloaded fonts went unused.
 */
 const code = JetBrains_Mono({
   variable: "--font-code",
@@ -52,7 +52,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         />
       </head>
       <body className="flex min-h-full flex-col">
-        {/* Same attribute and storage key as the homepage, so the theme carries across the whole site. */}
+        {/* Same attribute and storage key as the cosmos pages (lib/home.ts), so the theme carries between them. */}
         <ThemeProvider
           attribute="data-theme"
           defaultTheme="system"

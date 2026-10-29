@@ -1,7 +1,7 @@
 /*
   What a page and the site's menu hand each other. The page's own inline script (start-script.ts) fills
   window.siteMenu as the page parses; the menu's script (menu.ts) arrives later and opens the menu from it.
-  window.siteTheme is the page's own light and dark switch: the homepage, Earth's post and the Next pages each set it,
+  window.siteTheme is the page's own light and dark switch: the cosmos pages, Earth's post and the Next pages each set it,
   and the menu's "Change theme" goes through it, never around it.
 */
 
