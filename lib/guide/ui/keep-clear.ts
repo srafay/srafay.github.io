@@ -14,6 +14,13 @@ export const overlapArea = (first: Box, second: Box) =>
 /** A little air kept round everything a bubble avoids. */
 const AIR = 8;
 
+/**
+ * Whether something is seen now: not hidden (the bars while the tour plays), and not a line, card or name still
+ * waiting its turn unseen. What is not seen is not kept clear.
+ */
+const seenNow = (element: HTMLElement) =>
+  getComputedStyle(element).visibility !== "hidden" && !element.closest("[data-waiting], [data-awaiting-fetch], [data-awaiting-carry]");
+
 const grown = (box: DOMRect | Box): Box => ({
   left: box.left - AIR,
   top: box.top - AIR,
@@ -46,6 +53,7 @@ export class KeepClear {
     const height = window.innerHeight;
     this.controlsInView = [];
     for (const control of this.pageControls()) {
+      if (!seenNow(control)) continue;
       const box = control.getBoundingClientRect();
       if (box.bottom < 0 || box.top > height || !box.width) continue;
       this.controlsInView.push({ left: box.left, right: box.right, top: box.top + scrolled, bottom: box.bottom + scrolled });
@@ -59,7 +67,9 @@ export class KeepClear {
       const box = grown(element.getBoundingClientRect());
       return { ...box, top: box.top + scrolled, bottom: box.bottom + scrolled };
     });
-    this.onTop = this.top().map((element) => grown(element.getBoundingClientRect()));
+    this.onTop = this.top()
+      .filter(seenNow)
+      .map((element) => grown(element.getBoundingClientRect()));
     this.onBottom = this.bottom()
       .filter((element) => !element.hidden)
       .map((element) => {

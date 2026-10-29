@@ -103,6 +103,8 @@ export const asides = {
   pickedUp: ["Hello up there.", "Careful. My tools are hanging on.", "Put me down when you are done."],
   dropped: ["Floating home.", "Back in position.", "That was fun. Again?"],
   soundOn: "Sound on. I will keep it soft.",
+  /** Said once a visit, as it carries the first section's name in. */
+  carry: "This word weighs more than I do.",
 };
 
 /** What it says when tapped, one after another. */

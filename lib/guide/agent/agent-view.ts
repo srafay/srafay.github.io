@@ -7,18 +7,19 @@
 import * as THREE from "three";
 import { Follower } from "@/lib/about-cv/scene/follower";
 import { Attention, gazedOffset, routerFrame, type Gaze } from "./attention";
+import { Carry, headroomFor, type CarriedWord, type CarryMoment } from "./carry";
 import { tallestOf, type YearBar } from "./chart";
 import { Wardrobe, type CostumeKey } from "./costumes";
 import type { FieldsBehind } from "./dither";
 import { DitherRenderer } from "./dither";
 import { HitArea } from "./hit-area";
-import { conePlace, denRoomLeft, depthBelow, fanExtent, fanOffsets, largestRadius, opennessOf, placeOf, type Home, type Place, type Stage } from "./homes";
+import { conePlace, denRoomLeft, depthBelow, fanExtent, fanOffsets, largestRadius, opennessOf, placeOf, turnOpening, type Home, type Place, type Stage } from "./homes";
 import { Messenger } from "./messages";
 import { AgentModel, flatBoxOf, type FlatBox, type LinkLay } from "./model";
 import { Mobile } from "./mobile";
 import { canvasSideFor, messageSizeInCells, openWidthShare, shape } from "./proportions";
 import { NODE_COUNT, ROUTER, nodeOfTool, toolOfNode, type ToolKey } from "./topology";
-import { momentAt, timeline, tricks, type ChartPlan, type Part, type TrickContext, type TrickKey, type TrickPose } from "./tricks";
+import { momentAt, timeline, toolOfTrick, tricks, type ChartPlan, type Part, type TrickContext, type TrickKey, type TrickPose } from "./tricks";
 import { add, alongCurve, boundsOf, copyPoint, distance, lerpPoint, normalise, point, scale, subtract, turnedInPlane, type Bounds, type Point } from "./vectors";
 
 export type { Home } from "./homes";
@@ -72,6 +73,15 @@ export type AgentViewOptions = {
 };
 
 type Press = { pointerId: number; x: number; y: number; at: number; node: number };
+
+/** What the page does as a name is carried: moves it each frame, says a word as it is taken, and lets it rest. */
+export type CarryHandlers = {
+  onFrame(moment: CarryMoment): void;
+  onTaken(): void;
+  onLanded(): void;
+};
+
+type Carrying = { carry: Carry; handlers: CarryHandlers; taken: boolean; landed: boolean };
 type PlayingTrick = { key: TrickKey; started: number; parts: Part[]; seconds: number; context: TrickContext };
 
 export class AgentView {
@@ -99,6 +109,7 @@ export class AgentView {
   private readonly messenger = new Messenger();
   private press: Press | null = null;
   private trick: PlayingTrick | null = null;
+  private carrying: Carrying | null = null;
   private lookAt: Point | null = null;
   private frameRequested = false;
   private lastDrawn = 0;
@@ -239,6 +250,7 @@ export class AgentView {
   play(key: TrickKey, lines: string[], secondsToSay: (line: string) => number, routeUp = false) {
     if (this.held) return null;
     this.stopTrick();
+    this.landCarry();
     const router = point(this.routerX.value, this.routerY.value, this.routerZ.value);
     const radius = this.size.value;
     const context: TrickContext = {
@@ -254,6 +266,39 @@ export class AgentView {
     this.trick = { key, started: this.clock(), parts, seconds, context };
     this.requestFrame();
     return { parts, seconds };
+  }
+
+  /**
+   * Carries a section's name in, as a crane does, or answers false when it cannot now (held, playing a trick, or under
+   * reduced motion, where names are simply in place). A carry under way lands at once first.
+   */
+  carry(word: CarriedWord, handlers: CarryHandlers) {
+    if (this.held || this.trick || this.reducedMotion) return false;
+    this.landCarry();
+    const router = this.nodes[ROUTER] ?? point(this.routerX.value, this.routerY.value, this.routerZ.value);
+    this.carrying = { carry: new Carry(word, router, this.clock(), this.home === "den"), handlers, taken: false, landed: false };
+    this.requestFrame();
+    return true;
+  }
+
+  /** A carry under way ends now: its name is set in its place at once. */
+  landCarry() {
+    const carrying = this.carrying;
+    if (!carrying) return;
+    this.carrying = null;
+    this.model.setCord(null, point(), 0);
+    if (!carrying.landed) carrying.handlers.onLanded();
+    this.requestFrame();
+  }
+
+  /** Whether a name is being carried. */
+  get isCarrying() {
+    return this.carrying !== null;
+  }
+
+  /** The room a carry needs over a name's place: names are carried in the tour, at the size of its homes there. */
+  get carryHeadroom() {
+    return headroomFor(placeOf(this.stage, this.stage.den ? "den" : "left").radius);
   }
 
   /** Ends a trick now: everything it showed goes. */
@@ -292,6 +337,32 @@ export class AgentView {
     this.lookAt = place;
     this.requestFrame();
   }
+
+  /** Lends the cone out as a pen (true), or has it home again (false). */
+  lendCone(lent: boolean) {
+    this.model.lent = lent ? "route" : null;
+    this.requestFrame();
+  }
+
+  /** Where the cone sits on the screen (y down), as last drawn: where the pen leaves from and comes home to. */
+  coneOnScreen() {
+    return { x: this.cone.place.x, y: window.innerHeight - this.cone.place.y };
+  }
+
+  /** Where a tool sits on the screen (y down), as last drawn, or null before the first frame. */
+  toolOnScreen(tool: ToolKey) {
+    const node = this.nodes[nodeOfTool(tool)];
+    return node ? { x: node.x, y: window.innerHeight - node.y } : null;
+  }
+
+  /** Lights a tool for a while, in its ink: deep research as a card leaves its pile. */
+  lightFor(tool: ToolKey, seconds: number) {
+    this.litFor = { tool, until: this.clock() + seconds };
+    this.nudgedUntil = Math.max(this.nudgedUntil, this.litFor.until);
+    this.requestFrame();
+  }
+
+  private litFor: { tool: ToolKey | null; until: number } = { tool: null, until: 0 };
 
   /** Sends an idle message soon, for checks and crops. */
   sendMessageSoon() {
@@ -368,6 +439,7 @@ export class AgentView {
   private pickUp(hand: Point) {
     if (!this.press) return;
     this.stopTrick();
+    this.landCarry();
     this.mobile.place(this.nodes.length ? this.nodes : this.mobile.points);
     this.mobile.hold(this.press.node, hand);
     this.layer.dataset.held = "";
@@ -442,7 +514,7 @@ export class AgentView {
     const now = this.clock();
     // The time since the last frame drawn, not the last frame asked for: at 30 frames a second half are skipped.
     const seconds = Math.min(0.1, this.lastDrawn ? now - this.lastDrawn : 1 / 60);
-    const busy = Boolean(this.held || this.trick || this.press) || this.travelling || now < this.nudgedUntil;
+    const busy = Boolean(this.held || this.trick || this.press || this.carrying) || this.travelling || now < this.nudgedUntil;
     const idle = !this.reducedMotion;
     if (!busy && idle && now - this.lastDrawn < IDLE_FRAME_SECONDS) {
       this.requestFrame();
@@ -487,14 +559,19 @@ export class AgentView {
     if (this.press && !this.held && now - this.press.at > GRAB_AFTER_SECONDS) this.pickUp({ x: this.press.x, y: this.press.y, z: 0 });
     const step = this.reducedMotion ? 0 : seconds;
     const place = this.placeNow();
+    const carrying = this.held ? null : this.carrying;
     const radius = this.held ? this.size.value : this.follow(this.size, place.radius, step);
-    const folded = this.held ? this.fold.value : this.follow(this.fold, place.folded, step);
-    const turn = this.held ? this.turn.value : this.follow(this.turn, place.turn, step);
+    // Carrying, the fan folds on its side, opening the way it came from, out of the cord's way.
+    const folded = this.held ? this.fold.value : this.follow(this.fold, carrying ? 1 : place.folded, step);
+    const turn = this.held ? this.turn.value : this.follow(this.turn, carrying ? turnOpening(carrying.carry.word.side) : place.turn, step);
+    const carried = carrying ? carrying.carry.at(now, seconds, radius, this.stage.width) : null;
     // Floating: a slow rise and fall, so it never looks pinned.
     const bob = this.reducedMotion ? 0 : Math.sin(now * 0.9) * radius * 0.05;
     let router: Point = this.held
       ? this.mobile.points[ROUTER]
-      : point(this.follow(this.routerX, place.router.x, step), this.follow(this.routerY, place.router.y, step) + bob, this.follow(this.routerZ, place.router.z, step));
+      : carried
+        ? this.jumpRouterTo(carried.router)
+        : point(this.follow(this.routerX, place.router.x, step), this.follow(this.routerY, place.router.y, step) + bob, this.follow(this.routerZ, place.router.z, step));
 
     const trick = this.trick;
     let pose: TrickPose | null = null;
@@ -513,12 +590,16 @@ export class AgentView {
       }
     }
 
-    const target = this.attentionTarget(pose, router, radius, now);
+    // Carrying, it watches its load.
+    const target = carried?.hook ?? this.attentionTarget(pose, router, radius, now);
     this.attending = target;
     this.gaze = this.attention.step(router, target, radius, this.held ? step * 0.5 : step);
-    if (!this.held) router = add(router, point(this.gaze.leanX, this.gaze.leanY, 0));
+    if (!this.held && !carried) router = add(router, point(this.gaze.leanX, this.gaze.leanY, 0));
     const rest = this.restNodes(router, radius, folded, turn, now);
-    this.mobile.step(seconds, router, rest, radius);
+    // Under reduced motion nothing swings into place: the tools are at rest round the router at once, never left
+    // stretched where the last frame drawn found them.
+    if (this.reducedMotion && !this.held) this.mobile.place(rest);
+    else this.mobile.step(seconds, router, rest, radius);
 
     const nodes = this.mobile.points.map((each, node) => {
       const wanted = pose?.places[node];
@@ -526,6 +607,9 @@ export class AgentView {
     });
     const foldScale = 1 + (shape.foldedToolScale - 1) * folded;
     const toolScales = (pose?.toolScales ?? Array.from({ length: NODE_COUNT }, () => 1)).map((each, node) => (node === ROUTER ? each : each * foldScale));
+    // The cone lent out as a pen is not drawn here: its link stays, to an empty socket.
+    if (this.model.lent === "route") toolScales[nodeOfTool("route")] = 0;
+    this.model.showSocket();
     this.keepOnScreen(nodes, radius);
     this.keepTheRingLow(nodes, radius, toolScales);
     const message = this.messageNow(now, nodes, pose);
@@ -546,13 +630,16 @@ export class AgentView {
     layTheGraph();
     // Laid again at once when the cone has to move out further, so it never shows on a costume even for a frame.
     if (this.keepTheConeClearOfTheCostume(outward, step)) layTheGraph();
-    this.lit = pose ? pose.lit : message?.atTool ? message.tool : null;
+    this.lit = pose ? pose.lit : message?.atTool ? message.tool : now < this.litFor.until ? this.litFor.tool : null;
     this.model.setLit(this.lit);
     this.messageCells = messageSizeInCells(radius / largestRadius(this.stage));
     const cell = (this.dither.cell / this.dither.devicePixelRatio) * this.messageCells;
     this.message = message?.place ?? null;
-    this.model.setMessage(this.message, cell);
+    this.model.setMessage(this.message, cell, message?.tool ?? toolOfTrick(trick?.key ?? null));
     const extras = this.drawExtras(pose, nodes[ROUTER], radius, trick?.context ?? null);
+    if (carrying && carried) this.layTheCarry(carrying, carried, nodes[ROUTER], radius);
+    // The cord is drawn on the canvas too, down to its hook.
+    if (carried?.hook) extras.push(carried.hook);
 
     this.nodes = nodes;
     this.radius = radius;
@@ -567,6 +654,36 @@ export class AgentView {
     const reach = radius * 1.65 + this.conePush.value;
     this.options.onMoved(nodes[ROUTER], reach, mergeBounds(this.boundsOfGraph(withoutCone, radius, toolScales, pose), extras));
     this.frames++;
+  }
+
+  /** The router set where a carry has it: the float home starts from there when the carry ends. */
+  private jumpRouterTo(router: Point) {
+    this.routerX.jump(router.x);
+    this.routerY.jump(router.y);
+    this.routerZ.jump(router.z);
+    return copyPoint(router);
+  }
+
+  /** The cord and the carried name for this frame, and what the page hears as the carry goes on. */
+  private layTheCarry(carrying: Carrying, carried: CarryMoment, router: Point, radius: number) {
+    const hook = carried.hook;
+    if (hook && carried.cordShown > 0) {
+      const from = point(router.x, router.y - radius * 0.9, router.z);
+      this.model.setCord(from, lerpPoint(from, hook, carried.cordShown), radius);
+    } else this.model.setCord(null, point(), 0);
+    carrying.handlers.onFrame(carried);
+    if (hook && !carrying.taken) {
+      carrying.taken = true;
+      carrying.handlers.onTaken();
+    }
+    if (carried.landed && !carrying.landed) {
+      carrying.landed = true;
+      carrying.handlers.onLanded();
+    }
+    if (carried.done) {
+      this.carrying = null;
+      this.model.setCord(null, point(), 0);
+    }
   }
 
   /**

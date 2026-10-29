@@ -15,6 +15,9 @@ import { add, lerp, lerpPoint, point, scale, turnedInPlane, type Point } from ".
 
 export type TrickKey = ToolKey | "hallucinate";
 
+/** The tool a trick shows off, or null for one that is no tool's (hallucinate). */
+export const toolOfTrick = (key: TrickKey | null): ToolKey | null => (key && key !== "hallucinate" ? key : null);
+
 /** A part of a trick: its name, the line it says (if any), and when it starts and how long it lasts, in seconds. */
 export type Part = { name: string; say?: string; start: number; seconds: number };
 

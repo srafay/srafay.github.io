@@ -16,13 +16,19 @@ import { sideMargin } from "@/lib/guide/agent/proportions";
 import type { CostumeKey } from "@/lib/guide/agent/costumes";
 import { NODE_COUNT } from "@/lib/guide/agent/topology";
 import type { Part, TrickKey } from "@/lib/guide/agent/tricks";
-import { fieldColours, type SectionKey } from "@/lib/guide/palette";
+import { TOOL_INKS } from "@/lib/guide/agent/inks";
+import { bubbleOf, contrastRatio, fieldColours, type SectionKey } from "@/lib/guide/palette";
 import { asides, costumeLines, narration, routeLine, skillAnswerLine, tapLines, trickLines } from "@/lib/guide/script/lines";
 import { Sound } from "@/lib/guide/sound";
 import { PERCH_SIDE, SECTION_TITLES, TOUR_ORDER } from "@/lib/guide/tour";
 import { AnswerPanel } from "@/lib/guide/ui/answer-panel";
-import { Bars } from "@/lib/guide/ui/bars";
+import { guideGlyphs } from "@/lib/guide/icons";
+import { Bars, controlButton } from "@/lib/guide/ui/bars";
 import { CardDialog } from "@/lib/guide/ui/card-dialog";
+import { Carries } from "@/lib/guide/ui/carries";
+import { Fetches } from "@/lib/guide/ui/fetches";
+import { Pen } from "@/lib/guide/ui/pen";
+import { TourPlayer, type TourState } from "@/lib/guide/ui/tour-player";
 import { ChartLabels } from "@/lib/guide/ui/chart-labels";
 import { mockupsBlock, playgroundBlock, skillsBlock, linksBlock, type ArtAddresses } from "@/lib/guide/ui/extras";
 import { KeepClear } from "@/lib/guide/ui/keep-clear";
@@ -81,6 +87,8 @@ declare global {
         coneClearOfCostume: boolean;
         /** In the den on a phone: the strip's top and the highest the agent reaches, up from the bottom. */
         den: { inDen: boolean; top: number; highest: number; stripTop: number };
+        /** The tour playing by itself: its state, whether its control shows, and whether a name is carried or a line written. */
+        tour: { state: TourState; controlShown: boolean; skipShown: boolean; carrying: boolean; writing: boolean };
       };
       /** The share of a rectangle of the screen the agent's targets cover (y up from the bottom). */
       hitCoverage(left: number, bottom: number, width: number, height: number): number;
@@ -92,6 +100,12 @@ declare global {
       sendMessage(): void;
       /** Redraws at another cell size, for the comparison crop. */
       setCell(devicePixels: number): void;
+      /** Ends the tour where it is, lines as they stand, for the checks of the page without it. */
+      endTour(): void;
+      /** Every section's name and every card in place, for the checks of the page without the carries and fetches. */
+      setAllInPlace(): void;
+      /** The theme's fields and the tools' inks, for the contrast checks. */
+      palette(): { fields: Record<string, { field: string; words: string }>; inks: Record<string, { light: string; dark: string }> };
     };
   }
 }
@@ -164,6 +178,35 @@ export function routeTarget(current: SectionKey, seen: Set<SectionKey>): Section
   if (before) return before === "hello" ? null : before;
   return TOUR_ORDER[place + 1];
 }
+
+/** The lowest edge of something fixed along the top of the screen, or 0 when it is not showing. */
+function visibleBottom(fixed: HTMLElement | null | undefined) {
+  if (!fixed) return 0;
+  const style = getComputedStyle(fixed);
+  return style.visibility === "hidden" || style.display === "none" ? 0 : Math.max(0, fixed.getBoundingClientRect().bottom);
+}
+
+/**
+ * The pen's colours on a line: the route's ink in whichever print stands out more from the line's paper, and the
+ * line's words' colour for its shadow cells.
+ */
+function penColoursOn(line: HTMLElement) {
+  const key = (line.closest<HTMLElement>("[data-section]")?.dataset.section ?? "hello") as SectionKey;
+  const bubble = bubbleOf(fieldColours[key]);
+  const { light, dark } = TOOL_INKS.route;
+  const ink = contrastRatio(light, bubble.paper) >= contrastRatio(dark, bubble.paper) ? light : dark;
+  return { ink, shade: bubble.words };
+}
+
+/**
+ * Who has scrolled the page so far: the reader (a touch, the wheel, a key, a press) or the tour itself. A page scrolled
+ * by neither was restored by a reload.
+ */
+const scrolledBy = { reader: false, tour: false };
+for (const kind of ["wheel", "touchstart", "keydown", "pointerdown"]) window.addEventListener(kind, () => (scrolledBy.reader = true), { passive: true, once: true });
+
+/** How long the last of the first words stays to be read before the tour sets off, in seconds. */
+const FIRST_WORDS_READ_FOR = 2;
 
 export function mountGuide(root: HTMLElement, data: GuideData) {
   const parts = partsOf(root);
@@ -370,17 +413,104 @@ export function mountGuide(root: HTMLElement, data: GuideData) {
   // The bars are built: the den's strip has its real size now.
   agent.denChanged();
 
-  // The lines of the tour, said in turn as they come into view, the agent turning to each.
+  // The lines of the tour: said in turn, written by the agent's cone as a pen, each card fetched from deep research's
+  // pile of sources as its line is done. The agent watches the caret, then the card.
   let lookingAtLine: { documentY: number; x: number } | null = null;
+  const lookAtLine = (x: number, documentY: number) => {
+    lookingAtLine = { documentY, x };
+    followLine();
+  };
+  const restoredOnly = () => window.scrollY > 0 && !scrolledBy.reader && !scrolledBy.tour;
+  const pen = new Pen({
+    layer: parts.layer,
+    reducedMotion,
+    conePoint: () => (agent.nodes.length ? agent.coneOnScreen() : null),
+    lendCone: (lent) => agent.lendCone(lent),
+    writingArea: () => ({ top: readingBandTop(), bottom: Math.min(window.innerHeight, parts.bottom.getBoundingClientRect().top) }),
+    coloursOn: penColoursOn,
+  });
+  const cardOfLine = (line: HTMLElement) => line.closest(".guide-exchange")?.querySelector<HTMLElement>(".guide-card") ?? null;
+  const fetches = new Fetches([...parts.tour.querySelectorAll<HTMLElement>(".guide-card")], {
+    reducedMotion,
+    source: () => agent.toolOnScreen("research"),
+    onFetch: (card, seconds) => {
+      agent.lightFor("research", seconds);
+      const box = card.getBoundingClientRect();
+      lookAtLine(box.left + box.width / 2, box.top + box.height / 2 + window.scrollY);
+    },
+    restoredOnly,
+  });
   const narrator = new Narrator(lines, {
     instant: reducedMotion,
-    onWord: (word) => sound.blip(word),
+    onWord: (word, span) => {
+      sound.blip(word);
+      pen.toWord(span);
+      const box = span.getBoundingClientRect();
+      lookAtLine(box.right, box.top + box.height / 2 + window.scrollY);
+    },
     onLineStarted: (line) => {
       const box = line.getBoundingClientRect();
-      lookingAtLine = { documentY: box.top + box.height / 2 + window.scrollY, x: box.left + box.width / 2 };
-      followLine();
+      lookAtLine(box.left + box.width / 2, box.top + box.height / 2 + window.scrollY);
+      pen.write(line);
+    },
+    onLineDone: (line, written) => {
+      pen.lift();
+      const card = cardOfLine(line);
+      if (!card) return;
+      if (written) fetches.fetch(card);
+      else fetches.land(card);
     },
   });
+  let player: TourPlayer | null = null;
+  // Where the reading band starts: under the bar along the top, or the tour's control while it plays.
+  const readingBandTop = () => Math.max(visibleBottom(parts.top), visibleBottom(player?.element)) + 8;
+  // Each section's name is carried in by the agent the first time it comes into view; its lines wait for it.
+  const carries = new Carries([...parts.tour.querySelectorAll<HTMLElement>(".guide-section-name")], {
+    reducedMotion,
+    agent,
+    sideOf: (section) => (agent.stage.den || PERCH_SIDE[section.dataset.section as SectionKey] === "right" ? 1 : -1),
+    // From behind the den's strip on a phone; from just above the bottom edge on a computer.
+    takenAt: () => (agent.stage.den ? agent.stage.denTop : 2),
+    bandTop: readingBandTop,
+    restoredOnly,
+    onTaken: (first) => {
+      if (first) say.say(asides.carry);
+    },
+    onSet: (section) => narrator.release(section),
+  });
+  for (const section of parts.tour.querySelectorAll<HTMLElement>("[data-section]")) if (carries.isWaiting(section)) narrator.hold(section);
+  // The tour plays by itself after the first words; under reduced motion a Play the tour button starts it.
+  player = new TourPlayer({
+    root,
+    reducedMotion,
+    narrator,
+    carries,
+    fetches,
+    cardOf: cardOfLine,
+    hasExtra: (line) => Boolean(line.closest(".guide-exchange-wide")),
+    bandTop: readingBandTop,
+    onChromeChanged: () => {
+      carries.watch();
+      keepClear.measure();
+    },
+    onTourScrolled: () => (scrolledBy.tour = true),
+    sound: {
+      available: sound.available,
+      isOn: () => sound.on,
+      toggle: () => {
+        const on = sound.toggle();
+        bars.showSound(on);
+        if (on) say.say(asides.soundOn);
+        return on;
+      },
+    },
+  });
+  const tourPlayer = player;
+  if (reducedMotion) {
+    const play = controlButton("Play the tour", guideGlyphs.play, "guide-control guide-play-tour");
+    play.addEventListener("click", () => tourPlayer.play());
+    root.querySelector("[data-guide-hello-chat]")?.append(play);
+  }
   const followLine = () => {
     if (!lookingAtLine) return;
     agent.look({ x: lookingAtLine.x, y: window.innerHeight - (lookingAtLine.documentY - window.scrollY), z: 0 });
@@ -402,7 +532,8 @@ export function mountGuide(root: HTMLElement, data: GuideData) {
       seen.add(middle);
       const home: Home = middle === "hello" ? "hello" : agent.stage.den ? "den" : PERCH_SIDE[middle];
       agent.goHome(home);
-      if (middle !== "hello" && !say.isHolding) say.hide();
+      // A scroll the tour made itself never cuts a line short.
+      if (middle !== "hello" && !say.isHolding && !player?.scrolling) say.hide();
       else say.relook();
     }
     followLine();
@@ -461,12 +592,16 @@ export function mountGuide(root: HTMLElement, data: GuideData) {
 
   // The first words: who it is, then the hint about being picked up, then the way on.
   const hello = narration().hello;
-  const firstWords = [hello[0].line, asides.pickMeUp, hello[1].line];
+  // When the tour will play by itself, the hint about being picked up waits for a tap: the first words stay short.
+  const firstWords = reducedMotion ? [hello[0].line, asides.pickMeUp, hello[1].line] : [hello[0].line, hello[1].line];
   let spoken = 0;
   const sayNext = () => {
     // Never over another line: a tap's or a trick's aside finishes first, and the next first word waits for it.
     if (spoken >= firstWords.length || current !== "hello" || agent.held || agent.playing || say.shown) return;
-    say.say(firstWords[spoken++]);
+    const line = firstWords[spoken++];
+    say.say(line);
+    // The last first word written and read: the tour plays by itself.
+    if (spoken === firstWords.length) window.setTimeout(() => tourPlayer.begin(), (secondsToSay(line) + FIRST_WORDS_READ_FOR) * 1000);
   };
   const helloHidden = say.onHidden;
   say.onHidden = () => {
@@ -474,6 +609,8 @@ export function mountGuide(root: HTMLElement, data: GuideData) {
     window.setTimeout(sayNext, 900);
   };
   window.setTimeout(sayNext, reducedMotion ? 0 : 500);
+  // However the first words go (a tap, a trick, a hand on the agent), the tour starts within 20 seconds.
+  window.setTimeout(() => tourPlayer.begin(), 20000);
 
   const toViewport = (place: { x: number; y: number }) => ({ x: place.x, y: window.innerHeight - place.y });
   window.guide = {
@@ -521,6 +658,7 @@ export function mountGuide(root: HTMLElement, data: GuideData) {
           highest: agent.graphBounds.top,
           stripTop: window.innerHeight - stripTop,
         },
+        tour: { state: tourPlayer.state, controlShown: tourPlayer.controlShown, skipShown: tourPlayer.skipShown, carrying: carries.isCarrying, writing: pen.writing },
       };
     },
     hitCoverage: (left, bottomEdge, width, height) => agent.hits.coverage(left, bottomEdge, width, height),
@@ -531,6 +669,12 @@ export function mountGuide(root: HTMLElement, data: GuideData) {
       return toViewport({ x: (router.x + tool.x) / 2, y: (router.y + tool.y) / 2 });
     },
     sendMessage: () => agent.sendMessageSoon(),
+    endTour: () => tourPlayer.leave(),
+    setAllInPlace: () => {
+      carries.setAllInPlace();
+      fetches.landAll();
+    },
+    palette: () => ({ fields: fieldColours, inks: TOOL_INKS }),
     setCell: (devicePixels) => agent.setCell(devicePixels),
   };
   onScroll();

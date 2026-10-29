@@ -96,7 +96,7 @@ const BUILDERS: Record<ToolKey, (material: ToneMaterial) => THREE.Group> = {
 
 /** A tool's node, with the one material it lights by. */
 export function buildToolNode(tool: ToolKey) {
-  const material = toneMaterial({ baseTone: TOOL_TONE, shading: 0.8 });
+  const material = toneMaterial({ baseTone: TOOL_TONE, shading: 0.8, paint: tool });
   const group = BUILDERS[tool](material);
   group.userData.tool = tool;
   const holder = new THREE.Group();

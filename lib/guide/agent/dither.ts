@@ -1,13 +1,14 @@
 /*
-  The agent in 1-bit. The first pass draws it in grey into a small target whose every pixel is one dither cell. The
-  second pass reads each cell exactly (no filtering) and compares it with a 4 x 4 Bayer threshold: darker becomes the
-  field's deep shade, lighter becomes near white, nothing stays clear. A lit cell is one flat colour, with no dither:
-  near white on a dark field, the deep shade on a light one, where near white would vanish. Every cell is a whole
-  block of device pixels, and the canvas is drawn at the device's own pixels and never scaled by CSS, so nothing is
-  resampled into moire.
+  The agent in dithered inks. The first pass draws it in grey into a small target whose every pixel is one dither
+  cell, with the ink each cell prints in. The second pass reads each cell exactly (no filtering) and compares it with a
+  4 x 4 Bayer threshold: darker becomes the field's deep shade, lighter becomes the cell's ink, nothing stays clear.
+  A lit cell is one flat colour, with no dither. The inks for the fields behind the agent sit in a small table (a
+  texture, one column per ink), made again only when those fields change. Every cell is a whole block of device
+  pixels, and the canvas is drawn at the device's own pixels and never scaled by CSS, so nothing is resampled into moire.
 */
 import * as THREE from "three";
-import { AGENT_LIGHT, rgbOf, type FieldColours } from "@/lib/guide/palette";
+import { rgbOf, type FieldColours } from "@/lib/guide/palette";
+import { inkTableFor, PAINTS } from "./inks";
 
 /**
  * How many device pixels across one dither cell is: about 1.5 to 2 CSS pixels, always whole device pixels. One cell
@@ -38,12 +39,10 @@ const ditherFragment = /* glsl */ `
   precision highp float;
   precision highp int;
   uniform sampler2D toneMap;
+  uniform sampler2D inks;
   uniform float cell;
   uniform vec3 deepBelow;
   uniform vec3 deepAbove;
-  uniform vec3 light;
-  uniform float ceilingBelow;
-  uniform float ceilingAbove;
   uniform float lineFromBottom;
   in vec2 unused;
   out vec4 colour;
@@ -53,19 +52,24 @@ const ditherFragment = /* glsl */ `
     vec4 sampled = texelFetch(toneMap, cellIndex, 0);
     if (sampled.a < 0.5) discard;
     bool above = gl_FragCoord.y >= lineFromBottom;
-    float tone = min(sampled.r, above ? ceilingAbove : ceilingBelow);
+    // The blue holds the cell's ink and whether it is lit as one whole number: ink times two, plus one if lit.
+    int code = int(floor(sampled.b * 255.0 + 0.5));
+    int ink = code >> 1;
+    bool lit = (code & 1) == 1;
+    int row = above ? 2 : 0;
+    vec4 inkLight = texelFetch(inks, ivec2(ink, row), 0);
+    vec3 inkLit = texelFetch(inks, ivec2(ink, row + 1), 0).rgb;
+    float tone = min(sampled.r, inkLight.a);
     tone = floor(tone * 4.0 + 0.5) / 4.0;
     int bayerIndex = (cellIndex.y % 4) * 4 + (cellIndex.x % 4);
     float threshold = (float(BAYER[bayerIndex]) + 0.5) / 16.0;
     // Something faint (a copy, a phantom) keeps only its share of cells, so it shows and fades in dither, never grey.
     if (sampled.g < threshold) discard;
-    vec3 dark = above ? deepAbove : deepBelow;
-    float ceiling = above ? ceilingAbove : ceilingBelow;
-    if (sampled.b > 0.5) {
-      colour = vec4(ceiling < 1.0 ? dark : light, 1.0);
+    if (lit) {
+      colour = vec4(inkLit, 1.0);
       return;
     }
-    colour = vec4(tone > threshold ? light : dark, 1.0);
+    colour = vec4(tone > threshold ? inkLight.rgb : (above ? deepAbove : deepBelow), 1.0);
   }
 `;
 
@@ -75,6 +79,10 @@ export class DitherRenderer {
   private readonly quadScene = new THREE.Scene();
   private readonly quadCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
   private readonly quad: THREE.ShaderMaterial;
+  /** The inks on the fields behind the agent: four rows (light and lit, below then above), a column per ink. */
+  private readonly inkTable = new THREE.DataTexture(new Uint8Array(PAINTS.length * 4 * 4), PAINTS.length, 4, THREE.RGBAFormat, THREE.UnsignedByteType);
+  /** Which fields the ink table was made for. */
+  private inksMadeFor = "";
   /** The canvas's side in CSS pixels, its device pixel ratio and its cell, as last sized. */
   cssSide = 0;
   devicePixelRatio = 1;
@@ -106,15 +114,15 @@ export class DitherRenderer {
       depthWrite: false,
       uniforms: {
         toneMap: { value: this.target.texture },
+        inks: { value: this.inkTable },
         cell: { value: 1 },
         deepBelow: { value: new THREE.Vector3() },
         deepAbove: { value: new THREE.Vector3() },
-        light: { value: new THREE.Vector3(...rgbOf(AGENT_LIGHT)) },
-        ceilingBelow: { value: 1 },
-        ceilingAbove: { value: 1 },
         lineFromBottom: { value: 0 },
       },
     });
+    this.inkTable.minFilter = THREE.NearestFilter;
+    this.inkTable.magFilter = THREE.NearestFilter;
     const plane = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), this.quad);
     plane.frustumCulled = false;
     this.quadScene.add(plane);
@@ -139,8 +147,7 @@ export class DitherRenderer {
     const uniforms = this.quad.uniforms;
     (uniforms.deepBelow.value as THREE.Vector3).set(...rgbOf(fields.below.deep));
     (uniforms.deepAbove.value as THREE.Vector3).set(...rgbOf(fields.above.deep));
-    uniforms.ceilingBelow.value = fields.below.toneCeiling;
-    uniforms.ceilingAbove.value = fields.above.toneCeiling;
+    this.makeInksFor(fields.below, fields.above);
     uniforms.lineFromBottom.value = fields.lineFromBottom * this.devicePixelRatio;
     this.renderer.setRenderTarget(this.target);
     this.renderer.clear();
@@ -150,7 +157,29 @@ export class DitherRenderer {
     this.renderer.render(this.quadScene, this.quadCamera);
   }
 
+  /** Fills the ink table for the two fields behind the agent, when they are not the ones it was made for. */
+  private makeInksFor(below: FieldColours, above: FieldColours) {
+    const key = `${below.field} ${above.field}`;
+    if (key === this.inksMadeFor) return;
+    this.inksMadeFor = key;
+    const data = this.inkTable.image.data as Uint8Array;
+    const byte = (share: number) => Math.round(share * 255);
+    const write = (row: number, column: number, colour: string, alpha: number) => {
+      const at = (row * PAINTS.length + column) * 4;
+      const [red, green, blue] = rgbOf(colour);
+      data.set([byte(red), byte(green), byte(blue), byte(alpha)], at);
+    };
+    [below, above].forEach((field, side) =>
+      inkTableFor(field).forEach((ink, column) => {
+        write(side * 2, column, ink.light, ink.ceiling);
+        write(side * 2 + 1, column, ink.lit, 1);
+      }),
+    );
+    this.inkTable.needsUpdate = true;
+  }
+
   dispose() {
+    this.inkTable.dispose();
     this.target.dispose();
     this.renderer.dispose();
   }

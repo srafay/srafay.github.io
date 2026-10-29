@@ -27,6 +27,13 @@ function showDenSpeaking(speaking: boolean, grow = 0) {
   if (document.body.style.getPropertyValue("--guide-den-grow") !== growth) document.body.style.setProperty("--guide-den-grow", growth);
 }
 
+/** How far a bubble may be from the agent's body, in CSS pixels: never across the page from it. */
+const NEAR_THE_AGENT = 120;
+
+/** The gap between two boxes, in CSS pixels: 0 where they touch or overlap. */
+const gapBetween = (first: Box, second: Box) =>
+  Math.hypot(Math.max(0, first.left - second.right, second.left - first.right), Math.max(0, first.top - second.bottom, second.top - first.bottom));
+
 /** What a place for the bubble would cover: the page and the agent's body, and the room round its router. */
 type Cover = { kept: number; face: number };
 
@@ -330,15 +337,20 @@ export class Say {
     let bestOverlap = Infinity;
     let bestCover: Cover = { kept: Infinity, face: Infinity };
     let bestIndex = 0;
+    // Only places within reach of the agent are taken, so a line never reads as a stray across the page from it.
+    const near = (candidate: Box) => gapBetween(candidate, bodyBox) <= NEAR_THE_AGENT;
+    const anyNear = candidates.some(near);
+    const allowed = (candidate: Box) => !anyNear || near(candidate);
     // The place taken for this line stays while it covers nothing on the page and nothing of the agent but the room
     // round its router, where the cone swings and reaches out past a costume: so the bubble does not hop as the cone
     // turns to it, and at most the cone's tip touches the bubble it points at.
-    if (this.chosen >= 0 && overlapOf(candidates[this.chosen], kept) === 0) {
+    if (this.chosen >= 0 && allowed(candidates[this.chosen]) && overlapOf(candidates[this.chosen], kept) === 0) {
       best = candidates[this.chosen];
       bestOverlap = 0;
       bestIndex = this.chosen;
     } else
       for (const [index, candidate] of candidates.entries()) {
+        if (!allowed(candidate)) continue;
         const cover = { kept: overlapOf(candidate, kept), face: overlapOf(candidate, [face]) };
         if (coversLess(cover, bestCover)) {
           best = candidate;

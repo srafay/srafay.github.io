@@ -34,6 +34,9 @@ export type Place = { router: Point; radius: number; folded: number; turn: numbe
 /** The den's fan opens to the right: a quarter turn. */
 const DEN_TURN = Math.PI / 2;
 
+/** The fan folded on its side, opening toward one side (1 right, -1 left), as in the den: out of a cord's way. */
+export const turnOpening = (side: 1 | -1) => side * DEN_TURN;
+
 /** The largest the router gets on this screen: the first screen's size, which the canvas is made for. */
 export const largestRadius = (stage: Stage) =>
   stage.narrow || stage.den ? helloRadiusOnPhone(stage.width) : helloRadiusOnComputer(stage.width);

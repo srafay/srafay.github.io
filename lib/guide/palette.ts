@@ -1,8 +1,10 @@
 /*
-  The colour of each field of the tour. A field is one flat colour with its words at full strength, and the agent
-  drawn over it in two colours only: a deep shade of that field, and near white. The build checks every pair below for
-  contrast (checkPalette), so a colour changed here can never leave a word unreadable.
+  The colour of each field of the tour, from the page's theme, Night print (lib/guide/themes.ts). A field is one flat
+  colour with its words at full strength, its cards and bubbles in the theme's colours, and the agent drawn over it in
+  its inks and the field's deep shade. The build checks every pair below for contrast (checkPalette), so a colour
+  changed in the theme can never leave a word unreadable.
 */
+import { theme } from "@/lib/guide/themes";
 
 export type SectionKey =
   | "hello"
@@ -27,22 +29,25 @@ export type FieldColours = {
    * the brightest tone becomes sparse dark dots and the agent still reads by its dark cells, with no outline.
    */
   toneCeiling: number;
+  /** A card's paper and words, where they are not the deep shade and the agent's light. */
+  card?: string;
+  cardWords?: string;
+  /** A narration bubble's paper and words, where they are not the agent's light and the deep shade. */
+  paper?: string;
+  paperWords?: string;
+  /** The icons on the cards, where they are not in the card's words' colour. */
+  accent?: string;
 };
 
 /** The agent's light cells and the bubbles' paper, on every field. */
-export const AGENT_LIGHT = "#f6f3ea";
+export const AGENT_LIGHT = theme.agentLight;
 
-export const fieldColours: Record<SectionKey, FieldColours> = {
-  hello: { field: "#1f6b48", words: "#ffffff", deep: "#0a2617", toneCeiling: 1 },
-  now: { field: "#c2402a", words: "#ffffff", deep: "#3d1109", toneCeiling: 1 },
-  work: { field: "#2b3fbf", words: "#ffffff", deep: "#0d1447", toneCeiling: 1 },
-  study: { field: "#6a3d9a", words: "#ffffff", deep: "#22113a", toneCeiling: 1 },
-  projects: { field: "#0d6870", words: "#ffffff", deep: "#032529", toneCeiling: 1 },
-  courses: { field: "#e3a52a", words: "#211705", deep: "#4a3108", toneCeiling: 0.5 },
-  offTheClock: { field: "#f08a72", words: "#2a0d07", deep: "#5a1f12", toneCeiling: 0.5 },
-  skills: { field: "#e8dcc2", words: "#24201a", deep: "#4d3f26", toneCeiling: 0.5 },
-  findMe: { field: "#17181d", words: "#f6f3ea", deep: "#000000", toneCeiling: 1 },
-};
+export const fieldColours: Record<SectionKey, FieldColours> = theme.fields;
+
+/** What each part of a section is drawn in, with the theme's choices filled in where it leaves them to the field. */
+export const cardOf = (colours: FieldColours) => ({ paper: colours.card ?? colours.deep, words: colours.cardWords ?? AGENT_LIGHT });
+export const bubbleOf = (colours: FieldColours) => ({ paper: colours.paper ?? AGENT_LIGHT, words: colours.paperWords ?? colours.deep });
+
 
 /** A colour as three numbers from 0 to 1, for the shader. */
 export function rgbOf(hex: string): [number, number, number] {
@@ -65,20 +70,22 @@ export function contrastRatio(first: string, second: string) {
   return (lighter + 0.05) / (darker + 0.05);
 }
 
-/** The ratio every word on the page must reach. */
+/** The ratio every word on the page must reach, and a section's name, set huge. */
 export const LEAST_CONTRAST = 4.5;
+export const LEAST_HEADING_CONTRAST = 3;
 
 /** Fails the build when a word on a field, in a bubble or on a card would fall under 4.5:1. */
 export function checkPalette() {
   for (const [key, colours] of Object.entries(fieldColours)) {
-    const pairs: [string, string, string][] = [
-      ["words on the field", colours.words, colours.field],
-      ["a bubble's words", colours.deep, AGENT_LIGHT],
-      ["a card's words", AGENT_LIGHT, colours.deep],
+    const pairs: [string, string, string, number][] = [
+      ["words on the field", colours.words, colours.field, LEAST_CONTRAST],
+      ["a bubble's words", bubbleOf(colours).words, bubbleOf(colours).paper, LEAST_CONTRAST],
+      ["a card's words", cardOf(colours).words, cardOf(colours).paper, LEAST_CONTRAST],
+      ["the section's name", colours.words, colours.field, LEAST_HEADING_CONTRAST],
     ];
-    for (const [what, front, back] of pairs) {
+    for (const [what, front, back, least] of pairs) {
       const ratio = contrastRatio(front, back);
-      if (ratio < LEAST_CONTRAST)
+      if (ratio < least)
         throw new Error(`${key}: ${what} reach only ${ratio.toFixed(2)}:1`);
     }
   }

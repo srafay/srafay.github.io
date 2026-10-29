@@ -12,8 +12,9 @@ import { allEvents } from "@/lib/about-cv/events";
 import { checkSkillMarks } from "@/lib/about-cv/skill-marks";
 import { checkThreads, skillWords } from "@/lib/about-cv/skills";
 import { presentTime } from "@/lib/about-cv/time";
+import { checkInks } from "@/lib/guide/agent/inks";
 import { checkGuideGlyphs } from "@/lib/guide/icons";
-import { checkPalette, fieldColours } from "@/lib/guide/palette";
+import { AGENT_LIGHT, bubbleOf, checkPalette, fieldColours, type FieldColours } from "@/lib/guide/palette";
 import { checkTour } from "@/lib/guide/tour";
 import { fontFaceCss } from "@/lib/fonts";
 import { site } from "@/lib/site";
@@ -25,14 +26,28 @@ const TITLE = "About me · Syed Rafay";
 const DESCRIPTION =
   "Syed Rafay, senior software engineer at Twin Technology: his whole CV, toured by an AI agent drawn as a graph.";
 
+/** A section's own look, from the theme, as custom properties: only what it sets beyond the field's colours. */
+function themeProperties(colours: FieldColours) {
+  const properties: string[] = [];
+  const set = (name: string, value: string | undefined) => value && properties.push(`--${name}:${value}`);
+  set("card", colours.card);
+  set("card-words", colours.cardWords);
+  set("paper", colours.paper);
+  set("paper-words", colours.paperWords);
+  set("accent", colours.accent);
+  return properties.map((property) => `;${property}`).join("");
+}
+
 /** Each field's colours as custom properties, and the bars' words over each, from lib/guide/palette.ts. */
 function fieldStyles() {
-  const rules = [`:root{--guide-hello-field:${fieldColours.hello.field}}`];
+  const rules = [`:root{--guide-hello-field:${fieldColours.hello.field};--guide-light:${AGENT_LIGHT}}`];
   for (const [key, colours] of Object.entries(fieldColours)) {
-    rules.push(`.guide-field-${key}{--field:${colours.field};--words:${colours.words};--deep:${colours.deep}}`);
-    rules.push(`[data-under-top="${key}"] .guide-top{--bar-top-words:${colours.words};--bar-top-field:${colours.field};--bar-pressed-words:${colours.deep}}`);
+    rules.push(`.guide-field-${key}{--field:${colours.field};--words:${colours.words};--deep:${colours.deep}${themeProperties(colours)}}`);
+    rules.push(`[data-under-top="${key}"] .guide-top,[data-under-top="${key}"] .guide-player{--bar-top-words:${colours.words};--bar-top-field:${colours.field};--bar-pressed-words:${colours.deep}}`);
     rules.push(`[data-under-bottom="${key}"] .guide-bottom{--bar-bottom-words:${colours.words};--bar-bottom-field:${colours.field};--bar-pressed-words:${colours.deep}}`);
-    rules.push(`[data-under-agent="${key}"] .guide-say{--say-words:${colours.deep}}`);
+    // The agent's own bubble is a narration bubble of the field it is over.
+    const bubble = bubbleOf(colours);
+    rules.push(`[data-under-agent="${key}"] .guide-say{--say-words:${bubble.words};--say-paper:${bubble.paper}}`);
     rules.push(`[data-under-agent="${key}"] .guide-chart-labels{color:${colours.words}}`);
     rules.push(`[data-under-bottom="${key}"] .guide-chart-labels[data-in-den]{color:${colours.words}}`);
   }
@@ -58,13 +73,15 @@ const nameLines = () =>
     .join(" ");
 
 export async function buildGuidePage() {
-  // Every word readable, every glyph drawn, every skill threaded, every CV item on the tour: or the build fails.
+  // Every word readable, every tool's ink seen, every glyph drawn, every skill threaded, every CV item on the tour:
+  // or the build fails.
   const events = allEvents(presentTime());
   checkThreads(events);
   checkGlyphTables();
   checkSkillMarks(skillWords(events));
   checkGuideGlyphs();
   checkPalette();
+  checkInks(fieldColours);
   checkTour(events);
   fs.rmSync(OUTPUT, { recursive: true, force: true });
   fs.mkdirSync(OUTPUT, { recursive: true });

@@ -8,7 +8,7 @@ import * as THREE from "three";
 import { shape } from "./proportions";
 import { buildToolNode, pointsAlongLink } from "./tool-shapes";
 import { NODE_COUNT, ROUTER, TOOL_ORDER, nodeOfTool, type ToolKey } from "./topology";
-import { setLit, setPresence, toneMaterial, type ToneMaterial } from "./tone-material";
+import { paintOf, setLit, setPaint, setPresence, toneMaterial, type ToneMaterial } from "./tone-material";
 import { add, alongCurve, cross, normalise, scale, subtract, type Point } from "./vectors";
 
 /** The router's frame: which ways its front, top and side face. */
@@ -75,21 +75,39 @@ export type LinkLay = { from: Point; to: Point; fromRadius: number; toRadius: nu
 /** The control point that bows a link: its middle, moved aside. */
 const bowedMiddle = (from: Point, to: Point, bow: Point) => add(scale(add(from, to), 0.5), bow);
 
-/** A faint copy of some meshes, drawn again with a transform of its own. */
+/** A faint copy of some meshes, drawn again with a transform of its own, each part in its source's ink. */
 class FaintCopy {
   readonly group = new THREE.Group();
   private readonly pairs: { source: THREE.Mesh; copy: THREE.Mesh }[] = [];
-  readonly material = toneMaterial({ baseTone: 0.92, presence: 0.5 });
+  /** One material for each ink among the sources. */
+  private readonly materials = new Map<number, ToneMaterial>();
 
   constructor(sources: THREE.Mesh[]) {
     for (const source of sources) {
-      const copy = new THREE.Mesh(source.geometry, this.material);
+      const copy = new THREE.Mesh(source.geometry, this.materialLike(source.material as ToneMaterial));
       copy.matrixAutoUpdate = false;
       copy.frustumCulled = false;
       this.pairs.push({ source, copy });
       this.group.add(copy);
     }
     this.group.visible = false;
+  }
+
+  /** The copy's material for a source's ink. */
+  private materialLike(source: ToneMaterial) {
+    const paint = paintOf(source);
+    let material = this.materials.get(paint);
+    if (!material) {
+      material = toneMaterial({ baseTone: 0.92, presence: 0.5 });
+      material.uniforms.paint.value = paint;
+      this.materials.set(paint, material);
+    }
+    return material;
+  }
+
+  /** How much of the copy is there. */
+  setPresence(presence: number) {
+    for (const material of this.materials.values()) setPresence(material, presence);
   }
 
   /** Puts the copy where its sources are, moved by a transform. Their world matrices must be current. */
@@ -118,13 +136,19 @@ export class AgentModel {
   /** The router: shaded softly, so its lit side is dense dots and never one white patch, which would read as an eye. */
   private readonly routerMaterial = toneMaterial({ baseTone: 0.74, shading: 0.7 });
   private readonly tools: { tool: ToolKey; holder: THREE.Group; material: ToneMaterial }[] = [];
-  private readonly linkMaterial = toneMaterial({ baseTone: 0.78, shading: 0.85 });
+  private readonly linkMaterial = toneMaterial({ baseTone: 0.78, shading: 0.85, paint: "link" });
+  private readonly messageMaterial = toneMaterial({ baseTone: 1, shading: 0 });
   private readonly links: Tube[] = [];
   private readonly message: THREE.Mesh;
   private readonly bars: THREE.Mesh[] = [];
-  private readonly barMaterial = toneMaterial({ baseTone: 0.9 });
-  private readonly tallestBarMaterial = toneMaterial({ baseTone: 0.9 });
+  private readonly barMaterial = toneMaterial({ baseTone: 0.9, paint: "bars" });
+  private readonly tallestBarMaterial = toneMaterial({ baseTone: 0.9, paint: "bars" });
   private readonly copies: FaintCopy[] = [];
+  /** The cord a carried name hangs from, from the router's bottom down to its hook. */
+  private readonly cord: Tube;
+  /** A tool lent out (the cone, writing as a pen): its link stays, to an empty socket where it sat. */
+  lent: ToolKey | null = null;
+  private readonly socket: THREE.Mesh;
   private readonly personas: { mesh: THREE.Mesh; material: ToneMaterial; link: Tube }[] = [];
   private readonly phantoms: { holder: THREE.Group; link: Tube; material: ToneMaterial }[] = [];
   private readonly sides: number;
@@ -143,12 +167,24 @@ export class AgentModel {
       this.links.push(link);
       this.group.add(link.mesh);
     }
-    const messageMaterial = toneMaterial({ baseTone: 1, shading: 0 });
-    setLit(messageMaterial, true);
-    this.message = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), messageMaterial);
+    setLit(this.messageMaterial, true);
+    this.message = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), this.messageMaterial);
     this.message.visible = false;
     this.group.add(this.message);
     setLit(this.tallestBarMaterial, true);
+    this.cord = new Tube(sides, this.linkMaterial);
+    this.cord.mesh.visible = false;
+    this.group.add(this.cord.mesh);
+    this.socket = new THREE.Mesh(new THREE.TorusGeometry(1, 0.32, 8, 20), this.linkMaterial);
+    this.socket.visible = false;
+    this.group.add(this.socket);
+  }
+
+  /** The cord from a point down to a hook, thinner than a link, straight; null takes it away. */
+  setCord(from: Point | null, to: Point, radius: number) {
+    this.cord.mesh.visible = Boolean(from);
+    if (!from) return;
+    this.cord.lay(from, scale(add(from, to), 0.5), to, (shape.linkThickness / 2) * radius * 0.7);
   }
 
   /** Lays the graph: the router on its frame, each tool at its node, each link from the router to its tool. */
@@ -173,8 +209,18 @@ export class AgentModel {
       holder.visible = toolScales[node] > 0.02;
       const link = links[node - 1];
       this.layLink(this.links[node - 1], link, radius);
-      this.links[node - 1].mesh.visible = holder.visible;
+      const lentOut = tool === this.lent;
+      this.links[node - 1].mesh.visible = holder.visible || lentOut;
+      if (lentOut) {
+        this.socket.position.set(place.x, place.y, place.z);
+        this.socket.scale.setScalar(shape.toolSize * radius * 0.42);
+      }
     }
+  }
+
+  /** Shows the empty socket while a tool is lent out. */
+  showSocket() {
+    this.socket.visible = this.lent !== null;
   }
 
   private layLink(tube: Tube, link: LinkLay, radius: number) {
@@ -189,10 +235,11 @@ export class AgentModel {
     for (const { tool, material } of this.tools) setLit(material, tool === lit);
   }
 
-  /** The message cell at a place, a square this many CSS pixels across, or none. */
-  setMessage(place: Point | null, size: number) {
+  /** The message cell at a place, a square this many CSS pixels across, in the ink of the tool it runs to, or none. */
+  setMessage(place: Point | null, size: number, tool: ToolKey | null) {
     this.message.visible = Boolean(place);
     if (!place) return;
+    setPaint(this.messageMaterial, tool ?? "link");
     this.message.position.set(place.x, place.y, place.z + size);
     this.message.scale.setScalar(size);
   }
@@ -238,7 +285,7 @@ export class AgentModel {
       const copy = this.copies[index];
       if (!copy) return;
       copy.group.visible = each.presence > 0.02;
-      setPresence(copy.material, each.presence);
+      copy.setPresence(each.presence);
       copy.follow(each.transform);
     });
   }
@@ -261,7 +308,7 @@ export class AgentModel {
     personas.forEach((each, index) => {
       let persona = this.personas[index];
       if (!persona) {
-        const material = toneMaterial({ baseTone: 0.9 });
+        const material = toneMaterial({ baseTone: 0.9, paint: "personas" });
         persona = { mesh: new THREE.Mesh(new THREE.SphereGeometry(1, 20, 14), material), material, link: new Tube(this.sides, this.linkMaterial) };
         this.personas.push(persona);
         this.group.add(persona.mesh, persona.link.mesh);

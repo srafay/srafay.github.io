@@ -295,6 +295,7 @@ body.about-v6 {
 
 .guide-section {
   position: relative;
+  overflow-x: clip;
   background: var(--field);
   color: var(--words);
   padding: 120px var(--guide-gutter) 140px;
@@ -410,7 +411,7 @@ body.about-v6 {
   max-width: min(300px, calc(100vw - 2 * var(--guide-gutter)));
   padding: 12px 16px;
   border-radius: 18px;
-  background: var(--guide-light);
+  background: var(--say-paper, var(--guide-light));
   color: var(--say-words, #0a2617);
   font-size: 19px;
   font-weight: 600;
@@ -463,6 +464,22 @@ body.about-v6 {
   letter-spacing: -0.035em;
 }
 
+/*
+  A name waits unseen in its place until the agent carries it in (opacity, so a screen reader still has it); only
+  transforms move it, so nothing reflows. While carried it rides over the fields below it, under the strips and the agent.
+*/
+.guide-section-name[data-awaiting-carry] {
+  opacity: 0;
+}
+
+.guide-section-name[data-carrying] {
+  position: relative;
+  z-index: 2;
+  will-change: transform;
+  /* A crisp edge of the stock round the name, so it stays a word as it passes over a bone bubble. */
+  text-shadow: 3px 0 var(--field), -3px 0 var(--field), 0 3px var(--field), 0 -3px var(--field);
+}
+
 .guide-section-glyph {
   width: 0.5em;
   height: 0.5em;
@@ -503,8 +520,8 @@ body.about-v6 {
   margin: 0;
   padding: 12px 16px;
   border-radius: 18px;
-  background: var(--guide-light);
-  color: var(--deep);
+  background: var(--paper, var(--guide-light));
+  color: var(--paper-words, var(--deep));
   font-size: 19px;
   font-weight: 600;
   line-height: 1.3;
@@ -512,22 +529,16 @@ body.about-v6 {
   transition: opacity 0.2s;
 }
 
-/* A line waiting its turn keeps its place and its bubble, its words hidden behind three quiet dots. */
+/*
+  A line waiting its turn keeps its place, unseen (opacity only, so a screen reader still has it): it takes its paper as
+  the pen sets off for it, so at most one empty bubble shows, the one about to be written.
+*/
 .guide-line {
   position: relative;
 }
 
 .guide-line[data-waiting] {
-  color: transparent;
-}
-
-.guide-line[data-waiting]::after {
-  content: "\2022\2022\2022";
-  position: absolute;
-  left: 16px;
-  top: 12px;
-  color: var(--deep);
-  letter-spacing: 0.2em;
+  opacity: 0;
 }
 
 .guide-word {
@@ -542,9 +553,13 @@ body.about-v6 {
 .guide-card {
   display: grid;
   border-radius: 18px;
-  background: var(--deep);
-  color: var(--guide-light);
+  background: var(--card, var(--deep));
+  color: var(--card-words, var(--guide-light));
   overflow: hidden;
+}
+
+.guide-card .guide-icon {
+  color: var(--accent, currentColor);
 }
 
 .guide-card-open {
@@ -1046,4 +1061,128 @@ body.about-v6 {
   font-size: 16px;
   line-height: 1.28;
   padding: 10px 14px;
+}
+
+/* The cone lent out as a pen: its own small canvas, on whole device pixels, taking no presses. */
+.guide-nib {
+  position: fixed;
+  left: 0;
+  top: 0;
+  display: none;
+  pointer-events: none;
+  image-rendering: pixelated;
+  will-change: transform;
+}
+
+.guide-nib[data-out] {
+  display: block;
+}
+
+/* A card waits for its line unseen and out of reach (still in the accessibility tree), and rides over the page as it comes. */
+.guide-card[data-awaiting-fetch] {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.guide-card[data-fetching] {
+  position: relative;
+  z-index: 2;
+  pointer-events: none;
+}
+
+/*
+  The tour playing by itself: the bars step away (on a phone the den's strip stays, the agent's home, its buttons go)
+  and come back over half a second when it is paused or over. One small control stays at the top right, inside the
+  safe area: Pause or Play, Sound and Skip, each a real button. Pause and Sound fade after a while; Skip stays.
+*/
+.guide-top,
+.guide-bottom > * {
+  transition: opacity 0.5s, visibility 0s;
+}
+
+[data-tour="playing"] .guide-top,
+[data-tour="playing"] .guide-bottom > * {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.4s, visibility 0s linear 0.4s;
+}
+
+@media (min-width: 900px) {
+  .guide-bottom {
+    transition: opacity 0.5s, visibility 0s;
+  }
+  [data-tour="playing"] .guide-bottom {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.4s, visibility 0s linear 0.4s;
+  }
+}
+
+.guide-player {
+  position: fixed;
+  z-index: 34;
+  top: calc(env(safe-area-inset-top, 0px) + 10px);
+  right: calc(env(safe-area-inset-right, 0px) + var(--guide-gutter));
+  display: none;
+  align-items: center;
+  gap: 6px;
+}
+
+[data-tour="waiting"] .guide-player,
+[data-tour="playing"] .guide-player,
+[data-tour="paused"] .guide-player {
+  display: flex;
+}
+
+/* Before the tour sets off, Skip alone is offered, in the place of the top bar's right group, which steps aside. */
+[data-tour="waiting"] .guide-player-fades {
+  display: none;
+}
+
+[data-tour="waiting"] .guide-top-right {
+  visibility: hidden;
+}
+
+.guide-player-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--bar-top-field, #101c16);
+  color: var(--bar-top-words, #ece6d6);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  transition: opacity 0.3s;
+}
+
+@media (pointer: fine) {
+  .guide-player-button {
+    min-width: 36px;
+    min-height: 36px;
+  }
+}
+
+.guide-player[data-faded] .guide-player-fades {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Under reduced motion the tour waits for this button on the first screen. */
+.guide-play-tour {
+  margin-top: 20px;
+  box-shadow: inset 0 0 0 1.5px currentColor;
+}
+
+[data-tour="playing"] .guide-play-tour,
+[data-tour="ended"] .guide-play-tour {
+  display: none;
 }
