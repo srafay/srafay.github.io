@@ -4,8 +4,6 @@ Personal site and blog for Syed Rafay, live at https://srafay.github.io.
 
 The homepage draws Syed Rafay's roles, degrees, projects, courses and skills as one object in four dimensions. The years unfold from a single point, and a ride plays through them by itself. Drag to turn the object. Tap a light to open its card. Posts, at the top, leads to the posts. Find me lists the profiles.
 
-The [About page](https://srafay.github.io/about/) is laid out like a GitHub profile: the current role, earlier roles, pinned repositories and a year of contributions.
-
 ## Posts
 
 Each post is named after a real, confirmed exoplanet, unless the post is about one of the Sun's own planets.

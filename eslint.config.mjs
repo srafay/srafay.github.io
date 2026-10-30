@@ -17,8 +17,6 @@ const eslintConfig = defineConfig([
     "public/cosmos/**",
     // The site's menu, built from lib/site-menu/ by scripts/build-site-menu.ts.
     "public/site-menu.js",
-    // The About page's script, built by scripts/build-about-scenes.ts.
-    "public/about.js",
     // The homepage's scene (version 5 of the About page), built by scripts/build-hypercube-page.ts.
     "public/hypercube/**",
   ]),

@@ -58,8 +58,6 @@ CLAUDE.md
 # the site's menu, built from lib/site-menu/ by scripts/build-site-menu.ts
 /public/site-menu.js
 
-# the About page's script, built by scripts/build-about-scenes.ts
-/public/about.js
 # the homepage (version 5 of the About page), built by scripts/build-hypercube-page.ts: the scene's build it asks for,
 # and the page itself, which app/route.ts serves
 /public/hypercube/

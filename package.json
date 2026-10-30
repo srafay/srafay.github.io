@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "bun scripts/build-site-menu.ts && bun scripts/build-about-scenes.ts && next dev",
-    "build": "bun scripts/build-site-menu.ts && bun scripts/build-about-scenes.ts && next build && bun scripts/postbuild.ts",
+    "dev": "bun scripts/build-site-menu.ts && bun scripts/build-hypercube-page.ts && next dev",
+    "build": "bun scripts/build-site-menu.ts && bun scripts/build-hypercube-page.ts && next build && bun scripts/postbuild.ts",
     "start": "bunx serve@latest out",
     "lint": "eslint",
     "typecheck": "next typegen && tsc --noEmit",

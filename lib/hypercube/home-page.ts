@@ -13,6 +13,6 @@ export const BUILT_HOME_PAGE = path.join("lib", "hypercube", "built", "home.html
 export function homePage() {
   const file = path.join(process.cwd(), BUILT_HOME_PAGE);
   if (!fs.existsSync(file))
-    throw new Error(`The homepage is not built yet (${BUILT_HOME_PAGE}). Run: bun scripts/build-about-scenes.ts`);
+    throw new Error(`The homepage is not built yet (${BUILT_HOME_PAGE}). Run: bun scripts/build-hypercube-page.ts`);
   return fs.readFileSync(file, "utf8");
 }

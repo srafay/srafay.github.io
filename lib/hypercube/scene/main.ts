@@ -96,15 +96,15 @@ function elementsUnder(root: HTMLElement): HypercubeElements | null {
   return stage && canvas && title ? { root, stage, canvas, title } : null;
 }
 
-/** Without graphics there is no object to hold: one plain line points to the page that reads without them. */
+/** Without graphics there is no object to hold: one plain line points to the posts, which read without them. */
 function sayTheSceneCannotShow(root: HTMLElement) {
   const line = document.createElement("p");
   line.className = "cube-plain";
   line.append("This page needs graphics this browser cannot give it. ");
   const link = document.createElement("a");
-  link.href = "/about/";
-  link.textContent = "The About page";
-  line.append(link, " reads without them.");
+  link.href = "/posts/";
+  link.textContent = "The posts";
+  line.append(link, " read without them.");
   root.querySelector("[data-cube-stage]")?.append(line);
 }
 

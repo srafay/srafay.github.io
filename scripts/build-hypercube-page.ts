@@ -4,7 +4,8 @@
     lib/hypercube/art/, each asked for with a hash of its contents.
   - lib/hypercube/built/home.html is the page itself, from lib/hypercube/page.html with a homepage's head
     (scripts/hypercube-home-head.ts). app/route.ts serves it at / (lib/hypercube/home-page.ts).
-  Each is made here every time, so neither is committed. next build copies public/ into out/.
+  Run before `next build` and `next dev`, like scripts/build-site-menu.ts. Each is made here every time, so neither is
+  committed. next build copies public/ into out/.
 */
 import fs from "node:fs";
 import path from "node:path";
@@ -86,7 +87,7 @@ function writeHomePage(page: string) {
   console.log(BUILT_HOME_PAGE);
 }
 
-export async function buildHypercubePage() {
+async function buildHypercubePage() {
   // A skill named by an event must float somewhere, and every glyph must have a drawing: fail the build otherwise.
   const events = allEvents(presentTime());
   checkThreads(events);
@@ -95,3 +96,5 @@ export async function buildHypercubePage() {
   checkHypercubeGlyphs();
   writeHomePage(homePageFrom(await buildSharedFiles()));
 }
+
+await buildHypercubePage();

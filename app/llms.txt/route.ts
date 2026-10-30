@@ -25,7 +25,6 @@ Everything on this site is written by ${site.name} and is © ${site.name}. All r
 - Each post has its own page at \`${site.url}/posts/<slug>/\`. Its text is in the static HTML, so it reads without JavaScript. Some posts also draw figures and animations with scripts. The title is the \`<h1>\`, and the post's text is inside the element marked \`data-post-body\`. Each post's planet and date are in the list below.
 - Each post belongs to a planet. An exoplanet (always a real, confirmed one) labels the post but is not its subject. A post about one of the Sun's own planets belongs to that planet.
 - All posts, newest first: the list below, the RSS feed (${site.url}${site.rss}) and the sitemap (${site.url}/sitemap.xml).
-- The About page (${site.url}${site.about}) describes ${site.name}: the current role, earlier roles and degrees, pinned repositories and a year of GitHub contributions. Its text is in the static HTML.
 
 ## Using this content
 
@@ -39,7 +38,6 @@ ${posts.map((p) => `- [${p.title}](${site.url}/posts/${p.slug}/): ${p.summary} (
 
 ## Profiles
 
-- [About](${site.url}${site.about})
 ${site.links.map((l) => `- [${l.label}](${l.href})`).join("\n")}
 `;
 

@@ -81,8 +81,8 @@ const footer = () =>
     `<a href="${site.rss}">RSS</a>`,
   ].join("");
 
-/** Where the bar leads: the homepage, the list of posts and the About page are each a page of their own. */
-const barLinks = { home: "/", posts: "/posts/", about: site.about };
+/** Where the bar leads: the homepage and the list of posts are each a page of their own. */
+const barLinks = { home: "/", posts: "/posts/" };
 
 /** The name in the header, the same on every page, styled as on the daylight saving post. */
 const BRAND = "srafay<span>.github.io</span>";
@@ -157,7 +157,7 @@ ${styles}
 <div class="page" id="page">
   <header class="bar" id="bar">
     <a class="mark" href="${barLinks.home}">${BRAND}</a>
-    <nav aria-label="Sections"><a href="${barLinks.home}">Home</a><a href="${barLinks.posts}">Posts</a><a href="${barLinks.about}">About</a>
+    <nav aria-label="Sections"><a href="${barLinks.home}">Home</a><a href="${barLinks.posts}">Posts</a>
       ${themeButton(' id="flip"')}
     </nav>
   </header>
@@ -187,7 +187,7 @@ ${list(o.posts)}
 <div class="reader" id="reader" hidden role="dialog" aria-modal="true" aria-labelledby="rdTitle">
   <header class="bar reader-bar">
     <a class="mark" href="${barLinks.home}" data-reader-leave="home">${BRAND}</a>
-    <nav aria-label="Site"><a href="${barLinks.home}" data-reader-leave="home">Home</a><a href="${barLinks.posts}" data-reader-leave="posts">Posts</a><a href="${barLinks.about}">About</a>
+    <nav aria-label="Site"><a href="${barLinks.home}" data-reader-leave="home">Home</a><a href="${barLinks.posts}" data-reader-leave="posts">Posts</a>
       ${themeButton("")}
     </nav>
   </header>

@@ -19,7 +19,6 @@ const link = (label: string, address: string): MenuLink => ({
 });
 
 const homeLink = () => link("Home", "/");
-const aboutLink = () => link("About", "/about/");
 // The list of every post, above the posts themselves.
 const allPostsLink = () => link("All posts", "/posts/");
 const postLink = (post: MenuPost) => link(post.title, post.address);
@@ -34,7 +33,7 @@ const navigateMenu = (posts: MenuPost[]): MenuParent => ({
   kind: "parent",
   label: "Navigate",
   // In the order the bar at the top of every page has them.
-  items: [homeLink(), postsMenu(posts), aboutLink()],
+  items: [homeLink(), postsMenu(posts)],
 });
 
 /** Change theme, through the page's own switch, or nothing where the page has none. */

@@ -1,6 +1,6 @@
 /*
-  Dates and counts written out for reading, as the About page shows them: "September 2025", "25 October 2026",
-  "2,653". Dates are worked out in UTC, so a reader's own time zone never moves one by a day.
+  Dates and counts written out for reading: "September 2025", "25 October 2026", "2,653". The homepage's cards write
+  months this way (lib/about-cv/time.ts). Dates are worked out in UTC, so a reader's own time zone never moves one by a day.
 */
 const IN_UTC = { timeZone: "UTC" } as const;
 

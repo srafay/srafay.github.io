@@ -1,7 +1,8 @@
 /*
-  The About page's words and numbers. app/about/page.tsx draws them, so a change here needs no change there.
-  Sources: the owner's CV, the owner's own words for the current role (25 October 2026), and GitHub's figures for the
-  pinned repositories. The contribution calendar is in contributions.json, beside this file.
+  The words and numbers of Syed Rafay's life and work. The homepage (version 5 of the About page) reads them through
+  lib/about-cv/ and lib/hypercube/, and its build (scripts/build-hypercube-page.ts) takes the bio from here, so a
+  change here needs no change there. Sources: the owner's CV, the owner's own words for the current role
+  (25 October 2026), and GitHub's figures for the pinned repositories.
 */
 
 /** A month, written as "2025-09". */
@@ -266,9 +267,8 @@ export const pinnedRepositories: Repository[] = [
 ];
 
 /**
- * A few groups from the CV, not the whole list. A chip that some role in Experience lists among its skills answers
- * with those roles when pressed (lib/about/skills.ts). SQL is the one that does not. No role's stack names plain SQL
- * (the Northern Land Council's names SQL Server), so it stays a plain word.
+ * A few groups from the CV, not the whole list, as the first About page showed them. No role's stack names plain SQL
+ * (the Northern Land Council's names SQL Server).
  */
 export const skillGroups: SkillGroup[] = [
   { name: "Now", skills: ["C#", ".NET", "Blazor", "Azure"] },
@@ -311,7 +311,6 @@ export type City = { name: string; latitude: number; longitude: number };
 /*
   The three cities the introduction names, in the order the career reached them. Each is the city centre's coordinates
   as Wikipedia gives them (Karachi 24.8607 N 67.0011 E, Darwin 12.4637 S 130.8444 E, Sydney 33.8688 S 151.2093 E).
-  Version 2 of the About page draws the career as a constellation with the cities at these places.
 */
 export const cities: City[] = [
   { name: "Karachi", latitude: 24.8607, longitude: 67.0011 },
@@ -320,8 +319,8 @@ export const cities: City[] = [
 ];
 
 /*
-  Everything below is the rest of the CV, for the About page versions that draw the whole of it (from version 4 on,
-  read through lib/about-cv/). Source: the owner's CV, read on 28 October 2026, its words rewritten into the site's voice.
+  Everything below is the rest of the CV, for the homepage, which draws the whole of it (read through lib/about-cv/).
+  Source: the owner's CV, read on 28 October 2026, its words rewritten into the site's voice.
   The CV's phone number, email and summary paragraph are left out on purpose.
 */
 
@@ -1058,7 +1057,7 @@ export const cvSkillGroups: CvSkillGroup[] = [
 
 /**
  * Two skills the owner's own words for the current role name (currentRole above: ".NET, Blazor and Azure") that the
- * CV's Skills section does not list. Version 4 floats them with the rest.
+ * CV's Skills section does not list. The homepage counts them with the rest.
  */
 export const currentRoleSkills: string[] = [".NET", "Azure"];
 
